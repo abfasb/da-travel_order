@@ -12,52 +12,38 @@ const formSchema = z.object({
   mobileNumber: z.string().min(10),
   employmentStatus: z.string().min(1),
   division: z.string().min(1),
-  officialStation: z.string().min(2),
+  officialStation: z.string().min(1), 
   password: z.string().min(8),
 });
 
 export async function registerUser(data: any) {
   try {
     const parsedData = formSchema.safeParse(data);
-    
-    if (!parsedData.success) {
-      return { success: false, error: "Invalid data submitted." };
-    }
+    if (!parsedData.success) return { success: false, error: "Invalid data." };
 
-    const validData = parsedData.data;
+    const { password, employmentStatus, ...rest } = parsedData.data;
 
-    const existingUser = await prisma.user.findUnique({
-      where: { email: validData.email },
-    });
+    const statusMap: Record<string, "PERMANENT" | "COS" | "JO"> = {
+      "Permanent": "PERMANENT",
+      "Contract of Service (COS)": "COS",
+      "Job Order (JO)": "JO",
+    };
 
-    if (existingUser) {
-      return { success: false, error: "This email is already registered." };
-    }
-
-    const hashedPassword = await bcrypt.hash(validData.password, 10);
-
-    let statusEnum = "JO";
-    if (validData.employmentStatus === "Permanent") statusEnum = "PERMANENT";
-    if (validData.employmentStatus === "Contract of Service (COS)") statusEnum = "COS";
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     await prisma.user.create({
       data: {
+        ...rest,
         //@ts-ignore
-        firstName: validData.firstName,
-        middleInitial: validData.middleInitial || null,
-        lastName: validData.lastName,
-        email: validData.email,
-        mobileNumber: validData.mobileNumber,
-        employmentStatus: statusEnum as any,
-        division: validData.division,
-        officialStation: validData.officialStation,
+        middleInitial: rest.middleInitial || null,
+        employmentStatus: statusMap[employmentStatus] || "JO",
         password: hashedPassword,
       },
     });
 
     return { success: true };
-  } catch (error) {
-    console.error("Registration Error:", error);
-    return { success: false, error: "Something went wrong. Please try again." };
+  } catch (error: any) {
+    if (error.code === 'P2002') return { success: false, error: "Email already exists." };
+    return { success: false, error: "Registration failed." };
   }
 }

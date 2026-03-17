@@ -14,6 +14,24 @@ enum EmploymentStatus {
   JO
 }
 
+enum Role {
+  STAFF
+  APCO
+  CHIEF_AGRICULTURIST
+  CHIEF_ADMINISTRATIVE
+  REGIONAL_EXECUTIVE
+  HR
+  ADMIN
+}
+
+// Added this to track the progress of the travel order
+enum RequestStatus {
+  PENDING
+  REVIEWING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id               String           @id @default(uuid())
   firstName        String
@@ -24,10 +42,51 @@ model User {
   employmentStatus EmploymentStatus
   division         String
   officialStation  String
-  password         String           // You should hash this before saving!
+  password         String           
+
+  role             Role             @default(STAFF)
+  
+  // Link the user to their travel orders
+  travelOrders     TravelOrderRequest[]
   
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 
-  @@map("users") // Optional: renames table to lowercase 'users' in the DB
+  @@map("users") 
+}
+
+model TravelOrderRequest {
+  id                     String        @id @default(uuid())
+  
+  // Foreign Key linking to the User who made the request
+  userId                 String
+  user                   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name                   String
+  salaryPerMonth         String       
+  position               String
+  officialStation        String
+
+  departureDate          DateTime
+  returnDate             DateTime
+  
+  destinationProvince    String
+  specificLocation       String
+  destination            String        // Summary of destination
+  
+  specificPurpose        String        @db.Text
+  objectives             String        @db.Text
+  travelDetails          String        @db.Text
+
+  meansOfTransportation  String
+  estimatedExpenses      String        // String for easy currency formatting
+  sourceOfFunds          String
+  accompanyingPersonnel  String?       // Optional field
+
+  status                 RequestStatus @default(PENDING)
+
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+
+  @@map("travel_orders")
 }

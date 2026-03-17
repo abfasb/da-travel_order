@@ -1,28 +1,82 @@
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { loginUser } from "@/app/actions/login"; // Adjust path if your action is somewhere else
+
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    const toastId = toast.loading("Verifying credentials...");
+
+    const result = await loginUser(formData);
+
+    if (result.success && result.user) {
+      toast.success(`Welcome back, ${result.user.name}!`, { id: toastId });
+      
+      const userRole = result.user.role;
+      let targetRoute = "/employee/";
+
+      if (userRole === "ADMIN") {
+        targetRoute = "/admin";
+      } else if (userRole === "HR") {
+        targetRoute = "/hr";
+      } else if (
+        userRole === "CHIEF_AGRICULTURIST" ||
+        userRole === "CHIEF_ADMINISTRATIVE" ||
+        userRole === "REGIONAL_EXECUTIVE" ||
+        userRole === "APCO"
+      ) {
+        targetRoute = "/approvals"; 
+      }
+
+      router.push(targetRoute);
+      
+    } else {
+      toast.error(result.error || "Login failed.", { id: toastId });
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="shadow-lg"> {/* Added a bit of shadow for depth */}
+      <Card className="shadow-lg"> 
         <CardHeader className="text-center pt-8">
           <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
           <CardDescription className="text-base">
@@ -30,9 +84,10 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         
-        <CardContent className="p-8 pt-4"> {/* Increased padding here */}
-          <form>
-            <FieldGroup className="gap-5"> {/* Increased gap between fields */}
+        <CardContent className="p-8 pt-4"> 
+          <form onSubmit={handleSubmit}>
+            <FieldGroup className="gap-5"> 
+              
               <Field>
                 <Button variant="outline" type="button" className="w-full h-11 text-base">
                   <svg className="mr-2 size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -57,6 +112,9 @@ export function LoginForm({
                   placeholder="m@example.com"
                   required
                   className="h-11"
+                  value={formData.email}
+                  onChange={handleChange}
+                  disabled={isLoading}
                 />
               </Field>
 
@@ -72,12 +130,20 @@ export function LoginForm({
                     Forgot password?
                   </a>
                 </div>
-                <Input id="password" type="password" required className="h-11" />
+                <Input 
+                  id="password" 
+                  type="password" 
+                  required 
+                  className="h-11" 
+                  value={formData.password}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                />
               </Field>
 
               <Field className="pt-2">
-                <Button type="submit" className="w-full h-11 text-base font-semibold">
-                  Login
+                <Button type="submit" disabled={isLoading} className="w-full h-11 text-base font-semibold">
+                  {isLoading ? "Logging in..." : "Login"}
                 </Button>
                 <FieldDescription className="text-center mt-4 text-sm">
                   Don&apos;t have an account? <a href="/registration" className="text-primary font-medium hover:underline">Sign up</a>

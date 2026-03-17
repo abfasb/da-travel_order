@@ -1,15 +1,15 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import * as z from "zod";
-import { toast } from "sonner"; // <-- Added Sonner
-import { registerUser } from "@/app/actions/register"; // <-- Added your new action
+import { toast } from "sonner";
+import { registerUser } from "@/app/actions/register";
 
 import { 
   User, Mail, Briefcase, Lock, ChevronRight,
-  ShieldCheck, CheckCircle2, Building2
+  ShieldCheck, MapPin, Building2 
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,16 @@ import {
 } from "@/components/ui/select";
 
 const EMPLOYMENT_STATUSES = ["Permanent", "Contract of Service (COS)", "Job Order (JO)"] as const;
+
+const PROVINCES = [
+  "Oriental Mindoro",
+  "Occidental Mindoro",
+  "Marinduque",
+  "Palawan",
+  "Romblon"
+];
+
+const ORIENTAL_MINDORO_STATIONS = ["DA Victoria", "DA Barcenaga", "DA Calapan"];
 
 const DIVISION_CHOICES = [
   { value: "regulatory", label: "Regulatory Division" },
@@ -41,7 +51,10 @@ const formSchema = z.object({
   mobileNumber: z.string().min(10, "Valid mobile number is required"),
   employmentStatus: z.string().min(1, "Employment status is required"),
   division: z.string().min(1, "Division is required"),
-  officialStation: z.string().min(2, "Official station is required"),
+  // Logic fields
+  province: z.string().min(1, "Please select a province"),
+  subStation: z.string().optional(),
+  officialStation: z.string().min(1, "Official station is required"),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
@@ -53,41 +66,50 @@ export default function RegisterPage() {
     handleSubmit,
     control,
     reset,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       firstName: "", middleInitial: "", lastName: "",
       email: "", mobileNumber: "", division: "", employmentStatus: "",
-      officialStation: "", password: "",
+      province: "", subStation: "", officialStation: "", password: "",
     },
   });
 
+  const selectedProvince = watch("province");
+  const selectedSubStation = watch("subStation");
+
+  // Logic: Sync the hidden officialStation field based on selections
+  useEffect(() => {
+    if (selectedProvince === "Oriental Mindoro") {
+      setValue("officialStation", selectedSubStation || "");
+    } else {
+      setValue("officialStation", selectedProvince);
+      setValue("subStation", ""); // Reset substation if province is changed
+    }
+  }, [selectedProvince, selectedSubStation, setValue]);
+
   async function onSubmit(values: FormValues) {
-    // 1. Show loading toast
     const toastId = toast.loading("Creating your account...");
-    
-    // 2. Call the server action
     const result = await registerUser(values);
 
-    // 3. Handle the result
     if (result.success) {
       toast.success("Account created successfully!", { id: toastId });
-      reset(); // Clear the form
-      // Optional: router.push("/login") if you want to redirect them
+      reset();
     } else {
       toast.error(result.error || "Failed to create account.", { id: toastId });
     }
   }
 
-  const fieldHeight = "h-14 md:h-16"; // Slightly responsive height
+  const fieldHeight = "h-14 md:h-16";
 
   return (
     <div className="flex min-h-screen w-full bg-white overflow-hidden">
       
       {/* LEFT PANEL */}
       <div className="relative hidden lg:flex lg:w-1/2 bg-emerald-950 p-16 flex-col justify-between text-white">
-        {/* ... (Keep your existing Left Panel code unchanged) ... */}
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-16">
             <div className="h-12 w-12 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
@@ -157,6 +179,7 @@ export default function RegisterPage() {
               <h3 className="text-xs font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
                 <Briefcase className="w-4 h-4" /> Assignment
               </h3>
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Controller
@@ -164,7 +187,7 @@ export default function RegisterPage() {
                     name="employmentStatus"
                     render={({ field }) => (
                       <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger className={`${fieldHeight} px-6 border-slate-200 bg-white shadow-sm rounded-md text-lg font-medium`}>
+                        <SelectTrigger className={`${fieldHeight} px-6 border-slate-200 bg-white shadow-sm rounded-xl text-lg font-medium`}>
                           <SelectValue placeholder="Employment Status" />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl border-slate-200">
@@ -175,19 +198,59 @@ export default function RegisterPage() {
                   />
                   {errors.employmentStatus && <p className="text-red-500 text-xs mt-1 ml-2">{errors.employmentStatus.message}</p>}
                 </div>
+
+                {/* PROVINCE SELECTOR */}
                 <div>
-                  <Input {...register("officialStation")} placeholder="Official Station" className={`${fieldHeight} px-6 border-slate-200 bg-white shadow-sm rounded-xl text-lg`} />
-                  {errors.officialStation && <p className="text-red-500 text-xs mt-1 ml-2">{errors.officialStation.message}</p>}
+                  <Controller
+                    control={control}
+                    name="province"
+                    render={({ field }) => (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger className={`${fieldHeight} px-6 border-slate-200 bg-white shadow-sm rounded-xl text-lg font-medium`}>
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-5 h-5 text-slate-400" />
+                            <SelectValue placeholder="Official Station" />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-slate-200">
+                          {PROVINCES.map(p => <SelectItem key={p} value={p} className="py-3">{p}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.province && <p className="text-red-500 text-xs mt-1 ml-2">{errors.province.message}</p>}
                 </div>
               </div>
-              
+
+              {/* CONDITIONAL SUB-STATION DROPDOWN */}
+              {selectedProvince === "Oriental Mindoro" && (
+                <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                  <Controller
+                    control={control}
+                    name="subStation"
+                    render={({ field }) => (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger className={`${fieldHeight} px-6 border-emerald-200 bg-emerald-50/30 shadow-sm rounded-xl text-lg font-medium`}>
+                          <SelectValue placeholder="Select Specific Station" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-slate-200">
+                          {ORIENTAL_MINDORO_STATIONS.map(s => <SelectItem key={s} value={s} className="py-3">{s}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.officialStation && <p className="text-red-500 text-xs mt-1 ml-2">Please select a specific station</p>}
+                </div>
+              )}
+
+              {/* DIVISION SELECTOR */}
               <div>
                 <Controller
                   control={control}
                   name="division"
                   render={({ field }) => (
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger className={`${fieldHeight} px-6 border-slate-200 bg-white shadow-sm rounded-md text-lg font-medium`}>
+                      <SelectTrigger className={`${fieldHeight} px-6 border-slate-200 bg-white shadow-sm rounded-xl text-lg font-medium`}>
                         <div className="flex items-center gap-2">
                           <Building2 className="w-5 h-5 text-slate-400" />
                           <SelectValue placeholder="Select Assigned Division" />
