@@ -4,11 +4,14 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Users, CalendarDays, FileText, Wallet, PlaneTakeoff } from 'lucide-react'
+import { toast } from 'sonner'
+import { submitTravelOrder } from '@/app/actions/travelOrder'
 
 const formSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
   position: z.string().min(1, 'Position is required'),
   salaryPerMonth: z.string().min(1, 'Salary per month is required'),
+  copiesRequired: z.coerce.number().min(1, 'At least 1 copy is required'),
 
   departureDate: z.string().min(1, 'Departure date is required'),
   returnDate: z.string().min(1, 'Return date is required'),
@@ -38,29 +41,43 @@ export function RequestForm() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    reset,
+    formState: { errors, isSubmitting },
   } = useForm<FormValues>({
+    //@ts-ignore
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      copiesRequired: 3, 
+    }
   })
 
-  const onSubmit = (data: FormValues) => {
-    console.log('Form submitted:', data)
-    // Send to API here
+  const onSubmit = async (data: FormValues) => {
+    const toastId = toast.loading('Submitting Travel Order...')
+
+    const result = await submitTravelOrder(data)
+
+    if (result.success) {
+      toast.success('Travel order submitted successfully!', { id: toastId })
+      reset() 
+    } else {
+      toast.error(result.error || 'Failed to submit the request.', { id: toastId })
+    }
   }
 
-  // Helper to render error message
   const ErrorMessage = ({ error }: { error?: { message?: string } }) => (
     error?.message ? <p className="text-red-500 text-xs mt-1">{error.message}</p> : null
   )
 
   return (
+    //@ts-ignore
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
+      
       {/* SECTION 1: Personal Profile */}
       <div className="space-y-4">
         <h3 className="text-xs font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
           <Users className="w-4 h-4" /> Employee Profile
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="space-y-1">
             <label className="text-sm font-semibold text-slate-600">Full Name</label>
             <input
@@ -90,6 +107,16 @@ export function RequestForm() {
               {...register('salaryPerMonth')}
             />
             <ErrorMessage error={errors.salaryPerMonth} />
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-semibold text-slate-600">Copies Required</label>
+            <input
+              type="number"
+              min="1"
+              className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-emerald-500/20"
+              {...register('copiesRequired')}
+            />
+            <ErrorMessage error={errors.copiesRequired} />
           </div>
         </div>
       </div>
@@ -245,9 +272,10 @@ export function RequestForm() {
       <div className="pt-6 border-t border-slate-100 flex justify-end">
         <button
           type="submit"
-          className="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+          disabled={isSubmitting}
+          className="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
         >
-          Submit Travel Order
+          {isSubmitting ? "Submitting..." : "Submit Travel Order"}
         </button>
       </div>
     </form>

@@ -23,10 +23,8 @@ export default async function AnalyticsPage() {
         <p className="text-muted-foreground">Overview of your travel activities and insights.</p>
       </div>
 
-      {/* Key Metrics */}
       <StatsCards />
 
-      {/* Tabs for different views */}
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -34,9 +32,7 @@ export default async function AnalyticsPage() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
-          {/* Two column layout for charts */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            {/* Travel Frequency by Province – takes 4 columns on large screens */}
             <Card className="md:col-span-2 lg:col-span-4">
               <CardHeader>
                 <CardTitle>Travel Frequency by Province</CardTitle>
@@ -47,7 +43,6 @@ export default async function AnalyticsPage() {
               </CardContent>
             </Card>
 
-            {/* Travels by Division – takes 3 columns */}
             <Card className="md:col-span-2 lg:col-span-3">
               <CardHeader>
                 <CardTitle>Travels by Division</CardTitle>

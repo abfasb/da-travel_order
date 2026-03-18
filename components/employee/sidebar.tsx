@@ -17,6 +17,7 @@ import {
   PlusCircle,
   LogOut,
   Settings,
+  Users // Added for the CSO icon
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -28,6 +29,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 
+// Added CSO to the navigation
 const routes = [
   {
     label: 'Dashboard',
@@ -38,7 +40,7 @@ const routes = [
     label: 'Travel Requests',
     icon: ClipboardList,
     href: '/employee/requests',
-    badge: 3, // Example: number of pending
+    badge: 3, 
   },
   {
     label: 'Travel History',
@@ -49,6 +51,11 @@ const routes = [
     label: 'Analytics',
     icon: BarChart3,
     href: '/employee/analytics',
+  },
+  {
+    label: 'CSO',
+    icon: Users,
+    href: '/employee/cso',
   },
   {
     label: 'Notifications',
@@ -63,14 +70,24 @@ const routes = [
   },
 ]
 
+// 1. ADDED: Interface for the incoming user data
 interface SidebarProps {
   defaultCollapsed?: boolean
+  user: {
+    firstName: string;
+    lastName: string;
+    division: string;
+  }
 }
 
-export function Sidebar({ defaultCollapsed = false }: SidebarProps) {
+export function Sidebar({ defaultCollapsed = false, user }: SidebarProps) {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(defaultCollapsed)
   const [mounted, setMounted] = useState(false)
+
+  // 2. ADDED: Dynamically generate initials and full name
+  const initials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
+  const fullName = `${user.firstName} ${user.lastName}`;
 
   // Prevent hydration mismatch
   useEffect(() => {
@@ -161,29 +178,32 @@ export function Sidebar({ defaultCollapsed = false }: SidebarProps) {
               <TooltipTrigger asChild>
                 <Button variant="ghost" size="icon" className="w-full h-10">
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback>JD</AvatarFallback>
+                    {/* 3. Dynamic Initials */}
+                    <AvatarFallback>{initials}</AvatarFallback>
                   </Avatar>
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="right">
-                <p>Juan Dela Cruz</p>
-                <p className="text-xs text-muted-foreground">Agriculturist II</p>
+                {/* 4. Dynamic Name and Division */}
+                <p>{fullName}</p>
+                <p className="text-xs text-muted-foreground">{user.division}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         ) : (
           <div className="flex items-center gap-3 px-2 py-2">
             <Avatar className="h-8 w-8">
-              <AvatarFallback>JD</AvatarFallback>
+              {/* 3. Dynamic Initials */}
+              <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">Juan Dela Cruz</p>
-              <p className="text-xs text-muted-foreground truncate">Agriculturist II</p>
+              {/* 4. Dynamic Name and Division */}
+              <p className="text-sm font-medium truncate">{fullName}</p>
+              <p className="text-xs text-muted-foreground truncate">{user.division}</p>
             </div>
           </div>
         )}
 
-        {/* Collapse toggle */}
         <Button
           variant="ghost"
           size="icon"

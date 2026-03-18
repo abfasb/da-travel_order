@@ -1,7 +1,6 @@
-'use client'
-
-import Link from 'next/link'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { prisma } from "@/lib/prisma"
+import { cookies } from "next/headers"
+import { Badge } from "@/components/ui/badge"
 import {
   Table,
   TableBody,
@@ -9,97 +8,79 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { ChevronRight } from 'lucide-react'
+} from "@/components/ui/table"
 
-// Mock data – replace with real data fetching
-const recentRequests = [
-  {
-    id: 'TO-2026-012',
-    destination: 'Palawan',
-    purpose: 'Field Inspection',
-    date: '2026-03-15',
-    status: 'Pending Review',
-  },
-  {
-    id: 'TO-2026-011',
-    destination: 'Oriental Mindoro',
-    purpose: 'Training',
-    date: '2026-03-10',
-    status: 'Approved',
-  },
-  {
-    id: 'TO-2026-010',
-    destination: 'Marinduque',
-    purpose: 'Meeting',
-    date: '2026-03-08',
-    status: 'Rejected',
-  },
-  {
-    id: 'TO-2026-009',
-    destination: 'Romblon',
-    purpose: 'Monitoring',
-    date: '2026-03-05',
-    status: 'HR Processing',
-  },
-  {
-    id: 'TO-2026-008',
-    destination: 'Occidental Mindoro',
-    purpose: 'Seminar',
-    date: '2026-03-01',
-    status: 'Completed',
-  },
-]
+export async function RecentRequestsTable() {
+  const cookieStore = await cookies();
+  const userId = cookieStore.get("auth_session")?.value;
 
-const statusColorMap: Record<string, string> = {
-  'Pending Review': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  'Approved': 'bg-green-100 text-green-800 border-green-200',
-  'Rejected': 'bg-red-100 text-red-800 border-red-200',
-  'HR Processing': 'bg-blue-100 text-blue-800 border-blue-200',
-  'Completed': 'bg-gray-100 text-gray-800 border-gray-200',
-}
+  if (!userId) return null;
 
-export function RecentRequestsTable() {
+  const recentRequests = await prisma.travelOrderRequest.findMany({
+    where: { userId: userId },
+    orderBy: { createdAt: "desc" }, 
+    take: 5,
+  });
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'APPROVED': 
+        return <Badge className="bg-emerald-500 hover:bg-emerald-600">Approved</Badge>
+      case 'PENDING': 
+        return <Badge variant="outline" className="text-amber-600 border-amber-500 bg-amber-50">Pending</Badge>
+      case 'REJECTED': 
+        return <Badge variant="destructive">Rejected</Badge>
+      case 'REVIEWING': 
+        return <Badge className="bg-blue-500 hover:bg-blue-600">Reviewing</Badge>
+      case 'HR_PROCESSING': 
+        return <Badge className="bg-purple-500 hover:bg-purple-600">HR Processing</Badge>
+      default: 
+        return <Badge variant="outline">{status}</Badge>
+    }
+  }
+
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-lg font-medium">Recent Travel Requests</CardTitle>
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/employee/requests" className="gap-1">
-            View all <ChevronRight className="h-4 w-4" />
-          </Link>
-        </Button>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Travel No.</TableHead>
-              <TableHead>Destination</TableHead>
-              <TableHead>Purpose</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {recentRequests.map((req) => (
-              <TableRow key={req.id}>
-                <TableCell className="font-medium">{req.id}</TableCell>
-                <TableCell>{req.destination}</TableCell>
-                <TableCell>{req.purpose}</TableCell>
-                <TableCell>{new Date(req.date).toLocaleDateString()}</TableCell>
-                <TableCell>
-                  <Badge className={statusColorMap[req.status] || ''} variant="outline">
-                    {req.status}
-                  </Badge>
-                </TableCell>
+    <div className="rounded-xl border bg-card text-card-foreground shadow-sm h-full flex flex-col">
+      <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-100">
+        <h3 className="font-semibold leading-none tracking-tight text-lg">Recent Travel Requests</h3>
+        <p className="text-sm text-muted-foreground pt-1">Your most recently submitted itineraries.</p>
+      </div>
+      
+      <div className="p-0 flex-1 overflow-auto">
+        {recentRequests.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-48 text-center px-4">
+            <p className="text-sm text-muted-foreground">No travel requests found.</p>
+            <p className="text-xs text-muted-foreground mt-1">Submit a new request to see it here.</p>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader className="bg-slate-50">
+              <TableRow>
+                <TableHead className="pl-6">Destination</TableHead>
+                <TableHead>Dates</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right pr-6">Date Filed</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+            </TableHeader>
+            <TableBody>
+              {recentRequests.map((req) => (
+                <TableRow key={req.id}>
+                  <TableCell className="font-medium pl-6">{req.destinationProvince}</TableCell>
+                  <TableCell className="text-muted-foreground text-sm">
+                    {/* Format dates into readable strings */}
+                    {new Date(req.departureDate).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })} -{' '}
+                    {new Date(req.returnDate).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </TableCell>
+                  <TableCell>{getStatusBadge(req.status)}</TableCell>
+                  <TableCell className="text-right text-muted-foreground text-sm pr-6">
+                    {new Date(req.createdAt).toLocaleDateString('en-PH')}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </div>
+    </div>
   )
 }

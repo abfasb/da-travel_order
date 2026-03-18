@@ -41,7 +41,16 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 
-// Mock notifications
+// 1. ADDED: Interface for the incoming user data
+interface NavbarProps {
+  user: {
+    firstName: string;
+    lastName: string;
+    division: string;
+  }
+}
+
+// Mock notifications (You can connect this to Prisma later too!)
 const notifications = [
   {
     id: 1,
@@ -75,9 +84,14 @@ const notifications = [
 
 const unreadCount = notifications.filter(n => !n.read).length
 
-export function Navbar() {
+// 2. UPDATED: Accept the user prop
+export function Navbar({ user }: NavbarProps) {
   const pathname = usePathname()
   const [searchFocused, setSearchFocused] = useState(false)
+
+  // 3. ADDED: Dynamically generate initials and full name
+  const initials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
+  const fullName = `${user.firstName} ${user.lastName}`;
 
   const mobileRoutes = [
     { label: 'Dashboard', href: '/employee/dashboard', icon: LayoutDashboard },
@@ -125,18 +139,21 @@ export function Navbar() {
                 )
               })}
               <Separator className="my-4" />
+              
+              {/* 4. UPDATED: Mobile profile section now uses dynamic data */}
               <div className="px-3 py-2">
                 <p className="text-xs text-muted-foreground mb-2">Signed in as</p>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback>JD</AvatarFallback>
+                    <AvatarFallback>{initials}</AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="text-sm font-medium">Juan Dela Cruz</p>
-                    <p className="text-xs text-muted-foreground">Agriculturist II</p>
+                    <p className="text-sm font-medium">{fullName}</p>
+                    <p className="text-xs text-muted-foreground">{user.division}</p>
                   </div>
                 </div>
               </div>
+
             </nav>
           </ScrollArea>
         </SheetContent>
@@ -215,16 +232,16 @@ export function Navbar() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* User dropdown */}
+        {/* 5. UPDATED: Desktop User dropdown uses dynamic data */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="flex items-center gap-2 px-2">
               <Avatar className="h-8 w-8">
-                <AvatarFallback>JD</AvatarFallback>
+                <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
               <div className="hidden text-left lg:block">
-                <p className="text-sm font-medium">Juan Dela Cruz</p>
-                <p className="text-xs text-muted-foreground">Agriculturist II</p>
+                <p className="text-sm font-medium">{fullName}</p>
+                <p className="text-xs text-muted-foreground">{user.division}</p>
               </div>
             </Button>
           </DropdownMenuTrigger>

@@ -29,6 +29,15 @@ enum RequestStatus {
   REVIEWING
   APPROVED
   REJECTED
+  HR_PROCESSING
+  COMPLETED
+}
+
+enum ApprovalStatus {
+  PENDING
+  CHECKING
+  APPROVED
+  REJECTED
 }
 
 model User {
@@ -41,50 +50,148 @@ model User {
   employmentStatus EmploymentStatus
   division         String
   officialStation  String
-  password         String           
-
+  password         String
   role             Role             @default(STAFF)
-  
-  travelOrders     TravelOrderRequest[]
-  
+
+  // Relations
+  travelOrders     TravelOrderRequest[]  // requests created by this user
+  approvals        Approval[]            // approvals performed
+  auditLogs        AuditLog[]            // actions logged
+  notifications    Notification[]        // notifications received
+  hrProcessedOrders TravelOrderRequest[] @relation("HRAssignments") // travel orders processed by HR
+  attachments      Attachment[]          // files uploaded by this user
+
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 
-  @@map("users") 
+  @@map("users")
 }
 
 model TravelOrderRequest {
   id                     String        @id @default(uuid())
-  
-  // Foreign Key
+  travelOrderNumber      String?       @unique
+
+  requestorName          String
+  requestorPosition      String
+  requestorSalary        String
+  requestorStation       String
+  employmentStatus       EmploymentStatus
+  copiesRequired         Int
+
+  // Foreign key to the user who created it
   userId                 String
   user                   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  name                   String
-  salaryPerMonth         String        
-  position               String
-  // REMOVED officialStation here!
-
-  departureDate          DateTime
-  returnDate             DateTime
-  
+  // Travel details
+  purpose                String        @db.Text
   destinationProvince    String
   specificLocation       String
-  destination            String        
-  
-  specificPurpose        String        @db.Text
+  departureDate          DateTime
+  returnDate             DateTime
+  meansOfTransport       String
+  estimatedExpenses      String
+  sourceOfFunds          String
+  accompanyingPersonnel  String?
+
+  // Additional detailed fields
+  destinationSummary     String        @db.Text
   objectives             String        @db.Text
   travelDetails          String        @db.Text
 
-  meansOfTransportation  String
-  estimatedExpenses      String        
-  sourceOfFunds          String
-  accompanyingPersonnel  String?       
-
+  // Workflow tracking
   status                 RequestStatus @default(PENDING)
+  rejectionReason        String?       @db.Text
+
+  // HR actions
+  hrProcessedAt          DateTime?
+  hrUserId               String?
+  hrUser                 User?         @relation("HRAssignments", fields: [hrUserId], references: [id])
+
+  // Relations to other models
+  approvals              Approval[]
+  attachments            Attachment[]
+  auditLogs              AuditLog[]    @relation("TravelOrderAuditLogs")
+  notifications          Notification[] @relation("TravelOrderNotifications")
 
   createdAt              DateTime      @default(now())
   updatedAt              DateTime      @updatedAt
 
   @@map("travel_orders")
+}
+
+model Approval {
+  id                     String        @id @default(uuid())
+
+  travelOrderId          String
+  travelOrder            TravelOrderRequest @relation(fields: [travelOrderId], references: [id], onDelete: Cascade)
+
+  approverRole           Role
+  approverId             String?
+  approver               User?         @relation(fields: [approverId], references: [id])
+
+  status                 ApprovalStatus @default(PENDING)
+  comment                String?       @db.Text
+  signatureData          String?
+  certificationCheck     Boolean       @default(false)
+
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+
+  @@unique([travelOrderId, approverRole])
+  @@map("approvals")
+}
+
+model Attachment {
+  id                     String        @id @default(uuid())
+  travelOrderId          String
+  travelOrder            TravelOrderRequest @relation(fields: [travelOrderId], references: [id], onDelete: Cascade)
+
+  fileName               String
+  fileUrl                String
+  fileSize               Int
+  mimeType               String
+
+  uploadedById           String
+  uploadedBy             User          @relation(fields: [uploadedById], references: [id])
+
+  createdAt              DateTime      @default(now())
+
+  @@map("attachments")
+}
+
+model AuditLog {
+  id                     String        @id @default(uuid())
+  userId                 String
+  user                   User          @relation(fields: [userId], references: [id])
+
+  action                 String
+  details                String?       @db.Text
+  ipAddress              String?
+  userAgent              String?
+
+  travelOrderId          String?
+  travelOrder            TravelOrderRequest? @relation("TravelOrderAuditLogs", fields: [travelOrderId], references: [id])
+
+  createdAt              DateTime      @default(now())
+
+  @@map("audit_logs")
+}
+
+model Notification {
+  id                     String        @id @default(uuid())
+  userId                 String
+  user                   User          @relation(fields: [userId], references: [id])
+
+  type                   String
+  title                  String
+  message                String        @db.Text
+  isRead                 Boolean       @default(false)
+  link                   String?
+
+  travelOrderId          String?
+  travelOrder            TravelOrderRequest? @relation("TravelOrderNotifications", fields: [travelOrderId], references: [id])
+
+  createdAt              DateTime      @default(now())
+
+  @@map("notifications")
 }
