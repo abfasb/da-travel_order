@@ -11,7 +11,9 @@ export default function EmployeeLayout({
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Navbar />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 to-slate-100/50 p-6">
+          {children}
+        </main>
       </div>
     </div>
   )

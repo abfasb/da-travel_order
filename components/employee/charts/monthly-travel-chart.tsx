@@ -1,47 +1,69 @@
 'use client'
 
+import { Line, LineChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts'
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart'
 
-const data = [
-  { month: 'Jan', travels: 32 },
-  { month: 'Feb', travels: 25 },
-  { month: 'Mar', travels: 40 },
-  { month: 'Apr', travels: 38 },
-  { month: 'May', travels: 45 },
-  { month: 'Jun', travels: 42 },
+const chartData = [
+  { month: 'Jan', trips: 4 },
+  { month: 'Feb', trips: 3 },
+  { month: 'Mar', trips: 5 },
+  { month: 'Apr', trips: 2 },
+  { month: 'May', trips: 6 },
+  { month: 'Jun', trips: 4 },
+  { month: 'Jul', trips: 7 },
+  { month: 'Aug', trips: 5 },
+  { month: 'Sep', trips: 3 },
+  { month: 'Oct', trips: 4 },
+  { month: 'Nov', trips: 2 },
+  { month: 'Dec', trips: 3 },
 ]
 
-export function MonthlyTravelChart() {
+const chartConfig = {
+  trips: {
+    label: 'Number of Trips',
+    color: '#2F6B3E',
+  },
+} satisfies ChartConfig
+
+export function MonthlyTrendChart() {
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+    <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
+      <LineChart
+        data={chartData}
+        margin={{ top: 20, right: 20, left: 20, bottom: 20 }}
+      >
         <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-        <XAxis dataKey="month" className="text-xs" />
-        <YAxis className="text-xs" />
-        <Tooltip
-          contentStyle={{
-            backgroundColor: 'hsl(var(--background))',
-            borderColor: 'hsl(var(--border))',
-            borderRadius: '0.5rem',
-          }}
+        <XAxis
+          dataKey="month"
+          tickLine={false}
+          axisLine={false}
+          tickMargin={10}
+          className="text-xs"
+        />
+        <YAxis
+          tickLine={false}
+          axisLine={false}
+          tickMargin={10}
+          className="text-xs"
+        />
+        <ChartTooltip
+          cursor={false}
+          content={<ChartTooltipContent indicator="line" />}
         />
         <Line
           type="monotone"
-          dataKey="travels"
-          stroke="#2F6B3E"
+          dataKey="trips"
+          stroke="var(--color-trips)"
           strokeWidth={3}
-          dot={{ fill: '#2F6B3E', r: 4 }}
+          dot={{ fill: 'var(--color-trips)', r: 4 }}
           activeDot={{ r: 6 }}
         />
       </LineChart>
-    </ResponsiveContainer>
+    </ChartContainer>
   )
 }

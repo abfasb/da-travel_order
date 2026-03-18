@@ -51,12 +51,12 @@ export function LoginForm({
       toast.success(`Welcome back, ${result.user.name}!`, { id: toastId });
       
       const userRole = result.user.role;
-      let targetRoute = "/employee/";
+      let targetRoute = "/employee/dashboard";
 
       if (userRole === "ADMIN") {
-        targetRoute = "/admin";
+        targetRoute = "/admin/dashboard";
       } else if (userRole === "HR") {
-        targetRoute = "/hr";
+        targetRoute = "/hr/dashboard";
       } else if (
         userRole === "CHIEF_AGRICULTURIST" ||
         userRole === "CHIEF_ADMINISTRATIVE" ||

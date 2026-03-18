@@ -1,45 +1,61 @@
 'use client'
 
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { Pie, PieChart, Cell, Legend } from 'recharts'
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart'
 
-const data = [
-  { name: 'Regulatory', value: 45 },
-  { name: 'Field Operations', value: 38 },
-  { name: 'Laboratory', value: 21 },
-  { name: 'Research', value: 18 },
-  { name: 'Admin & Finance', value: 12 },
+const chartData = [
+  { division: 'Regulatory', travels: 45 },
+  { division: 'Field Operations', travels: 38 },
+  { division: 'Laboratory', travels: 21 },
+  { division: 'Research', travels: 18 },
+  { division: 'Admin & Finance', travels: 12 },
 ]
+
+const chartConfig = {
+  travels: {
+    label: 'Travels',
+  },
+} satisfies ChartConfig
 
 const COLORS = ['#2F6B3E', '#4A8B5C', '#6AA67A', '#8FC097', '#B4D9B2']
 
 export function DivisionChart() {
   return (
-    <ResponsiveContainer width="100%" height={300}>
+    <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
       <PieChart>
         <Pie
-          data={data}
+          data={chartData}
+          dataKey="travels"
+          nameKey="division"
           cx="50%"
           cy="50%"
-          labelLine={false}
+          innerRadius={60}
           outerRadius={100}
-          fill="#8884d8"
-          dataKey="value"
-          //@ts-ignore
-          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+          paddingAngle={2}
+          label={(entry) => `${entry.division}`}
+          labelLine={false}
         >
-          {data.map((entry, index) => (
+          {chartData.map((entry, index) => (
             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
           ))}
         </Pie>
-        <Tooltip
-          contentStyle={{
-            backgroundColor: 'hsl(var(--background))',
-            borderColor: 'hsl(var(--border))',
-            borderRadius: '0.5rem',
-          }}
+        <ChartTooltip
+          content={<ChartTooltipContent />}
         />
-        <Legend />
+        <Legend
+          layout="vertical"
+          align="right"
+          verticalAlign="middle"
+          iconType="circle"
+          iconSize={8}
+          wrapperStyle={{ fontSize: '12px' }}
+        />
       </PieChart>
-    </ResponsiveContainer>
+    </ChartContainer>
   )
 }
