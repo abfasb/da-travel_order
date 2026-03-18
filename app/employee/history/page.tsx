@@ -1,59 +1,21 @@
-// app/(employee)/history/page.tsx
-import { TravelHistoryTable } from '@/components/employee/travel-history-table'
-import { Card } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { prisma } from '@/lib/prisma'
+import { cookies } from 'next/headers'
+import { TravelHistoryTable } from '@/components/employee/travel-history-table' // Adjust your import path
 
-export default function HistoryPage() {
+export default async function TravelHistoryPage() {
+  const cookieStore = await cookies()
+  const userId = cookieStore.get('auth_session')?.value
+
+  if (!userId) return null;
+
+  const travelOrders = await prisma.travelOrderRequest.findMany({
+    where: { userId: userId },
+    orderBy: { createdAt: 'desc' },
+  })
+
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold tracking-tight">Travel History</h1>
-
-      {/* Filters */}
-      <Card className="p-4">
-        <div className="grid gap-4 sm:grid-cols-4">
-          <Input placeholder="Search by destination..." />
-          <Select>
-            <SelectTrigger>
-              <SelectValue placeholder="Month" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="jan">January</SelectItem>
-              <SelectItem value="feb">February</SelectItem>
-              {/* ... */}
-            </SelectContent>
-          </Select>
-          <Select>
-            <SelectTrigger>
-              <SelectValue placeholder="Year" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="2026">2026</SelectItem>
-              <SelectItem value="2025">2025</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select>
-            <SelectTrigger>
-              <SelectValue placeholder="Division" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="regulatory">Regulatory</SelectItem>
-              <SelectItem value="laboratory">Laboratory</SelectItem>
-              {/* ... */}
-            </SelectContent>
-          </Select>
-        </div>
-      </Card>
-
-      {/* Table */}
-      <TravelHistoryTable />
+    <div className="p-6">
+      <TravelHistoryTable data={travelOrders} />
     </div>
   )
 }
