@@ -24,7 +24,6 @@ enum Role {
   ADMIN
 }
 
-// Added this to track the progress of the travel order
 enum RequestStatus {
   PENDING
   REVIEWING
@@ -46,7 +45,6 @@ model User {
 
   role             Role             @default(STAFF)
   
-  // Link the user to their travel orders
   travelOrders     TravelOrderRequest[]
   
   createdAt        DateTime         @default(now())
@@ -58,30 +56,30 @@ model User {
 model TravelOrderRequest {
   id                     String        @id @default(uuid())
   
-  // Foreign Key linking to the User who made the request
+  // Foreign Key
   userId                 String
   user                   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   name                   String
-  salaryPerMonth         String       
+  salaryPerMonth         String        
   position               String
-  officialStation        String
+  // REMOVED officialStation here!
 
   departureDate          DateTime
   returnDate             DateTime
   
   destinationProvince    String
   specificLocation       String
-  destination            String        // Summary of destination
+  destination            String        
   
   specificPurpose        String        @db.Text
   objectives             String        @db.Text
   travelDetails          String        @db.Text
 
   meansOfTransportation  String
-  estimatedExpenses      String        // String for easy currency formatting
+  estimatedExpenses      String        
   sourceOfFunds          String
-  accompanyingPersonnel  String?       // Optional field
+  accompanyingPersonnel  String?       
 
   status                 RequestStatus @default(PENDING)
 
