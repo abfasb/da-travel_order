@@ -1,39 +1,43 @@
-// app/(employee)/analytics/page.tsx
-import { MonthlyTravelChart } from '@/components/employee/charts/monthly-travel-chart'
-import { DivisionChart } from '@/components/employee/charts/division-chart'
-import { ProvinceChart } from '@/components/employee/charts/province-chart'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+'use client'
 
-export default function AnalyticsPage() {
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts'
+
+const data = [
+  { province: 'Oriental Mindoro', travels: 40 },
+  { province: 'Palawan', travels: 18 },
+  { province: 'Marinduque', travels: 12 },
+  { province: 'Occidental Mindoro', travels: 10 },
+  { province: 'Romblon', travels: 8 },
+]
+
+export function ProvinceChart() {
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Monthly Travels</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <MonthlyTravelChart />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Travels by Division</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <DivisionChart />
-          </CardContent>
-        </Card>
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>Travels by Province</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ProvinceChart />
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <ResponsiveContainer width="100%" height={300}>
+      <BarChart
+        data={data}
+        layout="vertical"
+        margin={{ top: 20, right: 30, left: 80, bottom: 5 }}
+      >
+        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+        <XAxis type="number" className="text-xs" />
+        <YAxis type="category" dataKey="province" className="text-xs" />
+        <Tooltip
+          contentStyle={{
+            backgroundColor: 'hsl(var(--background))',
+            borderColor: 'hsl(var(--border))',
+            borderRadius: '0.5rem',
+          }}
+        />
+        <Bar dataKey="travels" fill="#2F6B3E" radius={[0, 4, 4, 0]} />
+      </BarChart>
+    </ResponsiveContainer>
   )
 }

@@ -22,7 +22,6 @@ import { Button } from '@/components/ui/button'
 import { Eye } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-// Mock data – replace with real data
 const allTravels = Array.from({ length: 25 }, (_, i) => ({
   id: `TO-2026-${(100 + i).toString().padStart(3, '0')}`,
   destination: ['Palawan', 'Oriental Mindoro', 'Marinduque', 'Romblon', 'Occidental Mindoro'][i % 5],
