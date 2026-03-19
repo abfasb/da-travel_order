@@ -81,13 +81,12 @@ export default function RegisterPage() {
   const selectedProvince = watch("province");
   const selectedSubStation = watch("subStation");
 
-  // Logic: Sync the hidden officialStation field based on selections
   useEffect(() => {
     if (selectedProvince === "Oriental Mindoro") {
       setValue("officialStation", selectedSubStation || "");
     } else {
       setValue("officialStation", selectedProvince);
-      setValue("subStation", ""); // Reset substation if province is changed
+      setValue("subStation", ""); 
     }
   }, [selectedProvince, selectedSubStation, setValue]);
 
@@ -108,7 +107,6 @@ export default function RegisterPage() {
   return (
     <div className="flex min-h-screen w-full bg-white overflow-hidden">
       
-      {/* LEFT PANEL */}
       <div className="relative hidden lg:flex lg:w-1/2 bg-emerald-950 p-16 flex-col justify-between text-white">
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-16">
