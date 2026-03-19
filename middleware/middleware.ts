@@ -35,7 +35,7 @@ export function middleware(request: NextRequest) {
       userRole === 'ADMIN';
 
     if (path.startsWith('/approvals') && !isManagement) {
-      return NextResponse.redirect(new URL('/dashboard', request.url)); // STAFF gets kicked out
+      return NextResponse.redirect(new URL('/dashboard', request.url));
     }
     
   }

@@ -100,11 +100,8 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
         </CardContent>
       </Card>
 
-      {/* Two‑column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* LEFT COLUMN: Travel Order Details */}
         <div className="space-y-6">
-          {/* Summary Card */}
           <Card>
             <CardHeader>
               <CardTitle>Travel Order Summary</CardTitle>
@@ -114,7 +111,6 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
             </CardContent>
           </Card>
 
-          {/* Full Document Preview Card */}
           <Card>
             <CardHeader>
               <CardTitle>Official Document Preview</CardTitle>
