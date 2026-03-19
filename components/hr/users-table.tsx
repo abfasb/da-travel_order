@@ -128,8 +128,8 @@ export function UsersTable({ users }: { users: any[] }) {
                         {user.role.replace('_', ' ')}
                       </Badge>
                     </TableCell>
-                    <TableCell>{user.division}</TableCell>
-                    <TableCell>{user.officialStation}</TableCell>
+                    <TableCell>{user.division || '—'}</TableCell>
+                    <TableCell>{user.officialStation || '—'}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">
                         Active

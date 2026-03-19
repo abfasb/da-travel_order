@@ -1,4 +1,4 @@
-import Sidebar from "@/components/hr/sidebar"
+import { Sidebar } from "@/components/hr/sidebar"
 import Navbar from "@/components/hr/navbar"
 
 export default function HRLayout({ children }: { children: React.ReactNode }) {

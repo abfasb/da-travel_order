@@ -47,9 +47,9 @@ model User {
   lastName         String
   email            String           @unique
   mobileNumber     String
-  employmentStatus EmploymentStatus
-  division         String
-  officialStation  String
+  employmentStatus EmploymentStatus?
+  division         String?
+  officialStation  String?
   password         String
   role             Role             @default(STAFF)
 

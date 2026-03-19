@@ -16,6 +16,7 @@ export default async function HRPrintPage({ params }: { params: { id: string } }
     include: { user: true, approvals: { include: { approver: true } } },
   })
 
+
   if (!travelOrder) notFound()
 
   return (
