@@ -8,8 +8,7 @@ import {
   ClipboardList,
   BarChart3,
   Leaf,
-  Printer,
-  FileText,
+  Users, 
 } from 'lucide-react'
 
 const routes = [
@@ -27,6 +26,11 @@ const routes = [
     label: 'Analytics',
     icon: BarChart3,
     href: '/hr/analytics',
+  },
+  {
+    label: 'User Management',
+    icon: Users,
+    href: '/hr/users',
   },
 ]
 

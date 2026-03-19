@@ -23,7 +23,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function ProvinceChart() {
+export default function ProvinceChart() {
   return (
     <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
       <BarChart

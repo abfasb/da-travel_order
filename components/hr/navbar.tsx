@@ -14,7 +14,7 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 
-export function Navbar() {
+export default function Navbar() {
   return (
     <header className="flex h-16 items-center border-b bg-card px-6">
       {/* Mobile menu button (would toggle sidebar on small screens) */}

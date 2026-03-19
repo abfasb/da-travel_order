@@ -19,7 +19,7 @@ interface AssignNumberModalProps {
   order: any | null
 }
 
-export function AssignNumberModal({ open, onOpenChange, order }: AssignNumberModalProps) {
+export default function AssignNumberModal({ open, onOpenChange, order }: AssignNumberModalProps) {
   const [number, setNumber] = useState('')
 
   const handleAssign = () => {

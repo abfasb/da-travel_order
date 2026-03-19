@@ -1,4 +1,4 @@
-import { OrdersTable } from '@/components/hr/orders-table'
+import OrdersTable from "@/components/hr/orders-table"
 
 export default function OrdersPage() {
   return (

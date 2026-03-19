@@ -30,7 +30,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Eye, Printer, Hash, Search, Filter } from 'lucide-react'
 
-// Mock data
 const allOrders = Array.from({ length: 50 }, (_, i) => ({
   id: `${i}`,
   travelOrderNumber: i % 3 === 0 ? `TO-2026-${100 + i}` : null,
@@ -50,7 +49,7 @@ const statusColorMap: Record<string, string> = {
 
 const ITEMS_PER_PAGE = 10
 
-export function OrdersTable() {
+export default function OrdersTable() {
   const [currentPage, setCurrentPage] = useState(1)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')

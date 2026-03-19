@@ -32,7 +32,7 @@ const stats = [
   },
 ]
 
-export function StatsCards() {
+export default function StatsCards() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat) => (

@@ -1,9 +1,9 @@
-import { StatsCards } from '@/components/hr/stats-cards'
-import { RecentOrdersTable } from '@/components/hr/recent-orders-table'
 import { Button } from '@/components/ui/button'
 import { Printer, FileText } from 'lucide-react'
+import StatsCards from '@/components/hr/stats-cards'
+import RecentOrdersTable from '@/components/hr/recent-orders-table'
 
-export default function HRDashboardPage() {
+export default function Page() {
   return (
     <div className="space-y-6">
       <div>

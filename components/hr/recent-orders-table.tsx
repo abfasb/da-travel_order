@@ -13,7 +13,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Eye, Printer, Hash } from 'lucide-react'
-import { AssignNumberModal } from './assign-number-modal'
+import AssignNumberModal from './assign-number-modal'
 
 // Mock data – replace with real data
 const pendingOrders = [
@@ -38,7 +38,7 @@ const pendingOrders = [
   // ... more
 ]
 
-export function RecentOrdersTable() {
+export default function RecentOrdersTable() {
   const [selectedOrder, setSelectedOrder] = useState<any>(null)
   const [modalOpen, setModalOpen] = useState(false)
 
