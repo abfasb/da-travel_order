@@ -6,6 +6,7 @@ import { StatsCards } from '@/components/employee/charts/stats-cards'
 import { TravelFrequencyChart } from '@/components/employee/charts/travel-frequency-chart'
 import { DivisionChart } from '@/components/employee/charts/division-chart'
 import { RecentTravelsTable } from '@/components/employee/recent-travels-table-analytics'
+import { ChartAreaInteractive } from '@/components/employee/charts/custom-chart'
 
 export const metadata: Metadata = {
   title: 'Analytics | TOMS Employee',
@@ -61,7 +62,7 @@ export default async function AnalyticsPage() {
               <CardDescription>Number of trips per month in 2026</CardDescription>
             </CardHeader>
             <CardContent>
-              <MonthlyTrendChart />
+              <ChartAreaInteractive />
             </CardContent>
           </Card>
         </TabsContent>
