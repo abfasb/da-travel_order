@@ -19,6 +19,7 @@ import {
   Clock,
   Users,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -38,6 +39,11 @@ interface Feature {
   description: string;
 }
 
+const router = useRouter();
+
+const createLogin = () => {
+  router.push('/login');
+}
 
 const TravelArc: React.FC<TravelArcProps> = ({ start, end, color }) => {
   return (
@@ -216,9 +222,9 @@ const Navbar: React.FC = () => (
       </div>
       <Button
         variant="default"
+        onClick={createLogin}
         className="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl h-9 px-5"
       >
-       <Link href="/login">Sign In</Link>
       </Button>
     </div>
   </nav>
