@@ -1,3 +1,4 @@
+// components/approver/signature-form.tsx
 'use client'
 
 import { useState, useRef } from 'react'
@@ -25,9 +26,10 @@ interface SignatureFormProps {
   orderId: string
   approvalId: string
   userRole: string
+  onSuccess?: () => void   // <-- new prop
 }
 
-export function SignatureForm({ orderId, approvalId, userRole }: SignatureFormProps) {
+export function SignatureForm({ orderId, approvalId, userRole, onSuccess }: SignatureFormProps) {
   const router = useRouter()
   const [signatureData, setSignatureData] = useState<string | null>(null)
   const [certified, setCertified] = useState(false)
@@ -84,6 +86,7 @@ export function SignatureForm({ orderId, approvalId, userRole }: SignatureFormPr
 
     if (result.success) {
       toast.success('Travel order approved successfully.')
+      if (onSuccess) onSuccess() // <-- call onSuccess before redirect
       router.push('/approvals')
       router.refresh()
     } else {
@@ -109,6 +112,7 @@ export function SignatureForm({ orderId, approvalId, userRole }: SignatureFormPr
 
     if (result.success) {
       toast.success('Travel order rejected.')
+      if (onSuccess) onSuccess() // <-- call onSuccess before redirect
       router.push('/approvals')
       router.refresh()
     } else {
