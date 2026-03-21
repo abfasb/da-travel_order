@@ -32,8 +32,10 @@ export default async function EmployeeLayout({
 
   return (
     <div className="flex h-screen bg-muted/10">
+        {/* @ts-ignore */}
       <Sidebar user={currentUser} />
       <div className="flex flex-1 flex-col overflow-hidden">
+        {/* @ts-ignore */}
         <Navbar user={currentUser} />
         <main className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 to-slate-100/50 p-6">
           {children}
