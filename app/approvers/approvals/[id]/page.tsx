@@ -132,7 +132,6 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
           </div>
         </div>
 
-        {/* Approval Timeline */}
         <div className="mb-10">
           <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
             <CardContent className="p-6">
@@ -172,7 +171,6 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          {/* Document Preview */}
           <div className="xl:col-span-2 space-y-6">
             <Card className="border-0 shadow-xl overflow-hidden">
               <div className="bg-gradient-to-r from-primary/5 to-primary/10 border-b">
@@ -193,7 +191,7 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
                   </div>
                 </div>
               </div>
-              <ScrollArea className="h-[calc(100vh-350px)] min-h-[600px] overflow-auto">
+              <ScrollArea className="h-[calc(100vh-350px)] min-h-[1200px] overflow-auto">
                 <div className=" bg-slate-50 dark:bg-slate-950 overflow-x-auto">
                       <TravelOrderDocument data={travelOrder} />
                 </div>
@@ -202,7 +200,6 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
           </div>
 
           <div className="space-y-6">
-            {/* Summary Card */}
             <Card className="border-0 shadow-lg overflow-hidden">
               <div className="bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 p-5 border-b">
                 <div className="flex items-center gap-2">
