@@ -1,4 +1,3 @@
-// app/approvals/signature/[id]/page.tsx
 import { cookies } from 'next/headers'
 import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
@@ -63,7 +62,6 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
     }
   }
 
-  // Build approval timeline data
   const timeline = sequence.map(role => {
     const approval = travelOrder.approvals.find(a => a.approverRole === role)
     return {
@@ -199,6 +197,7 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
             </Card>
           </div>
 
+
           <div className="space-y-6">
             <Card className="border-0 shadow-lg overflow-hidden">
               <div className="bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 p-5 border-b">
@@ -213,7 +212,6 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
               </CardContent>
             </Card>
 
-            {/* Quick Info */}
             <Card className="border-0 shadow-lg overflow-hidden">
               <div className="p-5 space-y-4">
                 <div className="flex items-start gap-3">

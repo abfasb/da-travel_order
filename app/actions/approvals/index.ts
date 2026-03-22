@@ -9,12 +9,14 @@ export async function submitApproval({
   signature,
   comment,
   certificationCheck,
+  placeSigned,
 }: {
   approvalId: string
   action: 'APPROVE' | 'REJECT'
   signature?: string | null
   comment?: string | null
   certificationCheck?: boolean
+  placeSigned?: string | null
 }) {
   try {
     const approval = await prisma.approval.findUnique({
@@ -31,6 +33,8 @@ export async function submitApproval({
         signatureData: signature,
         comment: comment,
         certificationCheck: action === 'APPROVE' ? certificationCheck : false,
+    // @ts-ignore
+        placeSigned: placeSigned,
       },
     })
 

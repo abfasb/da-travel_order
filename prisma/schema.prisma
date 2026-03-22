@@ -121,19 +121,16 @@ model TravelOrderRequest {
 
 model Approval {
   id                     String        @id @default(uuid())
-
   travelOrderId          String
   travelOrder            TravelOrderRequest @relation(fields: [travelOrderId], references: [id], onDelete: Cascade)
-
   approverRole           Role
   approverId             String?
   approver               User?         @relation(fields: [approverId], references: [id])
-
   status                 ApprovalStatus @default(PENDING)
   comment                String?       @db.Text
-  signatureData          String?
+  signatureData          String?       // base64 or URL of the signature image
   certificationCheck     Boolean       @default(false)
-
+  placeSigned            String?       // e.g., "DA Calapan City"
   createdAt              DateTime      @default(now())
   updatedAt              DateTime      @updatedAt
 

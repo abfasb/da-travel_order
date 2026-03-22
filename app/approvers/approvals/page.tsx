@@ -58,7 +58,6 @@ export default async function ApprovalsPage() {
     take: 20,
   })
 
-  // Stats
   const pendingCount = pendingOrders.length
   const approvedCount = historyOrders.filter(o => o.approvals[0]?.status === 'APPROVED').length
   const rejectedCount = historyOrders.filter(o => o.approvals[0]?.status === 'REJECTED').length
@@ -73,7 +72,6 @@ export default async function ApprovalsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
       <div className="container mx-auto py-8 px-4 md:px-6 max-w-7xl">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
             Approval Dashboard
@@ -83,7 +81,6 @@ export default async function ApprovalsPage() {
           </p>
         </div>
 
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           <Card className="border-0 shadow-md bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800">
             <CardContent className="p-6">
@@ -131,7 +128,6 @@ export default async function ApprovalsPage() {
           </Card>
         </div>
 
-        {/* Tabs */}
         <Tabs defaultValue="pending" className="space-y-6">
           <div className="bg-background/50 backdrop-blur-sm rounded-lg p-1">
             <TabsList className="grid w-full max-w-md grid-cols-2">

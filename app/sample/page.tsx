@@ -5,7 +5,7 @@ import Image from 'next/image'
 import logo from "@/assets/logo.png"
 
 interface TravelOrderDocumentProps {
-  data?: any // Replace with proper Prisma type if needed
+  data?: any
 }
 
 export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) {
@@ -28,6 +28,22 @@ export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) 
   const chiefAdmin = getApproval('CHIEF_ADMINISTRATIVE')
   const regionalDirector = getApproval('REGIONAL_EXECUTIVE')
 
+  const sequence = ['APCO', 'CHIEF_AGRICULTURIST', 'CHIEF_ADMINISTRATIVE', 'REGIONAL_EXECUTIVE']
+  const approvedApprovals = sequence
+    .map(role => {
+      const approval = data?.approvals?.find((a: any) => a.approverRole === role)
+      if (approval && approval.status === 'APPROVED') {
+        return {
+          role,
+          date: approval.updatedAt,
+          place: approval.placeSigned || '',
+          officer: `${approval.approver?.firstName || ''} ${approval.approver?.lastName || ''}`.trim() || '_________________________',
+        }
+      }
+      return null
+    })
+    .filter(Boolean)
+
   return (
     <>
       <style type="text/css" media="print">
@@ -39,7 +55,7 @@ export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) 
 
       <div className="min-h-screen bg-slate-200 py-8 flex justify-center print:bg-white print:py-0 print:block">
         <div className="bg-white w-[210mm] h-[297mm] shadow-xl p-[15mm] px-[15mm] font-serif text-black print:shadow-none print:w-full print:h-[297mm] box-border print:overflow-hidden relative">
-          
+
           {/* Header */}
           <div className="flex justify-between items-start mb-2">
             <div className="w-[70%] relative h-20">
@@ -190,7 +206,7 @@ export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) 
                 {data?.sourceOfFunds || ""}
               </div>
             </div>
-            
+
             <div className="flex items-start pt-0.5">
               <div className="w-[220px] flex justify-between pr-2 shrink-0">
                 <span>REMARKS OR SPECIAL INSTRUCTIONS</span><span>:</span>
@@ -205,11 +221,11 @@ export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) 
             </div>
           </div>
 
-          {/* Signatures */}
+          {/* Signatures (Recommending Approval & Approved By) */}
           <div className="flex justify-between mt-5 text-[11px]">
             <div className="w-[45%]">
               <p className="font-bold mb-6">RECOMMENDING APPROVAL:</p>
-              
+
               {/* Chief Admin */}
               {chiefAdmin && chiefAdmin.status === 'APPROVED' ? (
                 <>
@@ -240,7 +256,7 @@ export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) 
                 )}
               </div>
 
-              {/* APCO (if exists) */}
+              {/* APCO */}
               {apco && (
                 <div className="mt-2 text-[8px]">
                   {apco.status === 'APPROVED' ? (
@@ -284,9 +300,36 @@ export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) 
             <h2 className="font-bold text-[11px]">CERTIFICATE OF APPEARANCE</h2>
           </div>
 
+          {/* DYNAMIC CERTIFICATE OF APPEARANCE GRID */}
           <div className="grid grid-cols-3 gap-x-8 gap-y-4 text-center text-[10px]">
-            {[...Array(4)].map((_, i) => (
-              <React.Fragment key={i}>
+            {approvedApprovals.map((approval, idx) => (
+              <React.Fragment key={idx}>
+                <div>
+                  <div className="border-b border-black font-bold text-xs px-1">
+                  {/* @ts-ignore */}
+                    {formatDate(approval.date)} 
+                  </div>
+                  <p className="pt-0.5">Inclusive Date/s</p>
+                </div>
+                <div>
+                  <div className="border-b border-black font-bold text-xs px-1">
+                  {/* @ts-ignore */}
+                    {approval.place }
+                  </div>
+                  <p className="pt-0.5">Place Signed</p>
+                </div>
+                <div>
+                  <div className="border-b border-black font-bold text-xs px-1">
+                  {/* @ts-ignore */}
+                    {approval.officer}
+                  </div>
+                  <p className="pt-0.5">Certifying Officer/s</p>
+                </div>
+              </React.Fragment>
+            ))}
+            {/* Fill remaining rows (up to 4) with empty lines */}
+            {Array.from({ length: Math.max(0, 4 - approvedApprovals.length) }).map((_, i) => (
+              <React.Fragment key={`empty-${i}`}>
                 <div>
                   <div className="border-b border-black"></div>
                   <p className="pt-0.5">Inclusive Date/s</p>
