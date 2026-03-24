@@ -1,4 +1,3 @@
-// components/approver/signature-form.tsx
 'use client'
 
 import { useState, useRef } from 'react'
@@ -26,7 +25,7 @@ interface SignatureFormProps {
   orderId: string
   approvalId: string
   userRole: string
-  onSuccess?: () => void   // <-- new prop
+  onSuccess?: () => void  
 }
 
 export function SignatureForm({ orderId, approvalId, userRole, onSuccess }: SignatureFormProps) {
