@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 }
 
 export default async function AnalyticsPage() {
+
   // In a real app, fetch data from your API
   // const analyticsData = await fetchAnalytics()
 
@@ -45,7 +46,7 @@ export default async function AnalyticsPage() {
             </Card>
 
             <Card className="md:col-span-2 lg:col-span-3">
-              <CardHeader>
+              <CardHeader>    
                 <CardTitle>Travels by Division</CardTitle>
                 <CardDescription>Distribution of your trips</CardDescription>
               </CardHeader>
