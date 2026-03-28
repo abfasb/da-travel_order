@@ -26,15 +26,16 @@ export async function submitTravelOrder(data: any) {
     }
 
     await prisma.$transaction(async (tx) => {
+      
       const newTravelOrder = await tx.travelOrderRequest.create({
+            //@ts-ignore
         data: {
           userId: userId,
           requestorName: data.fullName,
           requestorPosition: data.position,
           requestorSalary: data.salaryPerMonth,
-          requestorStation: user.officialStation,
-          employmentStatus: user.employmentStatus,
-          copiesRequired: data.copiesRequired,
+          requestorStation: user.officialStation || "N/A", 
+          employmentStatus: user.employmentStatus || "PERMANENT",
 
           departureDate: new Date(data.departureDate),
           returnDate: new Date(data.returnDate),
@@ -53,6 +54,19 @@ export async function submitTravelOrder(data: any) {
           accompanyingPersonnel: data.accompanyingPersonnel || null,
 
           status: "PENDING",
+
+          ...(user.employmentStatus !== "PERMANENT" && data.itineraryItems && data.itineraryItems.length > 0
+            ? {
+                itineraryItems: {
+                  create: data.itineraryItems.map((item: any) => ({
+                    date: new Date(item.date),
+                    location: item.location,
+                    activity: item.activity,
+                    responsiblePerson: item.responsiblePerson,
+                  })),
+                },
+              }
+            : {}),
         },
       });
 

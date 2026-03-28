@@ -1,9 +1,9 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
+import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { Users, CalendarDays, FileText, Wallet, PlaneTakeoff } from 'lucide-react'
+import { Users, CalendarDays, FileText, Wallet, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { submitTravelOrder } from '@/app/actions/travelOrder'
 
@@ -11,7 +11,6 @@ const formSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
   position: z.string().min(1, 'Position is required'),
   salaryPerMonth: z.string().min(1, 'Salary per month is required'),
-  copiesRequired: z.coerce.number().min(1, 'At least 1 copy is required'),
 
   departureDate: z.string().min(1, 'Departure date is required'),
   returnDate: z.string().min(1, 'Return date is required'),
@@ -27,6 +26,20 @@ const formSchema = z.object({
   estimatedExpenses: z.string().min(1, 'Estimated expenses are required'),
   sourceOfFunds: z.string().min(1, 'Source of funds is required'),
   accompanyingPersonnel: z.string().optional(),
+
+  // Add employment status to schema so Zod can check it
+  employmentStatus: z.string().optional(),
+
+  // Make the array optional initially
+  itineraryItems: z.array(
+    z.object({
+      date: z.string().min(1, 'Date is required'),
+      location: z.string().min(1, 'Location is required'),
+      activity: z.string().min(1, 'Activity is required'),
+      responsiblePerson: z.string().min(1, 'Responsible person is required'),
+    })
+  ).optional(),
+
 }).refine((data) => {
   if (!data.departureDate || !data.returnDate) return true
   return new Date(data.returnDate) >= new Date(data.departureDate)
@@ -34,21 +47,43 @@ const formSchema = z.object({
   message: 'Return date cannot be before departure date',
   path: ['returnDate'],
 })
+.superRefine((data, ctx) => {
+  if (data.employmentStatus !== 'PERMANENT') {
+    if (!data.itineraryItems || data.itineraryItems.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "At least one itinerary row is required for COS/JO status",
+        path: ["itineraryItems", "root"]
+      });
+    }
+  }
+})
 
 type FormValues = z.infer<typeof formSchema>
 
-export function RequestForm() {
+export function RequestForm({ employmentStatus = 'COS' }: { employmentStatus?: string | null }) {
+  const isPermanent = employmentStatus === 'PERMANENT'
+
   const {
     register,
     handleSubmit,
+    control,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     //@ts-ignore
     resolver: zodResolver(formSchema),
     defaultValues: {
-      copiesRequired: 3, 
+      employmentStatus: employmentStatus || 'COS',
+      // If permanent, initialize with empty array. Otherwise, 1 blank row.
+      itineraryItems: isPermanent ? [] : [{ date: '', location: '', activity: '', responsiblePerson: '' }]
     }
+  })
+
+  // Initialize useFieldArray for dynamic rows
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'itineraryItems',
   })
 
   const onSubmit = async (data: FormValues) => {
@@ -72,13 +107,16 @@ export function RequestForm() {
     //@ts-ignore
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
       
+      {/* Hidden input so Zod knows the employment status during submission */}
+      <input type="hidden" {...register('employmentStatus')} value={employmentStatus || 'COS'} />
+
       {/* SECTION 1: Personal Profile */}
       <div className="space-y-4">
         <h3 className="text-xs font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
           <Users className="w-4 h-4" /> Employee Profile
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="space-y-1">
+          <div className="space-y-1 lg:col-span-2">
             <label className="text-sm font-semibold text-slate-600">Full Name</label>
             <input
               type="text"
@@ -108,23 +146,13 @@ export function RequestForm() {
             />
             <ErrorMessage error={errors.salaryPerMonth} />
           </div>
-          <div className="space-y-1">
-            <label className="text-sm font-semibold text-slate-600">Copies Required</label>
-            <input
-              type="number"
-              min="1"
-              className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:ring-2 focus:ring-emerald-500/20"
-              {...register('copiesRequired')}
-            />
-            <ErrorMessage error={errors.copiesRequired} />
-          </div>
         </div>
       </div>
 
       {/* SECTION 2: Schedule & Location */}
       <div className="space-y-4">
         <h3 className="text-xs font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
-          <CalendarDays className="w-4 h-4" /> Itinerary
+          <CalendarDays className="w-4 h-4" /> Schedule & Location
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="space-y-1">
@@ -168,7 +196,89 @@ export function RequestForm() {
         </div>
       </div>
 
-      {/* SECTION 3: Details & Purpose */}
+      {/* SECTION 3: Dynamic Itinerary Table - ONLY RENDER IF NOT PERMANENT */}
+      {!isPermanent && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
+              <CalendarDays className="w-4 h-4" /> Proposed Itinerary Details
+            </h3>
+            <button
+              type="button"
+              onClick={() => append({ date: '', location: '', activity: '', responsiblePerson: '' })}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors"
+            >
+              <Plus className="w-4 h-4" /> Add Row
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            {fields.map((field, index) => (
+              <div key={field.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 rounded-xl border border-slate-200 bg-slate-50 relative">
+                <div className="md:col-span-2 space-y-1">
+                  <label className="text-xs font-semibold text-slate-600">Date</label>
+                  <input
+                    type="date"
+                    className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500/20"
+                    {...register(`itineraryItems.${index}.date` as const)}
+                  />
+                  <ErrorMessage error={errors?.itineraryItems?.[index]?.date} />
+                </div>
+                
+                <div className="md:col-span-3 space-y-1">
+                  <label className="text-xs font-semibold text-slate-600">Location</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Naujan, Or. Mindoro"
+                    className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500/20"
+                    {...register(`itineraryItems.${index}.location` as const)}
+                  />
+                  <ErrorMessage error={errors?.itineraryItems?.[index]?.location} />
+                </div>
+
+                <div className="md:col-span-4 space-y-1">
+                  <label className="text-xs font-semibold text-slate-600">Activity</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Assist in personnel audit"
+                    className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500/20"
+                    {...register(`itineraryItems.${index}.activity` as const)}
+                  />
+                  <ErrorMessage error={errors?.itineraryItems?.[index]?.activity} />
+                </div>
+
+                <div className="md:col-span-3 space-y-1 relative">
+                  <label className="text-xs font-semibold text-slate-600">Responsible Person</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="e.g. Christine Montiano"
+                      className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-emerald-500/20"
+                      {...register(`itineraryItems.${index}.responsiblePerson` as const)}
+                    />
+                    {fields.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => remove(index)}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+                        title="Remove Row"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    )}
+                  </div>
+                  <ErrorMessage error={errors?.itineraryItems?.[index]?.responsiblePerson} />
+                </div>
+              </div>
+            ))}
+            {errors.itineraryItems?.root && (
+              <p className="text-red-500 text-sm">{errors.itineraryItems.root.message}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* SECTION 4: Details & Purpose */}
       <div className="space-y-4">
         <h3 className="text-xs font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
           <FileText className="w-4 h-4" /> Purpose & Objectives
@@ -219,7 +329,7 @@ export function RequestForm() {
         </div>
       </div>
 
-      {/* SECTION 4: Logistics & Finance */}
+      {/* SECTION 5: Logistics & Finance */}
       <div className="space-y-4">
         <h3 className="text-xs font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
           <Wallet className="w-4 h-4" /> Logistics & Funding

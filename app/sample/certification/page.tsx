@@ -4,7 +4,6 @@ import logo from "@/assets/logo.png";
 export default function CertificationDocument() {
   return (
     <>
-      {/* Forces the printer to strip its default margins, fixing blank pages and scaling */}
       <style dangerouslySetInnerHTML={{__html: `
         @media print {
           @page {
@@ -19,18 +18,16 @@ export default function CertificationDocument() {
       `}} />
 
       <div className="flex justify-center bg-gray-100 min-h-screen py-10 print:py-0 print:bg-white">
-        {/* A4 Paper Container - 0 Padding here so the logo touches the edges */}
         <div 
           className="bg-white shadow-lg box-border print:shadow-none overflow-hidden relative"
           style={{ 
             width: '210mm', 
             height: '297mm', // Strictly enforced 1 page
-            padding: '0',    // Removed padding for the top logo
+            padding: '0',   
             fontFamily: '"Times New Roman", Times, serif',
             color: 'black'
           }}
         >
-          {/* Full-Width Header Logo */}
           <header className="w-full">
             <Image 
               src={logo} 

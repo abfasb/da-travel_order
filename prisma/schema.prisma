@@ -76,7 +76,6 @@ model TravelOrderRequest {
   requestorSalary        String
   requestorStation       String
   employmentStatus       EmploymentStatus
-  copiesRequired         Int
 
   // Foreign key to the user who created it
   userId                 String
@@ -113,10 +112,29 @@ model TravelOrderRequest {
   auditLogs              AuditLog[]    @relation("TravelOrderAuditLogs")
   notifications          Notification[] @relation("TravelOrderNotifications")
 
+  itineraryItems         ItineraryItem[]
+
   createdAt              DateTime      @default(now())
   updatedAt              DateTime      @updatedAt
 
   @@map("travel_orders")
+}
+
+model ItineraryItem {
+  id                String             @id @default(uuid())
+  
+  travelOrderId     String
+  travelOrder       TravelOrderRequest @relation(fields: [travelOrderId], references: [id], onDelete: Cascade)
+  
+  date              DateTime
+  location          String             @db.Text
+  activity          String             @db.Text
+  responsiblePerson String
+
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@map("itinerary_items")
 }
 
 model Approval {

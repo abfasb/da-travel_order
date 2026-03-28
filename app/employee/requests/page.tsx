@@ -2,19 +2,31 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { PlaneTakeoff, Briefcase } from 'lucide-react'
 import { RequestForm } from '@/components/employee/request-form'
+import { prisma } from '@/lib/prisma' // Added Prisma import
 
 export default async function EmployeeDashboardPage() {
   const cookieStore = await cookies()
   const role = cookieStore.get('user_role')?.value
+  const userId = cookieStore.get('auth_session')?.value 
 
-  if (!role || role !== 'STAFF') {
+  if (!role || role !== 'STAFF' || !userId) {
+    redirect('/login')
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      employmentStatus: true,
+    },
+  })
+
+  if (!user) {
     redirect('/login')
   }
 
   return (
     <div className="min-h-screen bg-slate-50 p-6 md:p-10">
       <div className="max-w-6xl mx-auto space-y-8">
-        {/* Header Section */}
         <div className="bg-emerald-900 text-white p-8 rounded-3xl shadow-lg flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-black mb-2 tracking-tight">My Workspace</h1>
@@ -27,7 +39,6 @@ export default async function EmployeeDashboardPage() {
           </div>
         </div>
 
-        {/* Travel Order Form Card */}
         <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
           <div className="border-b border-slate-100 bg-slate-50/50 p-8">
             <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
@@ -38,7 +49,7 @@ export default async function EmployeeDashboardPage() {
           </div>
 
           <div className="p-8">
-            <RequestForm />
+            <RequestForm employmentStatus={user.employmentStatus} />
           </div>
         </div>
       </div>
