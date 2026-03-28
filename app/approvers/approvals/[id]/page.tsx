@@ -204,10 +204,8 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
           </Card>
         </div>
 
-        {/* Main Content Grid */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           
-          {/* Document Viewer Column */}
           <div className="xl:col-span-2 space-y-6">
             <Card className="border-0 shadow-xl overflow-hidden">
               <div className="bg-gradient-to-r from-slate-800 to-slate-900 text-white">
@@ -330,7 +328,6 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
               </div>
             </Card>
 
-            {/* Signature Action Card */}
             <Card className="border-0 shadow-xl overflow-hidden relative bg-white ring-1 ring-slate-200">
               <div className="absolute top-0 left-0 w-full h-1.5 bg-emerald-500" />
               <CardHeader className="pb-3 pt-6 text-center">
