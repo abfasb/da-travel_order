@@ -18,7 +18,7 @@ export function OrderSummary({ order }: { order: any }) {
           </div>
           <div>
             <span className="text-muted-foreground">Position:</span>{' '}
-            <span className="font-medium">{order.user.position}</span>
+            <span className="font-medium">{order.user.requestorPosition}</span>
           </div>
           <div>
             <span className="text-muted-foreground">Division:</span>{' '}

@@ -18,7 +18,6 @@ export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) 
     })
   }
 
-  // Helper to find approval by role
   const getApproval = (role: string) => {
     return data?.approvals?.find((a: any) => a.approverRole === role)
   }
@@ -53,7 +52,7 @@ export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) 
         `}
       </style>
 
-      <div className="min-h-screen bg-slate-200 py-8 flex justify-center print:bg-white print:py-0 print:block">
+      <div className="min-h-screen  py-8 flex justify-center print:bg-white print:py-0 print:block">
         <div className="bg-white w-[210mm] h-[297mm] shadow-xl p-[15mm] px-[15mm] font-serif text-black print:shadow-none print:w-full print:h-[297mm] box-border print:overflow-hidden relative">
 
           {/* Header */}

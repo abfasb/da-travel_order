@@ -1,12 +1,18 @@
 import Image from "next/image";
 import logo from "@/assets/logo.png";
 
-export default function ProposedItineraryDocument() {
+export default function ProposedItineraryDocument({ data }: { data: any }) {
+  const formatDate = (date: Date | string) => {
+    if (!date) return '';
+    return new Date(date).toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
   return (
     <>
-      {/* This style block forces the printer to strip its default margins. 
-        This fixes the blank second page and the scaling inaccuracies! 
-      */}
       <style dangerouslySetInnerHTML={{__html: `
         @media print {
           @page {
@@ -20,14 +26,14 @@ export default function ProposedItineraryDocument() {
         }
       `}} />
 
-      <div className="flex justify-center bg-gray-100 min-h-screen py-10 print:py-0 print:bg-white">
-        {/* A4 Paper Container - 0 Padding here so the logo touches the edges */}
+      <div className="flex justify-center bg-white">
+        {/* A4 Paper Container */}
         <div 
-          className="bg-white shadow-lg box-border print:shadow-none overflow-hidden relative"
+          className="bg-white box-border relative overflow-hidden"
           style={{ 
             width: '210mm', 
-            height: '297mm', // Strictly enforced 1 page
-            padding: '0',    // Removed padding
+            minHeight: '297mm', // Changed to minHeight in case there are many rows
+            padding: '0',    
             fontFamily: '"Times New Roman", Times, serif',
             color: 'black'
           }}
@@ -44,46 +50,43 @@ export default function ProposedItineraryDocument() {
             />
           </header>
 
-          {/* Content Wrapper - Re-applies the padding only to the text content */}
           <div style={{ padding: '10mm 20mm 20mm 20mm' }}>
             
-            {/* Document Title */}
             <div className="text-center mb-10">
               <h1 className="font-bold uppercase tracking-wide" style={{ fontSize: '12pt' }}>
                 PROPOSED ITINERARY FOR OFFICIAL TRAVEL
               </h1>
             </div>
 
-            {/* Employee & Travel Details */}
             <div className="grid grid-cols-2 gap-y-6 mb-8" style={{ fontSize: '11pt', paddingLeft: '5mm', paddingRight: '5mm' }}>
-              {/* Left Column */}
               <div className="flex flex-col gap-y-4">
                 <div className="flex">
                   <span className="w-[20mm]">Name:</span>
-                  <span className="font-bold">Juan A. Dela Cruz</span>
+                  <span className="font-bold uppercase">{data?.requestorName || 'N/A'}</span>
                 </div>
                 <div className="flex">
                   <span className="w-[20mm]">Position:</span>
-                  <span className="font-bold">Administrative Assistant IV</span>
+                  <span className="font-bold">{data?.requestorPosition || 'N/A'}</span>
                 </div>
               </div>
 
-              {/* Right Column */}
               <div className="flex flex-col gap-y-4">
                 <div className="flex">
                   <span className="w-[22mm]">Date:</span>
-                  <span className="font-bold">January 29, 2026</span>
+                  <span className="font-bold">
+                    {formatDate(data?.departureDate)}
+                  </span>
                 </div>
                 <div className="flex items-start">
                   <span className="w-[22mm]">Travel<br/>Destination:</span>
                   <span className="font-bold leading-tight">
-                    ILD & Research Barcenaga<br/>Naujan,<br/>Oriental Mindoro
+                    {data?.specificLocation}<br/>{data?.destinationProvince}
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Itinerary Table */}
+            {/* Itinerary Table Dynamic Loop */}
             <table 
               className="w-full border-collapse mb-16" 
               style={{ border: '1.5px solid black', fontSize: '11pt' }}
@@ -99,33 +102,41 @@ export default function ProposedItineraryDocument() {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td className="border border-black p-2 align-top font-bold text-center">
-                    January 29, 2026
-                  </td>
-                  <td className="border border-black p-2 align-top">
-                    Integrated Laboratory Division & Research Barcenaga Naujan, Oriental Mindoro
-                  </td>
-                  <td className="border border-black p-2 align-top">
-                    To assist in the conduct of personnel audit.
-                  </td>
-                  <td className="border border-black p-2 align-top text-center">
-                    Christine Anne Gizzlle E. Montiano
-                  </td>
-                </tr>
+                {data?.itineraryItems && data.itineraryItems.length > 0 ? (
+                  data.itineraryItems.map((item: any, index: number) => (
+                    <tr key={index}>
+                      <td className="border border-black p-2 align-top font-bold text-center">
+                        {formatDate(item.date)}
+                      </td>
+                      <td className="border border-black p-2 align-top">
+                        {item.location}
+                      </td>
+                      <td className="border border-black p-2 align-top">
+                        {item.activity}
+                      </td>
+                      <td className="border border-black p-2 align-top text-center">
+                        {item.responsiblePerson}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="border border-black p-4 text-center italic">
+                      No itinerary items provided.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
 
             {/* Signatures */}
             <div className="grid grid-cols-2 gap-10" style={{ fontSize: '11pt', paddingLeft: '5mm', paddingRight: '5mm' }}>
-              {/* Requested By */}
               <div className="flex flex-col">
                 <span className="mb-10">Requested by:</span>
-                <span className="font-bold uppercase">Juan A. Dela Cruz</span>
-                <span>Administrative Assistant IV</span>
+                <span className="font-bold uppercase">{data?.requestorName}</span>
+                <span>{data?.requestorPosition}</span>
               </div>
 
-              {/* Approved By */}
               <div className="flex flex-col">
                 <span className="mb-10">Approved by:</span>
                 <span className="font-bold uppercase">Atty. Marvin P. Apduhan, CPA</span>
@@ -134,8 +145,6 @@ export default function ProposedItineraryDocument() {
             </div>
 
           </div> 
-          {/* End Content Wrapper */}
-
         </div>
       </div>
     </>

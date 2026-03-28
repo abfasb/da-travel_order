@@ -1,7 +1,19 @@
 import Image from "next/image";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo.png"; 
 
-export default function CertificationDocument() {
+export default function CertificationDocument({ data }: { data: any }) {
+  const formatTravelPeriod = (start: Date, end: Date) => {
+    if (!start || !end) return '';
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    
+    if (startDate.getMonth() === endDate.getMonth() && startDate.getFullYear() === endDate.getFullYear()) {
+      return `${startDate.toLocaleString('default', { month: 'long' })} ${startDate.getDate()}-${endDate.getDate()}, ${startDate.getFullYear()}`;
+    }
+    
+    return `${startDate.toLocaleDateString()} to ${endDate.toLocaleDateString()}`;
+  };
+
   return (
     <>
       <style dangerouslySetInnerHTML={{__html: `
@@ -17,17 +29,18 @@ export default function CertificationDocument() {
         }
       `}} />
 
-      <div className="flex justify-center bg-gray-100 min-h-screen py-10 print:py-0 print:bg-white">
+      <div className="flex justify-center bg-white">
         <div 
-          className="bg-white shadow-lg box-border print:shadow-none overflow-hidden relative"
+          className="bg-white box-border relative overflow-hidden print:shadow-none"
           style={{ 
             width: '210mm', 
-            height: '297mm', // Strictly enforced 1 page
-            padding: '0',   
+            height: '297mm',
+            padding: '0',    // Removed padding to allow header to touch edges
             fontFamily: '"Times New Roman", Times, serif',
             color: 'black'
           }}
         >
+          {/* Full-Width Header Logo Banner */}
           <header className="w-full">
             <Image 
               src={logo} 
@@ -39,59 +52,47 @@ export default function CertificationDocument() {
             />
           </header>
 
-          {/* Content Wrapper - Re-applies padding only to the text content */}
-          <div style={{ padding: '15mm 25mm 20mm 25mm' }}>
+          {/* Content Wrapper - Applies padding only to the text content */}
+          <div style={{ padding: '10mm 20mm 20mm 20mm' }}>
             
-            {/* Document Title */}
-            <div className="text-center mb-12 mt-4">
-              <h1 className="font-bold uppercase" style={{ fontSize: '13pt', letterSpacing: '0.25em' }}>
-                CERTIFICATION
+            {/* Title */}
+            <div className="text-center mb-16 mt-10">
+              <h1 className="font-bold uppercase tracking-[0.2em]" style={{ fontSize: '14pt' }}>
+                C E R T I F I C A T I O N
               </h1>
             </div>
 
             {/* Paragraph 1 */}
-            <p className="text-justify mb-6" style={{ fontSize: '12pt', textIndent: '12.5mm', lineHeight: '1.8' }}>
+            <p className="mb-8 text-justify leading-loose" style={{ fontSize: '12pt', textIndent: '12.5mm' }}>
               In the interest of service and to attain efficient implementation of Department of 
-              Agriculture Programs in Region IV-B (MIMAROPA), Mr. <span className="underline">Juan A. Dela Cruz</span> of <span className="underline">DA-RFO 
-              MIMAROPA</span> is hereby authorized to travel from the period of <span className="italic">February 22-25, 2026</span> in <span className="italic">DA-
-              APCO, Odiongan, Romblon</span> to <span className="underline italic">assist in the conduct of personnel audit and orientation activities 
-              as well as to address and respond to employees' concerns and queries.</span>
+              Agriculture Programs in Region IV-B (MIMAROPA), Mr./Ms. <span className="font-bold underline">{data?.requestorName || '[Name]'}</span> of 
+              <span className="underline ml-1 uppercase">{data?.requestorStation || 'DA-RFO MIMAROPA'}</span> is hereby authorized to travel from the period of 
+              <span className="italic font-semibold mx-1">{formatTravelPeriod(data?.departureDate, data?.returnDate)}</span> in 
+              <span className="italic font-semibold mx-1">{data?.specificLocation}, {data?.destinationProvince}</span> to 
+              <span className="italic font-semibold underline mx-1">{data?.purpose?.toLowerCase()}</span>.
             </p>
 
             {/* Paragraph 2 */}
-            <p className="text-justify mb-24" style={{ fontSize: '12pt', textIndent: '12.5mm', lineHeight: '1.8' }}>
-              As such, Mr. <span className="underline">Juan A. Dela Cruz</span> is authorized to travel with the following conditions: 
+            <p className="mb-20 text-justify leading-loose" style={{ fontSize: '12pt', textIndent: '12.5mm' }}>
+              As such, Mr./Ms. <span className="font-bold underline">{data?.requestorName || '[Name]'}</span> is authorized to travel with the following conditions: 
               (1) The official task cannot be performed by/or assigned to any other regular/permanent 
-              personnel, and (2) the task/ activities are necessary to fulfill the obligations as stipulated in 
-              his/ her contract. In addition to the above mentioned name is entitled to claim/reimburse her 
+              personnel, and (2) the task/activities are necessary to fulfill the obligations as stipulated in 
+              his/her contract. In addition to the above mentioned name is entitled to claim/reimburse her 
               traveling expenses and per diem, subject to the availability of funds, accounting and auditing 
               rules and regulations.
             </p>
 
-            {/* Signatory */}
-            <div className="flex flex-col" style={{ fontSize: '12pt' }}>
-              <span className="font-bold underline uppercase">Atty. Christopher R. Bañas</span>
-              <span>Regional Executive Director</span>
+            {/* Signature Block */}
+            <div className="mt-24">
+              <p className="font-bold underline uppercase" style={{ fontSize: '12pt' }}>
+                ATTY. CHRISTOPHER R. BAÑAS
+              </p>
+              <p style={{ fontSize: '12pt' }}>
+                Regional Executive Director
+              </p>
             </div>
 
           </div> 
-          {/* End Content Wrapper */}
-
-          {/* Document Control Footer - Absolutely positioned to always stay at the bottom left */}
-          <div 
-            className="absolute" 
-            style={{ 
-              bottom: '25mm', 
-              left: '25mm', 
-              fontSize: '9pt', 
-              lineHeight: '1.3',
-              fontFamily: 'Arial, Helvetica, sans-serif'
-            }}
-          >
-            <p>Doc. No.: DAMIMAROPA-F015-2023</p>
-            <p>Rev. No.: 2</p>
-            <p>Issued Date: 02/06/26</p>
-          </div>
 
         </div>
       </div>
