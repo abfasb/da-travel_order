@@ -20,7 +20,6 @@ import {
   Briefcase,
   Download,
   Printer,
-  Info,
   PenTool,
   Lightbulb,
 } from 'lucide-react'
@@ -45,9 +44,10 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
     where: { id },
     include: {
       user: true,
-      itineraryItems: true, 
+      itineraryItems: true,
       approvals: {
         orderBy: { createdAt: 'asc' },
+        include: { approver: true },
       },
     },
   })
@@ -59,14 +59,39 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
     redirect('/approvals')
   }
 
-  const sequence = ['APCO', 'CHIEF_AGRICULTURIST', 'CHIEF_ADMINISTRATIVE', 'REGIONAL_EXECUTIVE']
-  const currentIndex = sequence.indexOf(userRole)
-  for (let i = 0; i < currentIndex; i++) {
-    const prevApproval = travelOrder.approvals.find(a => a.approverRole === sequence[i])
-    if (!prevApproval || prevApproval.status !== 'APPROVED') {
+  // --- AUTHORIZATION LOGIC ---
+  // Important: the stored division value is 'field_ops' (from the dropdown)
+  const isFieldOps = travelOrder.user?.division === 'field_ops'
+
+  // APCO and Chief Agriculturist are only for Field Ops
+  if (userRole === 'APCO' || userRole === 'CHIEF_AGRICULTURIST') {
+    if (!isFieldOps) redirect('/approvals')
+  }
+
+  // Chief Admin: for Field Ops, requires both APCO and Chief Agriculturist approved
+  if (userRole === 'CHIEF_ADMINISTRATIVE') {
+    if (isFieldOps) {
+      const apco = travelOrder.approvals.find(a => a.approverRole === 'APCO')
+      const agri = travelOrder.approvals.find(a => a.approverRole === 'CHIEF_AGRICULTURIST')
+      if (apco?.status !== 'APPROVED' || agri?.status !== 'APPROVED') {
+        redirect('/approvals')
+      }
+    }
+  }
+
+  // Regional Executive: always needs Chief Admin approved
+  if (userRole === 'REGIONAL_EXECUTIVE') {
+    const admin = travelOrder.approvals.find(a => a.approverRole === 'CHIEF_ADMINISTRATIVE')
+    if (admin?.status !== 'APPROVED') {
       redirect('/approvals')
     }
   }
+  // --- END AUTHORIZATION LOGIC ---
+
+  // --- DYNAMIC TIMELINE SEQUENCE ---
+  const sequence = isFieldOps
+    ? ['APCO', 'CHIEF_AGRICULTURIST', 'CHIEF_ADMINISTRATIVE', 'REGIONAL_EXECUTIVE']
+    : ['CHIEF_ADMINISTRATIVE', 'REGIONAL_EXECUTIVE']
 
   const timeline = sequence.map(role => {
     const approval = travelOrder.approvals.find(a => a.approverRole === role)
@@ -232,7 +257,6 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
                 </div>
               </div>
               <ScrollArea className="h-[calc(100vh-350px)] min-h-[1200px] overflow-auto">
-                {/* Maintained the exact padding you requested */}
                 <div className="bg-slate-100 dark:bg-slate-900/50 p-6 md:p-2 flex flex-col items-center gap-10 min-w-max">
                   
                   <div className="shadow-2xl bg-white rounded-md overflow-hidden border border-slate-200">
@@ -256,10 +280,8 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
             </Card>
           </div>
 
-          {/* Details & Signature Column */}
           <div className="space-y-6">
             
-            {/* Contextual Tutorial / Guide Box */}
             <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5 shadow-sm relative overflow-hidden">
               <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
                 <Lightbulb className="w-24 h-24 text-emerald-600" />
@@ -348,7 +370,6 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
           </div>
         </div>
 
-        {/* Footer */}
         <div className="mt-16 pt-8 border-t text-center">
           <p className="text-sm text-slate-500 font-medium">Department of Agriculture • Region IV-B (MIMAROPA)</p>
           <p className="text-xs text-slate-400 mt-1">This is an official government document. Your signature is legally binding.</p>

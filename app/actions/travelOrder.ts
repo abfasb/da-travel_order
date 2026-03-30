@@ -18,6 +18,7 @@ export async function submitTravelOrder(data: any) {
       select: {
         officialStation: true,
         employmentStatus: true,
+        division: true,
       }
     });
 
@@ -26,24 +27,22 @@ export async function submitTravelOrder(data: any) {
     }
 
     await prisma.$transaction(async (tx) => {
-      
       const newTravelOrder = await tx.travelOrderRequest.create({
-            //@ts-ignore
         data: {
           userId: userId,
           requestorName: data.fullName,
           requestorPosition: data.position,
           requestorSalary: data.salaryPerMonth,
-          requestorStation: user.officialStation || "N/A", 
+          requestorStation: user.officialStation || "N/A",
           employmentStatus: user.employmentStatus || "PERMANENT",
 
           departureDate: new Date(data.departureDate),
           returnDate: new Date(data.returnDate),
-          
+
           destinationProvince: data.destinationProvince,
           specificLocation: data.specificLocation,
           destinationSummary: data.destinationSummary,
-          
+
           purpose: data.specificPurpose,
           objectives: data.objectives,
           travelDetails: data.travelDetails,
@@ -70,18 +69,17 @@ export async function submitTravelOrder(data: any) {
         },
       });
 
-      const roles = [
-        "APCO",
-        "CHIEF_AGRICULTURIST",
-        "CHIEF_ADMINISTRATIVE",
-        "REGIONAL_EXECUTIVE"
-      ];
+      // Determine if user belongs to Field Operations Division (case‑insensitive)
+      const isFieldOps = user.division?.toLowerCase().includes('field') ?? false;
+      const roles = isFieldOps
+        ? ["APCO", "CHIEF_AGRICULTURIST", "CHIEF_ADMINISTRATIVE", "REGIONAL_EXECUTIVE"]
+        : ["CHIEF_ADMINISTRATIVE", "REGIONAL_EXECUTIVE"];
 
       for (const role of roles) {
         await tx.approval.create({
           data: {
             travelOrderId: newTravelOrder.id,
-            //@ts-ignore
+            // @ts-ignore
             approverRole: role,
             status: "PENDING",
           },

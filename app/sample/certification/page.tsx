@@ -1,5 +1,5 @@
 import Image from "next/image";
-import logo from "@/assets/logo.png"; 
+import logo from "@/assets/logo.png";
 
 export default function CertificationDocument({ data }: { data: any }) {
   const formatTravelPeriod = (start: Date, end: Date) => {
@@ -13,6 +13,15 @@ export default function CertificationDocument({ data }: { data: any }) {
     
     return `${startDate.toLocaleDateString()} to ${endDate.toLocaleDateString()}`;
   };
+
+  // Find Regional Director approval
+  const red = data?.approvals?.find((a: any) => a.approverRole === 'REGIONAL_EXECUTIVE');
+  const isRedApproved = red && red.status === 'APPROVED';
+  const redName = isRedApproved
+    ? `${red.approver?.firstName || ''} ${red.approver?.lastName || ''}`.trim()
+    : 'ATTY. CHRISTOPHER R. BAÑAS';
+  const redTitle = 'Regional Executive Director'; // unchanged
+  const signatureImage = isRedApproved ? red.signatureData : null;
 
   return (
     <>
@@ -35,12 +44,11 @@ export default function CertificationDocument({ data }: { data: any }) {
           style={{ 
             width: '210mm', 
             height: '297mm',
-            padding: '0',    // Removed padding to allow header to touch edges
+            padding: '0',
             fontFamily: '"Times New Roman", Times, serif',
             color: 'black'
           }}
         >
-          {/* Full-Width Header Logo Banner */}
           <header className="w-full">
             <Image 
               src={logo} 
@@ -52,17 +60,13 @@ export default function CertificationDocument({ data }: { data: any }) {
             />
           </header>
 
-          {/* Content Wrapper - Applies padding only to the text content */}
           <div style={{ padding: '10mm 20mm 20mm 20mm' }}>
-            
-            {/* Title */}
             <div className="text-center mb-16 mt-10">
               <h1 className="font-bold uppercase tracking-[0.2em]" style={{ fontSize: '14pt' }}>
                 C E R T I F I C A T I O N
               </h1>
             </div>
 
-            {/* Paragraph 1 */}
             <p className="mb-8 text-justify leading-loose" style={{ fontSize: '12pt', textIndent: '12.5mm' }}>
               In the interest of service and to attain efficient implementation of Department of 
               Agriculture Programs in Region IV-B (MIMAROPA), Mr./Ms. <span className="font-bold underline">{data?.requestorName || '[Name]'}</span> of 
@@ -72,7 +76,6 @@ export default function CertificationDocument({ data }: { data: any }) {
               <span className="italic font-semibold underline mx-1">{data?.purpose?.toLowerCase()}</span>.
             </p>
 
-            {/* Paragraph 2 */}
             <p className="mb-20 text-justify leading-loose" style={{ fontSize: '12pt', textIndent: '12.5mm' }}>
               As such, Mr./Ms. <span className="font-bold underline">{data?.requestorName || '[Name]'}</span> is authorized to travel with the following conditions: 
               (1) The official task cannot be performed by/or assigned to any other regular/permanent 
@@ -82,18 +85,18 @@ export default function CertificationDocument({ data }: { data: any }) {
               rules and regulations.
             </p>
 
-            {/* Signature Block */}
             <div className="mt-24">
+              {signatureImage && (
+                <img src={signatureImage} alt="Signature" className="h-10 mb-1 object-contain" />
+              )}
               <p className="font-bold underline uppercase" style={{ fontSize: '12pt' }}>
-                ATTY. CHRISTOPHER R. BAÑAS
+                {redName}
               </p>
               <p style={{ fontSize: '12pt' }}>
-                Regional Executive Director
+                {redTitle}
               </p>
             </div>
-
-          </div> 
-
+          </div>
         </div>
       </div>
     </>

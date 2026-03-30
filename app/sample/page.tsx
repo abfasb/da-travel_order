@@ -27,8 +27,15 @@ export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) 
   const chiefAdmin = getApproval('CHIEF_ADMINISTRATIVE')
   const regionalDirector = getApproval('REGIONAL_EXECUTIVE')
 
-  const sequence = ['APCO', 'CHIEF_AGRICULTURIST', 'CHIEF_ADMINISTRATIVE', 'REGIONAL_EXECUTIVE']
-  const approvedApprovals = sequence
+  // Determine if this is a field ops order (division stored as "field_ops")
+  const isFieldOps = data?.user?.division === 'field_ops'
+
+  // For certificate of appearance, list all approvers that should appear
+  const allRoles = isFieldOps
+    ? ['APCO', 'CHIEF_AGRICULTURIST', 'CHIEF_ADMINISTRATIVE', 'REGIONAL_EXECUTIVE']
+    : ['CHIEF_ADMINISTRATIVE', 'REGIONAL_EXECUTIVE']
+
+  const approvedApprovals = allRoles
     .map(role => {
       const approval = data?.approvals?.find((a: any) => a.approverRole === role)
       if (approval && approval.status === 'APPROVED') {
@@ -52,7 +59,7 @@ export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) 
         `}
       </style>
 
-      <div className="min-h-screen  py-8 flex justify-center print:bg-white print:py-0 print:block">
+      <div className="min-h-screen py-8 flex justify-center print:bg-white print:py-0 print:block">
         <div className="bg-white w-[210mm] h-[297mm] shadow-xl p-[15mm] px-[15mm] font-serif text-black print:shadow-none print:w-full print:h-[297mm] box-border print:overflow-hidden relative">
 
           {/* Header */}
@@ -225,9 +232,14 @@ export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) 
             <div className="w-[45%]">
               <p className="font-bold mb-6">RECOMMENDING APPROVAL:</p>
 
-              {/* Chief Admin */}
+              {/* Chief Admin (always present) */}
               {chiefAdmin && chiefAdmin.status === 'APPROVED' ? (
                 <>
+                  {chiefAdmin.signatureData && (
+                    <div className="flex justify-center mb-1">
+                      <img src={chiefAdmin.signatureData} alt="Signature" className="h-8 object-contain" />
+                    </div>
+                  )}
                   <div className="border-b border-black text-center font-bold px-2 text-[11px]">
                     {chiefAdmin.approver?.firstName} {chiefAdmin.approver?.lastName}
                   </div>
@@ -240,36 +252,47 @@ export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) 
                 </>
               )}
 
-              {/* Chief Agriculturist */}
-              <div className="mt-4 text-[8px] leading-[1.2]">
-                {chiefAgriculturist && chiefAgriculturist.status === 'APPROVED' ? (
-                  <>
-                    <p className="font-bold">{chiefAgriculturist.approver?.firstName} {chiefAgriculturist.approver?.lastName}</p>
-                    <p>Chief Agriculturist – Regulatory Division</p>
-                  </>
-                ) : (
-                  <>
-                    <p>_________________________</p>
-                    <p>Chief Agriculturist – Regulatory Division</p>
-                  </>
-                )}
-              </div>
+              {/* Only show APCO and Chief Agriculturist for Field Ops */}
+              {isFieldOps && (
+                <>
+                  {/* Chief Agriculturist */}
+                  <div className="mt-4 text-[8px] leading-[1.2]">
+                    {chiefAgriculturist && chiefAgriculturist.status === 'APPROVED' ? (
+                      <>
+                        {chiefAgriculturist.signatureData && (
+                          <img src={chiefAgriculturist.signatureData} alt="Signature" className="h-6 mb-1" />
+                        )}
+                        <p className="font-bold">{chiefAgriculturist.approver?.firstName} {chiefAgriculturist.approver?.lastName}</p>
+                        <p>Chief Agriculturist – Regulatory Division</p>
+                      </>
+                    ) : (
+                      <>
+                        <p>_________________________</p>
+                        <p>Chief Agriculturist – Regulatory Division</p>
+                      </>
+                    )}
+                  </div>
 
-              {/* APCO */}
-              {apco && (
-                <div className="mt-2 text-[8px]">
-                  {apco.status === 'APPROVED' ? (
-                    <>
-                      <p className="font-bold">{apco.approver?.firstName} {apco.approver?.lastName}</p>
-                      <p>Agricultural Program Coordinating Office</p>
-                    </>
-                  ) : (
-                    <>
-                      <p>_________________________</p>
-                      <p>Agricultural Program Coordinating Office</p>
-                    </>
+                  {/* APCO */}
+                  {apco && (
+                    <div className="mt-2 text-[8px]">
+                      {apco.status === 'APPROVED' ? (
+                        <>
+                          {apco.signatureData && (
+                            <img src={apco.signatureData} alt="Signature" className="h-6 mb-1" />
+                          )}
+                          <p className="font-bold">{apco.approver?.firstName} {apco.approver?.lastName}</p>
+                          <p>Agricultural Program Coordinating Office</p>
+                        </>
+                      ) : (
+                        <>
+                          <p>_________________________</p>
+                          <p>Agricultural Program Coordinating Office</p>
+                        </>
+                      )}
+                    </div>
                   )}
-                </div>
+                </>
               )}
             </div>
 
@@ -277,6 +300,11 @@ export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) 
               <p className="font-bold mb-6">APPROVED BY:</p>
               {regionalDirector && regionalDirector.status === 'APPROVED' ? (
                 <>
+                  {regionalDirector.signatureData && (
+                    <div className="flex justify-center mb-1">
+                      <img src={regionalDirector.signatureData} alt="Signature" className="h-8 object-contain" />
+                    </div>
+                  )}
                   <div className="border-b border-black text-center font-bold px-2 text-[11px]">
                     {regionalDirector.approver?.firstName} {regionalDirector.approver?.lastName}
                   </div>
@@ -299,34 +327,8 @@ export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) 
             <h2 className="font-bold text-[11px]">CERTIFICATE OF APPEARANCE</h2>
           </div>
 
-          {/* DYNAMIC CERTIFICATE OF APPEARANCE GRID */}
           <div className="grid grid-cols-3 gap-x-8 gap-y-4 text-center text-[10px]">
-            {approvedApprovals.map((approval, idx) => (
-              <React.Fragment key={idx}>
-                <div>
-                  <div className="border-b border-black font-bold text-xs px-1">
-                  {/* @ts-ignore */}
-                    {formatDate(approval.date)} 
-                  </div>
-                  <p className="pt-0.5">Inclusive Date/s</p>
-                </div>
-                <div>
-                  <div className="border-b border-black font-bold text-xs px-1">
-                  {/* @ts-ignore */}
-                    {approval.place }
-                  </div>
-                  <p className="pt-0.5">Place Signed</p>
-                </div>
-                <div>
-                  <div className="border-b border-black font-bold text-xs px-1">
-                  {/* @ts-ignore */}
-                    {approval.officer}
-                  </div>
-                  <p className="pt-0.5">Certifying Officer/s</p>
-                </div>
-              </React.Fragment>
-            ))}
-            {/* Fill remaining rows (up to 4) with empty lines */}
+            
             {Array.from({ length: Math.max(0, 4 - approvedApprovals.length) }).map((_, i) => (
               <React.Fragment key={`empty-${i}`}>
                 <div>

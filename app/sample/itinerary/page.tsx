@@ -11,6 +11,15 @@ export default function ProposedItineraryDocument({ data }: { data: any }) {
     });
   };
 
+  // Find Chief Admin approval
+  const chiefAdmin = data?.approvals?.find((a: any) => a.approverRole === 'CHIEF_ADMINISTRATIVE');
+  const isChiefAdminApproved = chiefAdmin && chiefAdmin.status === 'APPROVED';
+  const approverName = isChiefAdminApproved
+    ? `${chiefAdmin.approver?.firstName || ''} ${chiefAdmin.approver?.lastName || ''}`.trim()
+    : 'Atty. Marvin P. Apduhan, CPA';
+  const approverTitle = 'Chief, Administrative Officer'; // unchanged
+  const signatureImage = isChiefAdminApproved ? chiefAdmin.signatureData : null;
+
   return (
     <>
       <style dangerouslySetInnerHTML={{__html: `
@@ -27,18 +36,16 @@ export default function ProposedItineraryDocument({ data }: { data: any }) {
       `}} />
 
       <div className="flex justify-center bg-white">
-        {/* A4 Paper Container */}
         <div 
           className="bg-white box-border relative overflow-hidden"
           style={{ 
             width: '210mm', 
-            minHeight: '297mm', // Changed to minHeight in case there are many rows
+            minHeight: '297mm',
             padding: '0',    
             fontFamily: '"Times New Roman", Times, serif',
             color: 'black'
           }}
         >
-          {/* Full-Width Header Logo */}
           <header className="w-full">
             <Image 
               src={logo} 
@@ -51,7 +58,6 @@ export default function ProposedItineraryDocument({ data }: { data: any }) {
           </header>
 
           <div style={{ padding: '10mm 20mm 20mm 20mm' }}>
-            
             <div className="text-center mb-10">
               <h1 className="font-bold uppercase tracking-wide" style={{ fontSize: '12pt' }}>
                 PROPOSED ITINERARY FOR OFFICIAL TRAVEL
@@ -86,7 +92,6 @@ export default function ProposedItineraryDocument({ data }: { data: any }) {
               </div>
             </div>
 
-            {/* Itinerary Table Dynamic Loop */}
             <table 
               className="w-full border-collapse mb-16" 
               style={{ border: '1.5px solid black', fontSize: '11pt' }}
@@ -129,7 +134,6 @@ export default function ProposedItineraryDocument({ data }: { data: any }) {
               </tbody>
             </table>
 
-            {/* Signatures */}
             <div className="grid grid-cols-2 gap-10" style={{ fontSize: '11pt', paddingLeft: '5mm', paddingRight: '5mm' }}>
               <div className="flex flex-col">
                 <span className="mb-10">Requested by:</span>
@@ -139,12 +143,14 @@ export default function ProposedItineraryDocument({ data }: { data: any }) {
 
               <div className="flex flex-col">
                 <span className="mb-10">Approved by:</span>
-                <span className="font-bold uppercase">Atty. Marvin P. Apduhan, CPA</span>
-                <span>Chief, Administrative Officer</span>
+                {signatureImage && (
+                  <img src={signatureImage} alt="Signature" className="h-8 mb-1 object-contain" />
+                )}
+                <span className="font-bold uppercase">{approverName}</span>
+                <span>{approverTitle}</span>
               </div>
             </div>
-
-          </div> 
+          </div>
         </div>
       </div>
     </>

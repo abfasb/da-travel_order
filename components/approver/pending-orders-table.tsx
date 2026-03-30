@@ -1,4 +1,3 @@
-// components/approver/pending-orders-table.tsx
 'use client'
 
 import { useState, useMemo } from 'react'
@@ -44,7 +43,29 @@ export default function PendingOrdersTable({ orders, userRole }: PendingOrdersTa
     REGIONAL_EXECUTIVE: 'Regional Director',
   }
 
-  // Filter orders based on search term (employee name or destination)
+  const getApprovalStep = (order: any) => {
+   const isFieldOps = order.user?.division === 'field_ops'
+    const roles = isFieldOps
+      ? ['APCO', 'CHIEF_AGRICULTURIST', 'CHIEF_ADMINISTRATIVE', 'REGIONAL_EXECUTIVE']
+      : ['CHIEF_ADMINISTRATIVE', 'REGIONAL_EXECUTIVE']
+
+    const approvedRoles = order.approvals
+      .filter((a: any) => a.status === 'APPROVED')
+      .map((a: any) => a.approverRole)
+
+    const pendingRoles = roles.filter(role => !approvedRoles.includes(role))
+
+    if (pendingRoles.length === 0) return 'Completed'
+    if (pendingRoles[0] === userRole) return 'Awaiting Your Approval'
+    return `Waiting for: ${pendingRoles.join(', ')}`
+  }
+
+  const getStepBadgeColor = (step: string) => {
+    if (step === 'Awaiting Your Approval') return 'bg-amber-100 text-amber-800 border-amber-200'
+    if (step === 'Completed') return 'bg-green-100 text-green-800 border-green-200'
+    return 'bg-slate-100 text-slate-800 border-slate-200'
+  }
+
   const filteredOrders = useMemo(() => {
     return orders.filter(order => {
       const fullName = `${order.user.firstName} ${order.user.lastName}`.toLowerCase()
@@ -54,13 +75,11 @@ export default function PendingOrdersTable({ orders, userRole }: PendingOrdersTa
     })
   }, [orders, searchTerm])
 
-  // Sort orders
   const sortedOrders = useMemo(() => {
     return [...filteredOrders].sort((a, b) => {
       let aVal: any = a[sortField]
       let bVal: any = b[sortField]
 
-      // Handle special cases for dates
       if (sortField === 'createdAt' || sortField === 'departureDate' || sortField === 'returnDate') {
         aVal = new Date(aVal).getTime()
         bVal = new Date(bVal).getTime()
@@ -78,7 +97,6 @@ export default function PendingOrdersTable({ orders, userRole }: PendingOrdersTa
     })
   }, [filteredOrders, sortField, sortDirection])
 
-  // Pagination
   const paginatedOrders = useMemo(() => {
     const start = (page - 1) * pageSize
     return sortedOrders.slice(start, start + pageSize)
@@ -174,42 +192,51 @@ export default function PendingOrdersTable({ orders, userRole }: PendingOrdersTa
                     <SortIcon field="createdAt" />
                   </div>
                 </TableHead>
+                <TableHead>Approval Progress</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedOrders.map((order) => (
-                <TableRow key={order.id} className="hover:bg-muted/30 transition-colors">
-                  <TableCell className="font-medium">
-                    <div className="flex flex-col">
-                      <span>{order.user.firstName} {order.user.lastName}</span>
-                      <span className="text-xs text-muted-foreground">{order.user.division}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{order.destinationProvince || order.destination || '—'}</TableCell>
-                  <TableCell>
-                    {format(new Date(order.departureDate), 'MMM d')} – {format(new Date(order.returnDate), 'MMM d, yyyy')}
-                  </TableCell>
-                  <TableCell>{format(new Date(order.createdAt), 'MMM d, yyyy')}</TableCell>
-                  <TableCell className="text-right space-x-1">
-                    <Button variant="ghost" size="sm" asChild className="hover:bg-primary/10">
-                      <Link href={`/approvers/approvals/${order.id}`}>
-                        <PenSquare className="h-4 w-4" />
-                        <span className="sr-only">Sign</span>
-                      </Link>
-                    </Button>
-                    <Button variant="ghost" size="sm" asChild className="hover:bg-muted">
-                      <Link href={`/employee/requests/${order.id}`} target="_blank">
-                        <Eye className="h-4 w-4" />
-                        <span className="sr-only">View</span>
-                      </Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {paginatedOrders.map((order) => {
+                const step = getApprovalStep(order)
+                return (
+                  <TableRow key={order.id} className="hover:bg-muted/30 transition-colors">
+                    <TableCell className="font-medium">
+                      <div className="flex flex-col">
+                        <span>{order.user.firstName} {order.user.lastName}</span>
+                        <span className="text-xs text-muted-foreground">{order.user.division || '—'}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>{order.destinationProvince || order.destination || '—'}</TableCell>
+                    <TableCell>
+                      {format(new Date(order.departureDate), 'MMM d')} – {format(new Date(order.returnDate), 'MMM d, yyyy')}
+                    </TableCell>
+                    <TableCell>{format(new Date(order.createdAt), 'MMM d, yyyy')}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={getStepBadgeColor(step)}>
+                        {step}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right space-x-1">
+                      <Button variant="ghost" size="sm" asChild className="hover:bg-primary/10">
+                        <Link href={`/approvers/approvals/${order.id}`}>
+                          <PenSquare className="h-4 w-4" />
+                          <span className="sr-only">Sign</span>
+                        </Link>
+                      </Button>
+                      <Button variant="ghost" size="sm" asChild className="hover:bg-muted">
+                        <Link href={`/employee/requests/${order.id}`} target="_blank">
+                          <Eye className="h-4 w-4" />
+                          <span className="sr-only">View</span>
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
               {paginatedOrders.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                  <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
                     No matching requests found.
                   </TableCell>
                 </TableRow>

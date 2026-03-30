@@ -33,7 +33,6 @@ export async function submitApproval({
         signatureData: signature,
         comment: comment,
         certificationCheck: action === 'APPROVE' ? certificationCheck : false,
-    // @ts-ignore
         placeSigned: placeSigned,
       },
     })
@@ -71,7 +70,7 @@ export async function submitApproval({
       },
     })
 
-    revalidatePath('/approvals')
+    revalidatePath('/approvers/approvals')
     return { success: true }
   } catch (error) {
     console.error('Approval error:', error)

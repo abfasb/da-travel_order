@@ -16,27 +16,56 @@ export default async function ApprovalsPage() {
     redirect('/login')
   }
 
-  const sequence = ['APCO', 'CHIEF_AGRICULTURIST', 'CHIEF_ADMINISTRATIVE', 'REGIONAL_EXECUTIVE']
-  const currentIndex = sequence.indexOf(userRole)
-
-  const pendingConditions: any[] = [
-    { status: { notIn: ['REJECTED', 'COMPLETED'] } },
-    { approvals: { some: { approverRole: userRole, status: 'PENDING' } } },
-  ]
-
-  for (let i = 0; i < currentIndex; i++) {
-    pendingConditions.push({
-      approvals: { some: { approverRole: sequence[i], status: 'APPROVED' } },
-    })
+  const pendingWhere: any = {
+    status: { notIn: ['REJECTED', 'COMPLETED'] },
+    approvals: { some: { approverRole: userRole, status: 'PENDING' } },
   }
 
+  // Field Operations division is stored as "field_ops"
+  if (userRole === 'APCO') {
+    pendingWhere.user = { division: 'field_ops' }
+  } else if (userRole === 'CHIEF_AGRICULTURIST') {
+    pendingWhere.user = { division: 'field_ops' }
+  } else if (userRole === 'CHIEF_ADMINISTRATIVE') {
+    pendingWhere.OR = [
+      {
+        user: { division: 'field_ops' },
+        AND: [
+          { approvals: { some: { approverRole: 'APCO', status: 'APPROVED' } } },
+          { approvals: { some: { approverRole: 'CHIEF_AGRICULTURIST', status: 'APPROVED' } } }
+        ]
+      },
+      {
+        user: {
+          OR: [
+            { division: { not: 'field_ops' } },
+            { division: null }
+          ]
+        }
+      }
+    ]
+  } else if (userRole === 'REGIONAL_EXECUTIVE') {
+    pendingWhere.AND = [
+      { approvals: { some: { approverRole: 'CHIEF_ADMINISTRATIVE', status: 'APPROVED' } } }
+    ]
+  }
+
+  // Debug logs
+  console.log(`[ApprovalsPage] userRole: ${userRole}`)
+  console.log('[ApprovalsPage] pendingWhere:', JSON.stringify(pendingWhere, null, 2))
+
   const pendingOrders = await prisma.travelOrderRequest.findMany({
-    where: { AND: pendingConditions },
+    where: pendingWhere,
     include: {
       user: { select: { firstName: true, lastName: true, division: true } },
       approvals: true,
     },
     orderBy: { createdAt: 'desc' },
+  })
+
+  console.log(`[ApprovalsPage] Found ${pendingOrders.length} pending orders`)
+  pendingOrders.forEach(order => {
+    console.log(`  - ${order.user.firstName} ${order.user.lastName}, division: "${order.user.division}"`)
   })
 
   const historyOrders = await prisma.travelOrderRequest.findMany({
@@ -76,8 +105,8 @@ export default async function ApprovalsPage() {
           <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
             Approval Dashboard
           </h1>
-          <p className="text-muted-foreground mt-1">
-            Welcome back, {roleDisplay[userRole]}. Review and manage travel orders awaiting your signature.
+          <p className="text-muted-foreground mt-1 text-base">
+            Welcome back, <span className="font-semibold">{roleDisplay[userRole]}</span>. Review and manage travel orders awaiting your signature.
           </p>
         </div>
 
