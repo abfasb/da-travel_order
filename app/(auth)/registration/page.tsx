@@ -110,9 +110,9 @@ export default function RegisterPage() {
       <div className="relative hidden lg:flex lg:w-1/2 bg-emerald-950 p-16 flex-col justify-between text-white">
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-16">
-            <div className="h-12 w-12 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <ShieldCheck className="text-emerald-950 w-7 h-7" />
-            </div>
+            <img src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMVJJK1z4PWdaWJG9ArC6U45RvjxMJsEZVKQ&s' alt="Logo" className="h-12 w-12 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+             
+            </img>
             <span className="text-2xl font-black tracking-tighter uppercase italic">DA - Travel Order</span>
           </div>
           <h1 className="text-7xl font-black leading-[1] mb-8 tracking-tighter">
@@ -125,7 +125,6 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      {/* RIGHT PANEL: Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-20 bg-slate-50/30 overflow-y-auto">
         <div className="w-full max-w-2xl py-10">
           <div className="mb-14">
@@ -135,7 +134,6 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             
-            {/* NAME SECTION */}
             <div className="space-y-4">
               <h3 className="text-xs font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
                 <User className="w-4 h-4" /> Personal Details
@@ -155,7 +153,6 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* CONTACT SECTION */}
             <div className="space-y-4">
               <h3 className="text-xs font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
                 <Mail className="w-4 h-4" /> Reachability
@@ -172,7 +169,6 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* ASSIGNMENT SECTION */}
             <div className="space-y-4">
               <h3 className="text-xs font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
                 <Briefcase className="w-4 h-4" /> Assignment
@@ -197,7 +193,6 @@ export default function RegisterPage() {
                   {errors.employmentStatus && <p className="text-red-500 text-xs mt-1 ml-2">{errors.employmentStatus.message}</p>}
                 </div>
 
-                {/* PROVINCE SELECTOR */}
                 <div>
                   <Controller
                     control={control}
@@ -220,7 +215,6 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              {/* CONDITIONAL SUB-STATION DROPDOWN */}
               {selectedProvince === "Oriental Mindoro" && (
                 <div className="animate-in fade-in slide-in-from-top-2 duration-300">
                   <Controller

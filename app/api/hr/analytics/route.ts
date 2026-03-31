@@ -70,7 +70,6 @@ export async function GET() {
       }
     })
 
-    // Average approval time (in days)
     const approvedOrders = travelOrders.filter(to => to.status === 'APPROVED')
     let avgApprovalDays = 0
     if (approvedOrders.length > 0) {
