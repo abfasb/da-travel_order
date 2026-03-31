@@ -14,7 +14,6 @@ export default function CertificationDocument({ data }: { data: any }) {
     return `${startDate.toLocaleDateString()} to ${endDate.toLocaleDateString()}`;
   };
 
-  // Find Regional Director approval
   const red = data?.approvals?.find((a: any) => a.approverRole === 'REGIONAL_EXECUTIVE');
   const isRedApproved = red && red.status === 'APPROVED';
   const redName = isRedApproved

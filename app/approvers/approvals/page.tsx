@@ -21,7 +21,6 @@ export default async function ApprovalsPage() {
     approvals: { some: { approverRole: userRole, status: 'PENDING' } },
   }
 
-  // Field Operations division is stored as "field_ops"
   if (userRole === 'APCO') {
     pendingWhere.user = { division: 'field_ops' }
   } else if (userRole === 'CHIEF_AGRICULTURIST') {
@@ -50,9 +49,6 @@ export default async function ApprovalsPage() {
     ]
   }
 
-  // Debug logs
-  console.log(`[ApprovalsPage] userRole: ${userRole}`)
-  console.log('[ApprovalsPage] pendingWhere:', JSON.stringify(pendingWhere, null, 2))
 
   const pendingOrders = await prisma.travelOrderRequest.findMany({
     where: pendingWhere,

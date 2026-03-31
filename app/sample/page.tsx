@@ -27,10 +27,13 @@ export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) 
   const chiefAdmin = getApproval('CHIEF_ADMINISTRATIVE')
   const regionalDirector = getApproval('REGIONAL_EXECUTIVE')
 
-  // Determine if this is a field ops order (division stored as "field_ops")
+  const apcoName = "Maria Teresa Cardio"
+  const chiefAgriculturistName = "M.G.R.ILEDAN"
+  const chiefAdminName = "ATTY. MARVIN P. APDUHAN, CPA"
+  const regionalDirectorName = "ATTY. CHRISTOPHER R.BAÑAS"
+
   const isFieldOps = data?.user?.division === 'field_ops'
 
-  // For certificate of appearance, list all approvers that should appear
   const allRoles = isFieldOps
     ? ['APCO', 'CHIEF_AGRICULTURIST', 'CHIEF_ADMINISTRATIVE', 'REGIONAL_EXECUTIVE']
     : ['CHIEF_ADMINISTRATIVE', 'REGIONAL_EXECUTIVE']
@@ -227,7 +230,6 @@ export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) 
             </div>
           </div>
 
-          {/* Signatures (Recommending Approval & Approved By) */}
           <div className="flex justify-between mt-5 text-[11px]">
             <div className="w-[45%]">
               <p className="font-bold mb-6">RECOMMENDING APPROVAL:</p>
@@ -241,7 +243,7 @@ export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) 
                     </div>
                   )}
                   <div className="border-b border-black text-center font-bold px-2 text-[11px]">
-                    {chiefAdmin.approver?.firstName} {chiefAdmin.approver?.lastName}
+                    {chiefAdminName}
                   </div>
                   <p className="text-center font-bold text-[10px]">Chief Administrative Officer</p>
                 </>
@@ -252,17 +254,15 @@ export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) 
                 </>
               )}
 
-              {/* Only show APCO and Chief Agriculturist for Field Ops */}
               {isFieldOps && (
                 <>
-                  {/* Chief Agriculturist */}
                   <div className="mt-4 text-[8px] leading-[1.2]">
                     {chiefAgriculturist && chiefAgriculturist.status === 'APPROVED' ? (
                       <>
                         {chiefAgriculturist.signatureData && (
-                          <img src={chiefAgriculturist.signatureData} alt="Signature" className="h-6 mb-1" />
+                          <img src={chiefAgriculturist.signatureData} alt="Signature" className="h-6 ml-12 mb-1" />
                         )}
-                        <p className="font-bold">{chiefAgriculturist.approver?.firstName} {chiefAgriculturist.approver?.lastName}</p>
+                        <p className="font-bold ml-10">{chiefAgriculturistName}</p>
                         <p>Chief Agriculturist – Regulatory Division</p>
                       </>
                     ) : (
@@ -279,9 +279,9 @@ export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) 
                       {apco.status === 'APPROVED' ? (
                         <>
                           {apco.signatureData && (
-                            <img src={apco.signatureData} alt="Signature" className="h-6 mb-1" />
+                            <img src={apco.signatureData} alt="Signature" className="h-6 ml-12 mb-1" />
                           )}
-                          <p className="font-bold">{apco.approver?.firstName} {apco.approver?.lastName}</p>
+                          <p className="font-bold ml-10">{apcoName}</p>
                           <p>Agricultural Program Coordinating Office</p>
                         </>
                       ) : (
@@ -306,7 +306,7 @@ export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) 
                     </div>
                   )}
                   <div className="border-b border-black text-center font-bold px-2 text-[11px]">
-                    {regionalDirector.approver?.firstName} {regionalDirector.approver?.lastName}
+                    {regionalDirectorName}
                   </div>
                   <p className="text-center font-bold text-[10px]">Regional Executive Director</p>
                 </>
@@ -328,8 +328,8 @@ export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) 
           </div>
 
           <div className="grid grid-cols-3 gap-x-8 gap-y-4 text-center text-[10px]">
-            
-            {Array.from({ length: Math.max(0, 4 - approvedApprovals.length) }).map((_, i) => (
+           
+            {Array.from({ length: 4 }).map((_, i) => (
               <React.Fragment key={`empty-${i}`}>
                 <div>
                   <div className="border-b border-black"></div>

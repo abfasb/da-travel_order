@@ -21,7 +21,7 @@ export default function LoginPage() {
       <div className="relative z-10 flex w-full max-w-md flex-col gap-8"> 
         
         <div className="flex items-center gap-3 self-center font-bold text-2xl text-white drop-shadow-md">
-          <img src="https://icon2.cleanpng.com/20180807/vvz/aefc485bc1a28c54faccb201f6f8f29e.webp" 
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMVJJK1z4PWdaWJG9ArC6U45RvjxMJsEZVKQ&s" 
           alt="Logo"  className="flex size-10 items-center justify-center rounded-full  text-white shadow-lg border border-emerald-500/50">
           </img>
           Department of Agriculture

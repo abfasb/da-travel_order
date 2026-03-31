@@ -111,7 +111,7 @@ export function SignatureForm({ orderId, approvalId, userRole, onSuccess }: Sign
 
     if (result.success) {
       toast.success('Travel order rejected.')
-      if (onSuccess) onSuccess() // <-- call onSuccess before redirect
+      if (onSuccess) onSuccess() 
       router.push('/approvals')
       router.refresh()
     } else {
