@@ -110,20 +110,18 @@ export function Sidebar({ defaultCollapsed = false, user }: SidebarProps) {
         collapsed ? 'md:w-20' : 'md:w-64'
       )}
     >
-      {/* Logo area */}
       <div
         className={cn(
           'flex h-16 items-center border-b px-4',
           collapsed ? 'justify-center' : 'gap-2'
         )}
       >
-        <Leaf className="h-6 w-6 text-primary shrink-0" />
+        <img src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMVJJK1z4PWdaWJG9ArC6U45RvjxMJsEZVKQ&s' alt='DA Logo' className="h-12 w-12 text-primary shrink-0" />
         {!collapsed && (
           <span className="text-lg font-semibold whitespace-nowrap">TOMS · Employee</span>
         )}
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 space-y-1 p-3">
         {routes.map((route) => {
           const isActive = pathname === route.href

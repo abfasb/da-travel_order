@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import SignatureCanvas from 'react-signature-canvas'
 import { Button } from '@/components/ui/button'
@@ -32,7 +32,6 @@ export function SignatureModal({ orderId, approvalId, userRole }: SignatureModal
   const [signatureData, setSignatureData] = useState<string | null>(null)
   const [certified, setCertified] = useState(false)
   const [rejectReason, setRejectReason] = useState('')
-  const [placeSigned, setPlaceSigned] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const sigCanvas = useRef<SignatureCanvas>(null)
@@ -74,10 +73,6 @@ export function SignatureModal({ orderId, approvalId, userRole }: SignatureModal
       toast.error('You must certify that you have reviewed and approved this travel order.')
       return
     }
-    if (!placeSigned.trim()) {
-      toast.error('Please enter the place where you are signing.')
-      return
-    }
 
     setIsSubmitting(true)
     const result = await submitApproval({
@@ -86,13 +81,11 @@ export function SignatureModal({ orderId, approvalId, userRole }: SignatureModal
       signature: signatureData,
       comment: null,
       certificationCheck: certified,
-      placeSigned: placeSigned,
     })
 
     if (result.success) {
       toast.success('Travel order approved successfully.')
       setOpen(false)
-      // Optionally refresh the page or redirect
       window.location.reload()
     } else {
       toast.error(result.error || 'Failed to approve.')
@@ -113,7 +106,6 @@ export function SignatureModal({ orderId, approvalId, userRole }: SignatureModal
       signature: null,
       comment: rejectReason,
       certificationCheck: false,
-      placeSigned: null,
     })
 
     if (result.success) {
@@ -183,17 +175,6 @@ export function SignatureModal({ orderId, approvalId, userRole }: SignatureModal
             </div>
           )}
 
-          <div className="space-y-2">
-            <Label htmlFor="placeSigned">Place Signed</Label>
-            <Input
-              id="placeSigned"
-              placeholder="e.g., DA Calapan City, Oriental Mindoro"
-              value={placeSigned}
-              onChange={(e) => setPlaceSigned(e.target.value)}
-              disabled={isSubmitting}
-            />
-          </div>
-
           <div className="flex items-center space-x-2">
             <Checkbox
               id="certify"
@@ -209,7 +190,7 @@ export function SignatureModal({ orderId, approvalId, userRole }: SignatureModal
           <div className="flex gap-4 pt-2">
             <Button
               onClick={handleApprove}
-              disabled={!signatureData || !certified || !placeSigned.trim() || isSubmitting}
+              disabled={!signatureData || !certified || isSubmitting}
               className="bg-emerald-600 hover:bg-emerald-700 flex-1"
             >
               Approve

@@ -9,14 +9,12 @@ export async function submitApproval({
   signature,
   comment,
   certificationCheck,
-  placeSigned,
 }: {
   approvalId: string
   action: 'APPROVE' | 'REJECT'
   signature?: string | null
   comment?: string | null
   certificationCheck?: boolean
-  placeSigned?: string | null
 }) {
   try {
     const approval = await prisma.approval.findUnique({
@@ -33,7 +31,6 @@ export async function submitApproval({
         signatureData: signature,
         comment: comment,
         certificationCheck: action === 'APPROVE' ? certificationCheck : false,
-        placeSigned: placeSigned,
       },
     })
 
@@ -53,7 +50,7 @@ export async function submitApproval({
       if (allApproved) {
         await prisma.travelOrderRequest.update({
           where: { id: approval.travelOrderId },
-          data: { status: 'APPROVED' },
+          data: { status: 'HR_PROCESSING' },
         })
       }
     }
@@ -64,13 +61,13 @@ export async function submitApproval({
         type: action === 'APPROVE' ? 'APPROVAL' : 'REJECTION',
         title: `Travel order ${action === 'APPROVE' ? 'approved' : 'rejected'}`,
         message: action === 'APPROVE'
-          ? `Your travel order has been approved by ${approval.approverRole}.`
+          ? `Your travel order has been approved by ${approval.approverRole}. It is now in HR processing.`
           : `Your travel order was rejected. Reason: ${comment}`,
         link: `/employee/requests/${approval.travelOrderId}`,
       },
     })
 
-    revalidatePath('/approvers/approvals')
+    revalidatePath('/approvals')
     return { success: true }
   } catch (error) {
     console.error('Approval error:', error)
