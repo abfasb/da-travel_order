@@ -11,14 +11,14 @@ export default function ProposedItineraryDocument({ data }: { data: any }) {
     });
   };
 
-  // Find Chief Admin approval
+  // Find Chief Admin approval (to show signature if available)
   const chiefAdmin = data?.approvals?.find((a: any) => a.approverRole === 'CHIEF_ADMINISTRATIVE');
   const isChiefAdminApproved = chiefAdmin && chiefAdmin.status === 'APPROVED';
-  const approverName = isChiefAdminApproved
-    ? `${chiefAdmin.approver?.firstName || ''} ${chiefAdmin.approver?.lastName || ''}`.trim()
-    : 'Atty. Marvin P. Apduhan, CPA';
-  const approverTitle = 'Chief, Administrative Officer'; // unchanged
   const signatureImage = isChiefAdminApproved ? chiefAdmin.signatureData : null;
+
+  // Hardcoded name – always shown
+  const approverName = "Atty. Marvin P. Apduhan, CPA";
+  const approverTitle = "Chief, Administrative Officer";
 
   return (
     <>
@@ -65,6 +65,7 @@ export default function ProposedItineraryDocument({ data }: { data: any }) {
             </div>
 
             <div className="grid grid-cols-2 gap-y-6 mb-8" style={{ fontSize: '11pt', paddingLeft: '5mm', paddingRight: '5mm' }}>
+              {/* Left column */}
               <div className="flex flex-col gap-y-4">
                 <div className="flex">
                   <span className="w-[20mm]">Name:</span>
@@ -76,6 +77,7 @@ export default function ProposedItineraryDocument({ data }: { data: any }) {
                 </div>
               </div>
 
+              {/* Right column */}
               <div className="flex flex-col gap-y-4">
                 <div className="flex">
                   <span className="w-[22mm]">Date:</span>
@@ -134,20 +136,24 @@ export default function ProposedItineraryDocument({ data }: { data: any }) {
               </tbody>
             </table>
 
+            {/* Signatures row – fixed alignment */}
             <div className="grid grid-cols-2 gap-10" style={{ fontSize: '11pt', paddingLeft: '5mm', paddingRight: '5mm' }}>
+              {/* Left: Requested by */}
               <div className="flex flex-col">
-                <span className="mb-10">Requested by:</span>
-                <span className="font-bold uppercase">{data?.requestorName}</span>
+                <span className="mb-2">Requested by:</span>
+                <span className="font-bold mt-8 uppercase">{data?.requestorName}</span>
                 <span>{data?.requestorPosition}</span>
               </div>
 
               <div className="flex flex-col">
-                <span className="mb-10">Approved by:</span>
-                {signatureImage && (
-                  <img src={signatureImage} alt="Signature" className="h-8 mb-1 object-contain" />
-                )}
+                <span className="mb-2">Approved by:</span>
+                <div style={{ minHeight: '18px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
+                  {signatureImage && (
+                    <img src={signatureImage} alt="Signature" className="h-8 ml-20 object-contain" />
+                  )}
+                </div>
                 <span className="font-bold uppercase">{approverName}</span>
-                <span>{approverTitle}</span>
+                <span className="ml-8">{approverTitle}</span>
               </div>
             </div>
           </div>

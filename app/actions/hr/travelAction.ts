@@ -43,3 +43,31 @@ export async function completeTravelOrder(orderId: string, travelNumber: string)
     return { success: false, error: 'Failed to complete travel order' }
   }
 }
+
+export async function getNextTravelNumber() {
+  const currentYear = new Date().getFullYear()
+  const prefix = `TO-${currentYear}-`
+  
+  const lastOrder = await prisma.travelOrderRequest.findFirst({
+    where: {
+      travelOrderNumber: {
+        startsWith: prefix,
+      },
+    },
+    orderBy: {
+      travelOrderNumber: 'desc',
+    },
+  })
+  
+  let nextNumber = 1
+  if (lastOrder?.travelOrderNumber) {
+    const parts = lastOrder.travelOrderNumber.split('-')
+    const lastSeq = parseInt(parts[2])
+    if (!isNaN(lastSeq)) {
+      nextNumber = lastSeq + 1
+    }
+  }
+  
+  const paddedNumber = nextNumber.toString().padStart(3, '0')
+  return `${prefix}${paddedNumber}`
+}

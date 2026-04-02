@@ -30,9 +30,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Eye, Printer, Hash, Search, Filter } from 'lucide-react'
+import { Eye, Printer, Search, Filter } from 'lucide-react'
+import { DownloadCloudIcon } from 'lucide-react'
 import { toast } from 'sonner'
-import { completeTravelOrder } from '@/app/actions/hr/travelAction'
+import { completeTravelOrder, getNextTravelNumber } from '@/app/actions/hr/travelAction'
 
 interface Order {
   id: string
@@ -65,8 +66,9 @@ export default function OrdersTable({ initialOrders }: { initialOrders: Order[] 
   const [travelNumberInput, setTravelNumberInput] = useState('')
   const [assignModalOpen, setAssignModalOpen] = useState(false)
   const [assignOrderId, setAssignOrderId] = useState<string | null>(null)
+  const [suggestedNumber, setSuggestedNumber] = useState<string>('')
+  const [isLoadingNumber, setIsLoadingNumber] = useState(false)
 
-  // Filter orders
   const filteredOrders = initialOrders.filter((order) => {
     const fullName = `${order.user.firstName} ${order.user.lastName}`.toLowerCase()
     const matchesSearch = fullName.includes(search.toLowerCase()) ||
@@ -79,10 +81,20 @@ export default function OrdersTable({ initialOrders }: { initialOrders: Order[] 
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
   const paginatedOrders = filteredOrders.slice(startIndex, startIndex + ITEMS_PER_PAGE)
 
-  const handleAssignNumber = (orderId: string) => {
+  const handleAssignNumber = async (orderId: string) => {
     setAssignOrderId(orderId)
-    setTravelNumberInput('')
     setAssignModalOpen(true)
+    setIsLoadingNumber(true)
+    try {
+      const nextNumber = await getNextTravelNumber()
+      setSuggestedNumber(nextNumber)
+      setTravelNumberInput(nextNumber)
+    } catch (error) {
+      console.error('Failed to generate travel number', error)
+      setSuggestedNumber('')
+    } finally {
+      setIsLoadingNumber(false)
+    }
   }
 
   const handleComplete = async () => {
@@ -186,7 +198,7 @@ export default function OrdersTable({ initialOrders }: { initialOrders: Order[] 
                           onClick={() => handleAssignNumber(order.id)}
                           disabled={processingId === order.id}
                         >
-                          <Hash className="h-4 w-4" />
+                          <DownloadCloudIcon className="h-4 w-4" />
                         </Button>
                       )}
                       <Button variant="ghost" size="sm" asChild>
@@ -256,11 +268,25 @@ export default function OrdersTable({ initialOrders }: { initialOrders: Order[] 
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h2 className="text-lg font-bold mb-4">Assign Travel Order Number</h2>
             <div className="space-y-4">
-              <Input
-                placeholder="e.g., TO-2026-001"
-                value={travelNumberInput}
-                onChange={(e) => setTravelNumberInput(e.target.value)}
-              />
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  Travel Order Number
+                </label>
+                <Input
+                  placeholder="e.g., TO-2026-001"
+                  value={travelNumberInput}
+                  onChange={(e) => setTravelNumberInput(e.target.value)}
+                  disabled={isLoadingNumber}
+                />
+                {isLoadingNumber && (
+                  <p className="text-xs text-gray-500 mt-1">Generating suggested number...</p>
+                )}
+                {!isLoadingNumber && suggestedNumber && (
+                  <p className="text-xs text-green-600 mt-1">
+                    Suggested: {suggestedNumber}
+                  </p>
+                )}
+              </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setAssignModalOpen(false)}>
                   Cancel

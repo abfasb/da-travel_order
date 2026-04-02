@@ -15,19 +15,17 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
-/* ─── Status config ─────────────────────────────────────── */
 const getStatusConfig = (status: string) => {
   const configs: Record<string, { color: string; dot: string; label: string; glow: string }> = {
-    PENDING:        { color: '#b45309', dot: '#f59e0b', label: 'Pending',        glow: 'rgba(245,158,11,0.18)' },
-    APPROVED:       { color: '#065f46', dot: '#10b981', label: 'Approved',       glow: 'rgba(16,185,129,0.18)' },
-    REJECTED:       { color: '#991b1b', dot: '#ef4444', label: 'Rejected',       glow: 'rgba(239,68,68,0.18)'  },
-    HR_PROCESSING:  { color: '#5b21b6', dot: '#8b5cf6', label: 'HR Processing',  glow: 'rgba(139,92,246,0.18)' },
-    COMPLETED:      { color: '#0f4c81', dot: '#3b82f6', label: 'Completed',      glow: 'rgba(59,130,246,0.18)' },
+    PENDING:        { color: '#b45309', dot: '#f59e0b', label: 'Pending',        glow: 'rgba(245,158,11,0.12)' },
+    APPROVED:       { color: '#065f46', dot: '#10b981', label: 'Approved',       glow: 'rgba(16,185,129,0.12)' },
+    REJECTED:       { color: '#991b1b', dot: '#ef4444', label: 'Rejected',       glow: 'rgba(239,68,68,0.12)'  },
+    HR_PROCESSING:  { color: '#5b21b6', dot: '#8b5cf6', label: 'HR Processing',  glow: 'rgba(139,92,246,0.12)' },
+    COMPLETED:      { color: '#0f4c81', dot: '#3b82f6', label: 'Completed',      glow: 'rgba(59,130,246,0.12)' },
   }
   return configs[status] || configs['PENDING']
 }
 
-/* ─── Role display titles ───────────────────────────────── */
 const roleTitles: Record<string, string> = {
   APCO:                  'Agricultural Program Coordinating Office',
   CHIEF_AGRICULTURIST:   'Chief Agriculturist – Regulatory Division',
@@ -35,7 +33,7 @@ const roleTitles: Record<string, string> = {
   REGIONAL_EXECUTIVE:    'Regional Executive Director',
 }
 
-/* ─── ApprovalStep ──────────────────────────────────────── */
+/* ─── ApprovalStep (Light Theme) ───────────────────────── */
 const ApprovalStep = ({
   role, title, status, approver, placeSigned,
   signedAt, signatureData, comment, isLast, index,
@@ -55,6 +53,9 @@ const ApprovalStep = ({
           animation: stepIn 0.4s ease both;
           animation-delay: calc(${index} * 80ms);
         }
+        @keyframes pulseLight {
+          0%,100% { opacity: 0.7; } 50% { opacity: 1; }
+        }
       `}</style>
 
       <div className="step-card relative flex gap-5">
@@ -65,24 +66,24 @@ const ApprovalStep = ({
             borderRadius: '50%',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             flexShrink: 0,
-            background: isApproved ? 'rgba(16,185,129,0.1)'
-                       : isRejected ? 'rgba(239,68,68,0.1)'
-                       : 'rgba(255,255,255,0.06)',
-            border: `2px solid ${isApproved ? '#10b981' : isRejected ? '#ef4444' : 'rgba(255,255,255,0.15)'}`,
-            boxShadow: isApproved ? '0 0 12px rgba(16,185,129,0.2)'
-                      : isRejected ? '0 0 12px rgba(239,68,68,0.2)' : 'none',
+            background: isApproved ? '#ecfdf5'
+                       : isRejected ? '#fef2f2'
+                       : '#f1f5f9',
+            border: `2px solid ${isApproved ? '#10b981' : isRejected ? '#ef4444' : '#cbd5e1'}`,
+            boxShadow: isApproved ? '0 0 0 4px rgba(16,185,129,0.1)'
+                      : isRejected ? '0 0 0 4px rgba(239,68,68,0.1)' : 'none',
             zIndex: 1, position: 'relative',
           }}>
             {isApproved && <CheckCircle size={16} color="#10b981" />}
             {isRejected && <XCircle    size={16} color="#ef4444" />}
-            {isPending  && <Clock      size={16} color="#94a3b8" />}
+            {isPending  && <Clock      size={16} color="#64748b" />}
           </div>
           {!isLast && (
             <div style={{
               width: 2, flex: 1, marginTop: 4,
               background: isApproved
-                ? 'linear-gradient(180deg, #10b981, rgba(16,185,129,0.1))'
-                : 'rgba(255,255,255,0.08)',
+                ? 'linear-gradient(180deg, #10b981, #d1fae5)'
+                : '#e2e8f0',
               minHeight: 32,
             }} />
           )}
@@ -92,31 +93,32 @@ const ApprovalStep = ({
         <div style={{
           flex: 1, marginBottom: 20,
           borderRadius: 12,
-          border: `1px solid ${isApproved ? 'rgba(16,185,129,0.2)' : isRejected ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.08)'}`,
-          background: isApproved ? 'rgba(16,185,129,0.04)'
-                     : isRejected ? 'rgba(239,68,68,0.04)'
-                     : 'rgba(255,255,255,0.03)',
+          border: `1px solid ${isApproved ? '#d1fae5' : isRejected ? '#fee2e2' : '#e2e8f0'}`,
+          background: isApproved ? '#f0fdf4'
+                     : isRejected ? '#fef2f2'
+                     : '#ffffff',
           padding: '16px 18px',
           transition: 'box-shadow 0.2s ease',
+          boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
         }}
         >
           {/* Row header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
             <div>
-              <p style={{ fontWeight: 600, color: '#f1f5f9', fontSize: 13.5, margin: 0 }}>
+              <p style={{ fontWeight: 600, color: '#0f172a', fontSize: 13.5, margin: 0 }}>
                 {role.replace(/_/g, ' ')}
               </p>
-              <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: 11.5, marginTop: 2 }}>{title}</p>
+              <p style={{ color: '#64748b', fontSize: 11.5, marginTop: 2 }}>{title}</p>
             </div>
             <span style={{
               fontFamily: "'DM Mono', monospace",
               fontSize: 10, fontWeight: 500,
               padding: '3px 8px', borderRadius: 5,
               letterSpacing: '0.06em',
-              background: isApproved ? 'rgba(16,185,129,0.1)'
-                         : isRejected ? 'rgba(239,68,68,0.1)' : 'rgba(245,158,11,0.1)',
-              color: isApproved ? '#34d399' : isRejected ? '#f87171' : '#fbbf24',
-              border: `1px solid ${isApproved ? 'rgba(52,211,153,0.25)' : isRejected ? 'rgba(248,113,113,0.25)' : 'rgba(251,191,36,0.25)'}`,
+              background: isApproved ? '#d1fae5'
+                         : isRejected ? '#fee2e2' : '#fef3c7',
+              color: isApproved ? '#065f46' : isRejected ? '#991b1b' : '#b45309',
+              border: `1px solid ${isApproved ? '#a7f3d0' : isRejected ? '#fecaca' : '#fde68a'}`,
             }}>
               {status}
             </span>
@@ -126,33 +128,33 @@ const ApprovalStep = ({
           {isApproved && approver && (
             <div style={{
               marginTop: 14, paddingTop: 14,
-              borderTop: '1px solid rgba(255,255,255,0.07)',
+              borderTop: '1px solid #e2e8f0',
               display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
               gap: '10px 24px',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                <UserCheck size={13} color="#4ade80" />
-                <span style={{ fontSize: 12.5, color: '#cbd5e1', fontWeight: 500 }}>
+                <UserCheck size={13} color="#059669" />
+                <span style={{ fontSize: 12.5, color: '#334155', fontWeight: 500 }}>
                   {approver.firstName} {approver.lastName}
                 </span>
               </div>
               {placeSigned && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                  <MapPin size={13} color="#4ade80" />
-                  <span style={{ fontSize: 12.5, color: '#94a3b8' }}>{placeSigned}</span>
+                  <MapPin size={13} color="#059669" />
+                  <span style={{ fontSize: 12.5, color: '#475569' }}>{placeSigned}</span>
                 </div>
               )}
               {signedAt && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                  <CalendarDays size={13} color="#4ade80" />
-                  <span style={{ fontSize: 12.5, color: '#94a3b8' }}>
+                  <CalendarDays size={13} color="#059669" />
+                  <span style={{ fontSize: 12.5, color: '#475569' }}>
                     {new Date(signedAt).toLocaleString()}
                   </span>
                 </div>
               )}
               {signatureData && (
                 <div style={{ gridColumn: '1/-1', marginTop: 4 }}>
-                  <p style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.3)', marginBottom: 6, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                  <p style={{ fontSize: 10.5, color: '#64748b', marginBottom: 6, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
                     Digital Signature
                   </p>
                   <img
@@ -160,9 +162,9 @@ const ApprovalStep = ({
                     alt="Signature"
                     style={{
                       height: 44, objectFit: 'contain',
-                      background: 'rgba(255,255,255,0.96)',
+                      background: '#f8fafc',
                       borderRadius: 6, padding: '4px 12px',
-                      border: '1px solid rgba(255,255,255,0.15)',
+                      border: '1px solid #e2e8f0',
                     }}
                   />
                 </div>
@@ -174,18 +176,18 @@ const ApprovalStep = ({
           {isPending && (
             <div style={{
               marginTop: 12, paddingTop: 12,
-              borderTop: '1px solid rgba(255,255,255,0.07)',
+              borderTop: '1px solid #e2e8f0',
               display: 'flex', alignItems: 'center', gap: 8,
             }}>
               <span style={{
                 width: 6, height: 6, borderRadius: '50%',
                 background: '#f59e0b',
                 boxShadow: '0 0 0 3px rgba(245,158,11,0.25)',
-                animation: 'pulse 2s ease-in-out infinite',
+                animation: 'pulseLight 2s ease-in-out infinite',
                 flexShrink: 0,
                 display: 'inline-block',
               }} />
-              <span style={{ fontSize: 12, color: '#fbbf24' }}>Awaiting approval from this officer</span>
+              <span style={{ fontSize: 12, color: '#b45309' }}>Awaiting approval from this officer</span>
             </div>
           )}
 
@@ -193,10 +195,10 @@ const ApprovalStep = ({
           {isRejected && comment && (
             <div style={{
               marginTop: 12, paddingTop: 12,
-              borderTop: '1px solid rgba(255,255,255,0.07)',
+              borderTop: '1px solid #e2e8f0',
             }}>
-              <span style={{ fontSize: 12, color: '#fca5a5' }}>
-                <strong style={{ color: '#f87171' }}>Reason: </strong>{comment}
+              <span style={{ fontSize: 12, color: '#dc2626' }}>
+                <strong style={{ color: '#b91c1c' }}>Reason: </strong>{comment}
               </span>
             </div>
           )}
@@ -206,7 +208,7 @@ const ApprovalStep = ({
   )
 }
 
-/* ─── Page ──────────────────────────────────────────────── */
+/* ─── Page (Light Theme) ───────────────────────────────── */
 export default async function HROrderDetailPage({ params }: PageProps) {
   const { id } = await params
 
@@ -239,38 +241,31 @@ export default async function HROrderDetailPage({ params }: PageProps) {
           from { opacity: 0; transform: translateY(16px); }
           to   { opacity: 1; transform: translateY(0); }
         }
-        @keyframes pulse {
-          0%,100% { opacity: 1; } 50% { opacity: 0.4; }
-        }
         @keyframes progressFill {
           from { width: 0; }
           to   { width: ${progressPct}%; }
-        }
-        @keyframes shimmer {
-          0%   { background-position: -200% center; }
-          100% { background-position: 200% center; }
         }
 
         .od-root {
           font-family: 'DM Sans', sans-serif;
           min-height: 100vh;
-          background: #080a10;
-          color: #f1f5f9;
+          background: #f1f5f9;
+          color: #0f172a;
         }
 
-        /* ── sticky header ── */
+        /* ── sticky header (light) ── */
         .od-header {
           position: sticky; top: 0; z-index: 50;
-          background: rgba(8,10,16,0.85);
+          background: rgba(255,255,255,0.92);
           backdrop-filter: blur(16px);
           -webkit-backdrop-filter: blur(16px);
-          border-bottom: 1px solid rgba(255,255,255,0.07);
+          border-bottom: 1px solid #e2e8f0;
         }
         .od-header::after {
           content: '';
-          position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
-          background: linear-gradient(90deg, transparent, #4ade80 30%, #16a34a 60%, transparent);
-          opacity: 0.5;
+          position: absolute; bottom: -1px; left: 0; right: 0; height: 1px;
+          background: linear-gradient(90deg, transparent, #10b981 30%, #059669 60%, transparent);
+          opacity: 0.4;
         }
         .od-header-inner {
           max-width: 1200px; margin: 0 auto;
@@ -279,20 +274,20 @@ export default async function HROrderDetailPage({ params }: PageProps) {
         }
         .od-back-btn {
           width: 36px; height: 36px; border-radius: 9px;
-          border: 1px solid rgba(255,255,255,0.1);
-          background: rgba(255,255,255,0.04);
-          color: rgba(255,255,255,0.5);
+          border: 1px solid #e2e8f0;
+          background: #ffffff;
+          color: #64748b;
           display: flex; align-items: center; justify-content: center;
           cursor: pointer; text-decoration: none;
           transition: all 0.15s ease;
           flex-shrink: 0;
         }
-        .od-back-btn:hover { background: rgba(255,255,255,0.09); color: #f1f5f9; border-color: rgba(255,255,255,0.2); }
+        .od-back-btn:hover { background: #f1f5f9; color: #0f172a; border-color: #cbd5e1; }
 
         .od-header-meta { flex: 1; min-width: 0; }
         .od-header-row  { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
         .od-title {
-          font-size: 18px; font-weight: 700; color: #f1f5f9;
+          font-size: 18px; font-weight: 700; color: #0f172a;
           letter-spacing: -0.01em; margin: 0;
         }
         .od-status-pill {
@@ -304,19 +299,19 @@ export default async function HROrderDetailPage({ params }: PageProps) {
         }
         .od-status-dot {
           width: 6px; height: 6px; border-radius: 50%;
-          animation: pulse 2s ease-in-out infinite;
+          animation: pulseLight 2s ease-in-out infinite;
         }
         .od-ref {
           margin-top: 4px;
-          font-size: 12.5px; color: rgba(255,255,255,0.35);
+          font-size: 12.5px; color: #64748b;
           display: flex; align-items: center; gap: 6px;
         }
         .od-ref-val {
           font-family: 'DM Mono', monospace;
           font-size: 11.5px; font-weight: 500;
-          color: #4ade80;
-          background: rgba(74,222,128,0.08);
-          border: 1px solid rgba(74,222,128,0.18);
+          color: #059669;
+          background: #ecfdf5;
+          border: 1px solid #a7f3d0;
           border-radius: 5px; padding: 1px 7px;
           letter-spacing: 0.06em;
         }
@@ -328,13 +323,14 @@ export default async function HROrderDetailPage({ params }: PageProps) {
           display: flex; flex-direction: column; gap: 32px;
         }
 
-        /* ── section card ── */
+        /* ── section card (light) ── */
         .od-card {
           border-radius: 16px;
-          border: 1px solid rgba(255,255,255,0.07);
-          background: rgba(255,255,255,0.025);
+          border: 1px solid #e2e8f0;
+          background: #ffffff;
           overflow: hidden;
           animation: fadeUp 0.45s ease both;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
         .od-card:nth-child(1) { animation-delay: 0ms; }
         .od-card:nth-child(2) { animation-delay: 80ms; }
@@ -342,21 +338,21 @@ export default async function HROrderDetailPage({ params }: PageProps) {
 
         .od-card-head {
           padding: 20px 24px 18px;
-          border-bottom: 1px solid rgba(255,255,255,0.06);
+          border-bottom: 1px solid #e2e8f0;
           display: flex; align-items: center; justify-content: space-between;
-          background: rgba(255,255,255,0.02);
+          background: #fafcff;
         }
         .od-card-title {
           display: flex; align-items: center; gap: 9px;
-          font-size: 14px; font-weight: 600; color: #f1f5f9;
+          font-size: 14px; font-weight: 600; color: #0f172a;
           margin: 0;
         }
         .od-card-icon {
           width: 30px; height: 30px; border-radius: 8px;
-          background: rgba(74,222,128,0.1);
-          border: 1px solid rgba(74,222,128,0.2);
+          background: #ecfdf5;
+          border: 1px solid #a7f3d0;
           display: flex; align-items: center; justify-content: center;
-          color: #4ade80;
+          color: #059669;
           flex-shrink: 0;
         }
         .od-card-body { padding: 24px; }
@@ -369,41 +365,41 @@ export default async function HROrderDetailPage({ params }: PageProps) {
         }
         .od-prog-track {
           flex: 1; height: 5px; border-radius: 99px;
-          background: rgba(255,255,255,0.07); overflow: hidden;
+          background: #e2e8f0; overflow: hidden;
         }
         .od-prog-fill {
           height: 100%; border-radius: 99px;
-          background: linear-gradient(90deg, #16a34a, #4ade80);
+          background: linear-gradient(90deg, #059669, #10b981);
           animation: progressFill 1s cubic-bezier(.4,0,.2,1) both;
           animation-delay: 200ms;
-          box-shadow: 0 0 10px rgba(74,222,128,0.4);
+          box-shadow: 0 0 4px rgba(16,185,129,0.4);
         }
         .od-prog-label {
           font-family: 'DM Mono', monospace;
           font-size: 11px; font-weight: 500;
-          color: rgba(255,255,255,0.35);
+          color: #64748b;
           white-space: nowrap;
         }
-        .od-prog-label strong { color: #4ade80; }
+        .od-prog-label strong { color: #059669; }
 
-        /* ── rejection banner ── */
+        /* ── rejection banner (light) ── */
         .od-rejection-banner {
           margin-bottom: 24px;
           padding: 14px 18px;
           border-radius: 10px;
-          border: 1px solid rgba(239,68,68,0.25);
-          background: rgba(239,68,68,0.06);
+          border: 1px solid #fecaca;
+          background: #fef2f2;
           display: flex; align-items: flex-start; gap: 12px;
         }
         .od-rejection-icon {
           width: 30px; height: 30px; border-radius: 8px;
-          background: rgba(239,68,68,0.12);
-          border: 1px solid rgba(239,68,68,0.2);
+          background: #fee2e2;
+          border: 1px solid #fecaca;
           display: flex; align-items: center; justify-content: center;
           flex-shrink: 0;
         }
 
-        /* ── special step boxes ── */
+        /* ── special step boxes (light) ── */
         .od-special-step {
           display: flex; gap: 16px; align-items: flex-start;
         }
@@ -417,16 +413,16 @@ export default async function HROrderDetailPage({ params }: PageProps) {
           border: 1px solid;
         }
 
-        /* ── document wrappers ── */
+        /* ── document wrappers (light) with distinct background ── */
         .od-doc-section {
           display: flex; flex-direction: column; gap: 28px;
         }
         .od-doc-card {
           border-radius: 16px;
-          border: 1px solid rgba(255,255,255,0.07);
-          background: #ffffff;
+          background: #eef2f6;  /* soft gray background to make white document stand out */
+          border: 1px solid #cbd5e1;
           overflow: hidden;
-          box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+          box-shadow: 0 8px 20px rgba(0,0,0,0.08);
           animation: fadeUp 0.5s ease both;
         }
         .od-doc-card:nth-child(1) { animation-delay: 200ms; }
@@ -435,19 +431,27 @@ export default async function HROrderDetailPage({ params }: PageProps) {
         .od-doc-label {
           display: flex; align-items: center; gap: 9px;
           padding: 12px 20px;
-          background: rgba(255,255,255,0.02);
-          border-bottom: 1px solid rgba(255,255,255,0.07);
+          background: #ffffff;
+          border-bottom: 1px solid #e2e8f0;
           font-size: 11.5px; font-weight: 600;
           letter-spacing: 0.08em; text-transform: uppercase;
-          color: rgba(255,255,255,0.35);
+          color: #1e293b;
         }
         .od-doc-label span {
           font-family: 'DM Mono', monospace;
           font-size: 10px;
-          background: rgba(74,222,128,0.1); color: #4ade80;
-          border: 1px solid rgba(74,222,128,0.2);
+          background: #ecfdf5; color: #059669;
+          border: 1px solid #a7f3d0;
           border-radius: 4px; padding: 1px 6px;
           letter-spacing: 0.06em;
+        }
+        /* Inner document wrapper – white paper effect */
+        .od-doc-paper {
+          background: white;
+          margin: 20px;
+          border-radius: 12px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+          overflow: hidden;
         }
       `}</style>
 
@@ -467,7 +471,7 @@ export default async function HROrderDetailPage({ params }: PageProps) {
                   style={{
                     color: statusConfig.dot,
                     borderColor: `${statusConfig.dot}44`,
-                    background: `${statusConfig.glow}`,
+                    background: statusConfig.glow,
                   }}
                 >
                   <span className="od-status-dot" style={{ background: statusConfig.dot }} />
@@ -519,13 +523,13 @@ export default async function HROrderDetailPage({ params }: PageProps) {
               {travelOrder.status === 'REJECTED' && travelOrder.rejectionReason && (
                 <div className="od-rejection-banner">
                   <div className="od-rejection-icon">
-                    <XCircle size={15} color="#f87171" />
+                    <XCircle size={15} color="#dc2626" />
                   </div>
                   <div>
-                    <p style={{ fontWeight: 600, color: '#fca5a5', margin: '0 0 3px', fontSize: 13 }}>
+                    <p style={{ fontWeight: 600, color: '#991b1b', margin: '0 0 3px', fontSize: 13 }}>
                       Travel Request Rejected
                     </p>
-                    <p style={{ color: '#f87171', fontSize: 12.5, margin: 0 }}>
+                    <p style={{ color: '#b91c1c', fontSize: 12.5, margin: 0 }}>
                       {travelOrder.rejectionReason}
                     </p>
                   </div>
@@ -552,12 +556,12 @@ export default async function HROrderDetailPage({ params }: PageProps) {
               {/* HR Processing step */}
               {travelOrder.status === 'HR_PROCESSING' && (
                 <div className="od-special-step" style={{ marginTop: 8 }}>
-                  <div className="od-special-dot" style={{ background: 'rgba(139,92,246,0.12)', border: '2px solid #8b5cf6', boxShadow: '0 0 12px rgba(139,92,246,0.25)' }}>
+                  <div className="od-special-dot" style={{ background: '#f3e8ff', border: '2px solid #8b5cf6', boxShadow: '0 0 0 4px rgba(139,92,246,0.1)' }}>
                     <Clock size={16} color="#8b5cf6" />
                   </div>
-                  <div className="od-special-card" style={{ borderColor: 'rgba(139,92,246,0.2)', background: 'rgba(139,92,246,0.05)' }}>
-                    <p style={{ fontWeight: 600, color: '#c4b5fd', margin: '0 0 4px', fontSize: 13 }}>HR Processing</p>
-                    <p style={{ color: '#a78bfa', fontSize: 12.5, margin: 0 }}>
+                  <div className="od-special-card" style={{ borderColor: '#e9d5ff', background: '#faf5ff' }}>
+                    <p style={{ fontWeight: 600, color: '#6d28d9', margin: '0 0 4px', fontSize: 13 }}>HR Processing</p>
+                    <p style={{ color: '#7c3aed', fontSize: 12.5, margin: 0 }}>
                       This travel order is awaiting HR processing. A travel number will be assigned.
                     </p>
                   </div>
@@ -567,14 +571,14 @@ export default async function HROrderDetailPage({ params }: PageProps) {
               {/* Completed step */}
               {travelOrder.status === 'COMPLETED' && travelOrder.travelOrderNumber && (
                 <div className="od-special-step" style={{ marginTop: 8 }}>
-                  <div className="od-special-dot" style={{ background: 'rgba(16,185,129,0.12)', border: '2px solid #10b981', boxShadow: '0 0 12px rgba(16,185,129,0.25)' }}>
+                  <div className="od-special-dot" style={{ background: '#ecfdf5', border: '2px solid #10b981', boxShadow: '0 0 0 4px rgba(16,185,129,0.1)' }}>
                     <CheckCircle size={16} color="#10b981" />
                   </div>
-                  <div className="od-special-card" style={{ borderColor: 'rgba(16,185,129,0.2)', background: 'rgba(16,185,129,0.04)' }}>
-                    <p style={{ fontWeight: 600, color: '#6ee7b7', margin: '0 0 4px', fontSize: 13 }}>Completed</p>
-                    <p style={{ color: '#a7f3d0', fontSize: 12.5, margin: 0 }}>
+                  <div className="od-special-card" style={{ borderColor: '#a7f3d0', background: '#f0fdf4' }}>
+                    <p style={{ fontWeight: 600, color: '#065f46', margin: '0 0 4px', fontSize: 13 }}>Completed</p>
+                    <p style={{ color: '#047857', fontSize: 12.5, margin: 0 }}>
                       Travel Order Number:{' '}
-                      <span style={{ fontFamily: "'DM Mono', monospace", fontWeight: 700, color: '#4ade80', letterSpacing: '0.06em' }}>
+                      <span style={{ fontFamily: "'DM Mono', monospace", fontWeight: 700, color: '#059669', letterSpacing: '0.06em' }}>
                         {travelOrder.travelOrderNumber}
                       </span>
                     </p>
@@ -589,43 +593,52 @@ export default async function HROrderDetailPage({ params }: PageProps) {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{
                 width: 30, height: 30, borderRadius: 8,
-                background: 'rgba(74,222,128,0.1)',
-                border: '1px solid rgba(74,222,128,0.2)',
+                background: '#ecfdf5',
+                border: '1px solid #a7f3d0',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <FileText size={14} color="#4ade80" />
+                <FileText size={14} color="#059669" />
               </div>
-              <h2 style={{ fontSize: 14, fontWeight: 600, color: '#f1f5f9', margin: 0 }}>
+              <h2 style={{ fontSize: 14, fontWeight: 600, color: '#0f172a', margin: 0 }}>
                 Supporting Documents
               </h2>
             </div>
 
+            {/* Travel Order Form */}
             <div className="od-doc-card">
               <div className="od-doc-label">
                 <FileText size={12} />
                 Travel Order Form
                 <span>DOC 01</span>
               </div>
-              <TravelOrderDocument data={travelOrder} />
+              <div className="od-doc-paper">
+                <TravelOrderDocument data={travelOrder} />
+              </div>
             </div>
 
             {travelOrder.employmentStatus !== 'PERMANENT' && (
               <>
+                {/* Proposed Itinerary */}
                 <div className="od-doc-card">
                   <div className="od-doc-label">
                     <FileText size={12} />
                     Proposed Itinerary
                     <span>DOC 02</span>
                   </div>
-                  <ProposedItineraryDocument data={travelOrder} />
+                  <div className="od-doc-paper">
+                    <ProposedItineraryDocument data={travelOrder} />
+                  </div>
                 </div>
+
                 <div className="od-doc-card">
                   <div className="od-doc-label">
                     <FileText size={12} />
                     Certification Document
                     <span>DOC 03</span>
                   </div>
-                  <CertificationDocument data={travelOrder} />
+                  <div className="od-doc-paper">
+                    <CertificationDocument data={travelOrder} />
+                  </div>
                 </div>
               </>
             )}
