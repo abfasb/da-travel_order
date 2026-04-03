@@ -42,7 +42,6 @@ export default function HistoryOrdersTable({ orders }: HistoryOrdersTableProps) 
     REJECTED: 'bg-red-50 text-red-700 border-red-200',
   }
 
-  // Filter orders
   const filteredOrders = useMemo(() => {
     return orders.filter(order => {
       const fullName = `${order.user.firstName} ${order.user.lastName}`.toLowerCase()
@@ -52,7 +51,6 @@ export default function HistoryOrdersTable({ orders }: HistoryOrdersTableProps) 
     })
   }, [orders, searchTerm])
 
-  // Sort orders
   const sortedOrders = useMemo(() => {
     return [...filteredOrders].sort((a, b) => {
       let aVal: any = a[sortField]
@@ -75,7 +73,6 @@ export default function HistoryOrdersTable({ orders }: HistoryOrdersTableProps) 
     })
   }, [filteredOrders, sortField, sortDirection])
 
-  // Pagination
   const paginatedOrders = useMemo(() => {
     const start = (page - 1) * pageSize
     return sortedOrders.slice(start, start + pageSize)

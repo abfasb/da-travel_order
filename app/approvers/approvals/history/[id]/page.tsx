@@ -307,7 +307,6 @@ export default async function HistoryViewPage({ params }: { params: Promise<{ id
             </Card>
           </div>
         </div>
-
         <div className="mt-12 sm:mt-16 pt-6 sm:pt-8 border-t text-center">
           <p className="text-xs sm:text-sm text-slate-500 font-medium">Department of Agriculture • Region IV-B (MIMAROPA)</p>
           <p className="text-[10px] sm:text-xs text-slate-400 mt-1">This is an official government document. Your signature is legally binding.</p>
