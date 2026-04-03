@@ -28,7 +28,6 @@ interface NavbarProps {
 
 export function Navbar({ user }: NavbarProps) {
   const router = useRouter()
-  // Hydration safety check
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
@@ -66,11 +65,10 @@ export function Navbar({ user }: NavbarProps) {
     <header className="border-b bg-card px-6 py-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Leaf className="h-6 w-6 text-primary" />
+          <img src="https://c8.alamy.com/comp/KENDB8/logo-of-the-department-of-agriculture-of-the-philippines-KENDB8.jpg" alt='DA Logo' className="h-8 rounded-full w-8" />
           <span className="text-lg font-semibold">TOMS · {displayRole || 'Approver'}</span>
         </div>
 
-        {/* Only render the dropdown once safely mounted on the client */}
         {isMounted && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

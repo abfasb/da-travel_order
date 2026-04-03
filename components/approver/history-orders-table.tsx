@@ -196,7 +196,7 @@ export default function HistoryOrdersTable({ orders }: HistoryOrdersTableProps) 
                     </TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="sm" asChild className="hover:bg-muted">
-                        <Link href={`/employee/requests/${order.id}`} target="_blank">
+                        <Link href={`/approvers/approvals/history/${order.id}`}>
                           <Eye className="h-4 w-4" />
                           <span className="sr-only">View</span>
                         </Link>

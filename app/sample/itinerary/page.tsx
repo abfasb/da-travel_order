@@ -136,9 +136,7 @@ export default function ProposedItineraryDocument({ data }: { data: any }) {
               </tbody>
             </table>
 
-            {/* Signatures row – fixed alignment */}
             <div className="grid grid-cols-2 gap-10" style={{ fontSize: '11pt', paddingLeft: '5mm', paddingRight: '5mm' }}>
-              {/* Left: Requested by */}
               <div className="flex flex-col">
                 <span className="mb-2">Requested by:</span>
                 <span className="font-bold mt-8 uppercase">{data?.requestorName}</span>
