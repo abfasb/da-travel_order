@@ -373,13 +373,11 @@ export default async function TravelOrderPage({ params }: PageProps) {
           </CardContent>
         </Card>
 
-        {/* Approval Workflow Section */}
         <div className="print:hidden">
           <Card className="border-0 shadow-xl overflow-hidden">
             <CardHeader className="bg-gradient-to-r from-slate-50 to-white border-b">
               <div className="flex items-center justify-between flex-wrap gap-3">
-                <CardTitle className="flex items-center gap-2 text-slate-800">
-                  <Award className="w-5 h-5 text-emerald-600" />
+                <CardTitle className="flex items-center gap-2 font-bold text-slate-800">
                   Approval Workflow
                 </CardTitle>
                 {!isRejected && !isCompleted && (

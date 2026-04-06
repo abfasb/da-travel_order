@@ -73,12 +73,11 @@ export function Navbar({ user }: NavbarProps) {
   const initials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
   const fullName = `${user.firstName} ${user.lastName}`
 
-  // Fetch notifications and unread count
   const fetchNotifications = async () => {
     try {
       const [count, recent] = await Promise.all([
         getUnreadCount(),
-        getRecentNotifications(5) // Get 5 most recent notifications
+        getRecentNotifications(5) 
       ])
       setUnreadCount(count)
       setRecentNotifications(recent)
@@ -91,13 +90,11 @@ export function Navbar({ user }: NavbarProps) {
 
   useEffect(() => {
     fetchNotifications()
-    // Refresh every 30 seconds
     const interval = setInterval(fetchNotifications, 30000)
     return () => clearInterval(interval)
   }, [])
 
   const handleNotificationClick = async (notification: Notification) => {
-    // Mark as read if not already
     if (!notification.isRead) {
       const { markAsRead } = await import('@/app/actions/notifications')
       await markAsRead(notification.id)
@@ -106,7 +103,6 @@ export function Navbar({ user }: NavbarProps) {
         prev.map(n => n.id === notification.id ? { ...n, isRead: true } : n)
       )
     }
-    // Navigate if link exists
     if (notification.link) {
       router.push(notification.link)
     }
@@ -210,18 +206,17 @@ export function Navbar({ user }: NavbarProps) {
       <div className="flex items-center gap-2 md:gap-4">
         <Button asChild variant="default" size="sm" className="hidden md:flex">
           <Link href="/employee/requests/">
-            <PlusCircle className="mr-2 h-4 w-4" />new
+            <PlusCircle className="mr-2 h-4 w-4" />
             New Request
           </Link>
         </Button>
 
-        {/* Notifications dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-5 w-5" />
               {unreadCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground">
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground text-white">
                   {unreadCount > 99 ? '99+' : unreadCount}
                 </span>
               )}

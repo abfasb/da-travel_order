@@ -11,31 +11,25 @@ import {
 } from "@/components/ui/table"
 
 export async function RecentRequestsTable() {
-  const cookieStore = await cookies();
-  const userId = cookieStore.get("auth_session")?.value;
+  const cookieStore = await cookies()
+  const userId = cookieStore.get("auth_session")?.value
 
-  if (!userId) return null;
+  if (!userId) return null
 
   const recentRequests = await prisma.travelOrderRequest.findMany({
-    where: { userId: userId },
-    orderBy: { createdAt: "desc" }, 
+    where: { userId },
+    orderBy: { createdAt: "desc" },
     take: 5,
-  });
+  })
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'APPROVED': 
-        return <Badge className="bg-emerald-500 hover:bg-emerald-600">Approved</Badge>
-      case 'PENDING': 
-        return <Badge variant="outline" className="text-amber-600 border-amber-500 bg-amber-50">Pending</Badge>
-      case 'REJECTED': 
-        return <Badge variant="destructive">Rejected</Badge>
-      case 'REVIEWING': 
-        return <Badge className="bg-blue-500 hover:bg-blue-600">Reviewing</Badge>
-      case 'HR_PROCESSING': 
-        return <Badge className="bg-purple-500 hover:bg-purple-600">HR Processing</Badge>
-      default: 
-        return <Badge variant="outline">{status}</Badge>
+      case 'APPROVED': return <Badge className="bg-emerald-500 hover:bg-emerald-600">Approved</Badge>
+      case 'PENDING': return <Badge variant="outline" className="text-amber-600 border-amber-500 bg-amber-50">Pending</Badge>
+      case 'REJECTED': return <Badge variant="destructive">Rejected</Badge>
+      case 'REVIEWING': return <Badge className="bg-blue-500 hover:bg-blue-600">Reviewing</Badge>
+      case 'HR_PROCESSING': return <Badge className="bg-purple-500 hover:bg-purple-600">HR Processing</Badge>
+      default: return <Badge variant="outline">{status}</Badge>
     }
   }
 
@@ -45,7 +39,6 @@ export async function RecentRequestsTable() {
         <h3 className="font-semibold leading-none tracking-tight text-lg">Recent Travel Requests</h3>
         <p className="text-sm text-muted-foreground pt-1">Your most recently submitted itineraries.</p>
       </div>
-      
       <div className="p-0 flex-1 overflow-auto">
         {recentRequests.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 text-center px-4">
@@ -67,7 +60,6 @@ export async function RecentRequestsTable() {
                 <TableRow key={req.id}>
                   <TableCell className="font-medium pl-6">{req.destinationProvince}</TableCell>
                   <TableCell className="text-muted-foreground text-sm">
-                    {/* Format dates into readable strings */}
                     {new Date(req.departureDate).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })} -{' '}
                     {new Date(req.returnDate).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </TableCell>
