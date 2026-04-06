@@ -35,9 +35,9 @@ export default function ProposedItineraryDocument({ data }: { data: any }) {
         }
       `}} />
 
-      <div className="flex justify-center bg-white">
+      <div className="flex justify-center p-8 bg-white">
         <div 
-          className="bg-white box-border relative overflow-hidden"
+          className="bg-white box-border shadow-xl relative overflow-hidden"
           style={{ 
             width: '210mm', 
             minHeight: '297mm',
@@ -65,7 +65,6 @@ export default function ProposedItineraryDocument({ data }: { data: any }) {
             </div>
 
             <div className="grid grid-cols-2 gap-y-6 mb-8" style={{ fontSize: '11pt', paddingLeft: '5mm', paddingRight: '5mm' }}>
-              {/* Left column */}
               <div className="flex flex-col gap-y-4">
                 <div className="flex">
                   <span className="w-[20mm]">Name:</span>
@@ -140,7 +139,7 @@ export default function ProposedItineraryDocument({ data }: { data: any }) {
               <div className="flex flex-col">
                 <span className="mb-2">Requested by:</span>
                 <span className="font-bold mt-8 uppercase">{data?.requestorName}</span>
-                <span>{data?.requestorPosition}</span>
+                <span className="ml-14">{data?.requestorPosition}</span>
               </div>
 
               <div className="flex flex-col">

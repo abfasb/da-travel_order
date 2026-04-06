@@ -19,7 +19,7 @@ export default function CertificationDocument({ data }: { data: any }) {
   const redName = isRedApproved
     ? `${red.approver?.firstName || ''} ${red.approver?.lastName || ''}`.trim()
     : 'ATTY. CHRISTOPHER R. BAÑAS';
-  const redTitle = 'Regional Executive Director'; // unchanged
+  const redTitle = 'Regional Executive Director';
   const signatureImage = isRedApproved ? red.signatureData : null;
 
   return (
@@ -37,9 +37,9 @@ export default function CertificationDocument({ data }: { data: any }) {
         }
       `}} />
 
-      <div className="flex justify-center bg-white">
+      <div className="flex justify-center p-8 bg-white">
         <div 
-          className="bg-white box-border relative overflow-hidden print:shadow-none"
+          className="bg-white shadow-xl p-4 box-border relative overflow-hidden print:shadow-none"
           style={{ 
             width: '210mm', 
             height: '297mm',
@@ -86,12 +86,12 @@ export default function CertificationDocument({ data }: { data: any }) {
 
             <div className="mt-24">
               {signatureImage && (
-                <img src={signatureImage} alt="Signature" className="h-10 mb-1 object-contain" />
+                <img src={signatureImage} alt="Signature" className="h-10 ml-20 mb-1 object-contain" />
               )}
               <p className="font-bold underline uppercase" style={{ fontSize: '12pt' }}>
-                {redName}
+                ATTY. CHRISTOPHER R. BAÑAS
               </p>
-              <p style={{ fontSize: '12pt' }}>
+              <p className="ml-8" style={{ fontSize: '12pt' }}>
                 {redTitle}
               </p>
             </div>

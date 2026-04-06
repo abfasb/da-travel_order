@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Leaf, LogOut, User } from 'lucide-react'
+import { Leaf, LogOut, User, Settings, LayoutDashboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -89,6 +89,12 @@ export function Navbar({ user }: NavbarProps) {
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => router.push('/profile')} className="cursor-pointer">
                 <User className="mr-2 h-4 w-4" /> Profile
+              </DropdownMenuItem>
+               <DropdownMenuItem onClick={() => router.push('/approvers/approvals')} className="cursor-pointer">
+                <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/approvers/approvals/settings')} className="cursor-pointer">
+                <Settings className="mr-2 h-4 w-4" /> Settings
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 focus:text-red-600">
                 <LogOut className="mr-2 h-4 w-4" /> Log out
