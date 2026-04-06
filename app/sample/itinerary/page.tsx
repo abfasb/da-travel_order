@@ -11,12 +11,10 @@ export default function ProposedItineraryDocument({ data }: { data: any }) {
     });
   };
 
-  // Find Chief Admin approval (to show signature if available)
   const chiefAdmin = data?.approvals?.find((a: any) => a.approverRole === 'CHIEF_ADMINISTRATIVE');
   const isChiefAdminApproved = chiefAdmin && chiefAdmin.status === 'APPROVED';
   const signatureImage = isChiefAdminApproved ? chiefAdmin.signatureData : null;
 
-  // Hardcoded name – always shown
   const approverName = "Atty. Marvin P. Apduhan, CPA";
   const approverTitle = "Chief, Administrative Officer";
 

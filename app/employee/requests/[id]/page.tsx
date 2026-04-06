@@ -49,7 +49,6 @@ const getApprovalStepClass = (status: string) => {
   return 'bg-white border-slate-300 text-slate-400'
 }
 
-// Role display names
 const roleTitles: Record<string, string> = {
   'APCO': 'Agricultural Program Coordinating Office',
   'CHIEF_AGRICULTURIST': 'Chief Agriculturist – Regulatory Division',
@@ -57,7 +56,6 @@ const roleTitles: Record<string, string> = {
   'REGIONAL_EXECUTIVE': 'Regional Executive Director',
 }
 
-// ========== Approval Step Component ==========
 const ApprovalStep = ({ 
   role, 
   title, 
@@ -164,11 +162,10 @@ const ApprovalStep = ({
   )
 }
 
-// ========== HR Step Component ==========
 const HRProcessingStep = ({ status, travelOrderNumber }: { status: string, travelOrderNumber?: string | null }) => {
   const isCompleted = status === 'COMPLETED'
   const isProcessing = status === 'HR_PROCESSING'
-  const isWaiting = status === 'APPROVED' // All officials approved but not yet HR_PROCESSING (should not happen normally)
+  const isWaiting = status === 'APPROVED' 
   
   let displayStatus = status
   let bgColor = 'bg-purple-50/40'
@@ -298,7 +295,6 @@ export default async function TravelOrderPage({ params }: PageProps) {
               <div>
                 <div className="flex items-center gap-3 flex-wrap">
                   <h1 className="text-xl font-bold tracking-tight text-slate-800 flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-emerald-600" />
                     Travel Order Details
                   </h1>
                   <Badge variant="outline" className={`${statusConfig.bg} ${statusConfig.color} border ${statusConfig.border} px-3 py-1`}>
@@ -327,7 +323,6 @@ export default async function TravelOrderPage({ params }: PageProps) {
           <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -translate-y-32 translate-x-32" />
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-semibold text-slate-700 flex items-center gap-2">
-              <Briefcase className="w-5 h-5 text-emerald-600" />
               Request Summary
             </CardTitle>
           </CardHeader>

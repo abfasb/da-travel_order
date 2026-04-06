@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   Bell,
   Search,
@@ -18,6 +18,7 @@ import {
   BarChart3,
   Leaf,
 } from 'lucide-react'
+import { formatDistanceToNow } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -40,8 +41,9 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
+import { getUnreadCount, getRecentNotifications } from '@/app/actions/notifications'
+import { toast } from 'sonner'
 
-// 1. ADDED: Interface for the incoming user data
 interface NavbarProps {
   user: {
     firstName: string;
@@ -50,48 +52,65 @@ interface NavbarProps {
   }
 }
 
-// Mock notifications (You can connect this to Prisma later too!)
-const notifications = [
-  {
-    id: 1,
-    title: 'Travel order approved',
-    description: 'TO-2026-012 has been approved by APCO',
-    time: '5 min ago',
-    read: false,
-  },
-  {
-    id: 2,
-    title: 'New travel request',
-    description: 'Maria Santos submitted a travel request',
-    time: '1 hour ago',
-    read: false,
-  },
-  {
-    id: 3,
-    title: 'Travel order rejected',
-    description: 'TO-2026-011 was rejected by Regional Director',
-    time: '3 hours ago',
-    read: true,
-  },
-  {
-    id: 4,
-    title: 'HR assigned travel number',
-    description: 'TO-2026-010 now has travel number',
-    time: 'yesterday',
-    read: true,
-  },
-]
+interface Notification {
+  id: string
+  title: string
+  message: string
+  type: string
+  isRead: boolean
+  link: string | null
+  createdAt: Date
+}
 
-const unreadCount = notifications.filter(n => !n.read).length
-
-// 2. UPDATED: Accept the user prop
 export function Navbar({ user }: NavbarProps) {
   const pathname = usePathname()
+  const router = useRouter()
   const [searchFocused, setSearchFocused] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [recentNotifications, setRecentNotifications] = useState<Notification[]>([])
+  const [loading, setLoading] = useState(true)
 
-  // 3. ADDED: Dynamically generate initials and full name
-  const initials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
-  const fullName = `${user.firstName} ${user.lastName}`;
+  const initials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
+  const fullName = `${user.firstName} ${user.lastName}`
+
+  // Fetch notifications and unread count
+  const fetchNotifications = async () => {
+    try {
+      const [count, recent] = await Promise.all([
+        getUnreadCount(),
+        getRecentNotifications(5) // Get 5 most recent notifications
+      ])
+      setUnreadCount(count)
+      setRecentNotifications(recent)
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchNotifications()
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchNotifications, 30000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const handleNotificationClick = async (notification: Notification) => {
+    // Mark as read if not already
+    if (!notification.isRead) {
+      const { markAsRead } = await import('@/app/actions/notifications')
+      await markAsRead(notification.id)
+      setUnreadCount(prev => Math.max(0, prev - 1))
+      setRecentNotifications(prev =>
+        prev.map(n => n.id === notification.id ? { ...n, isRead: true } : n)
+      )
+    }
+    // Navigate if link exists
+    if (notification.link) {
+      router.push(notification.link)
+    }
+  }
 
   const mobileRoutes = [
     { label: 'Dashboard', href: '/employee/dashboard', icon: LayoutDashboard },
@@ -101,6 +120,20 @@ export function Navbar({ user }: NavbarProps) {
     { label: 'Notifications', href: '/employee/notifications', icon: Bell },
     { label: 'Profile', href: '/employee/profile', icon: User },
   ]
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch('/api/auth/logout', { method: 'POST' })
+      if (res.ok) {
+        toast.success('Logged out successfully')
+        router.push('/login')
+      } else {
+        toast.error('Logout failed')
+      }
+    } catch (error) {
+      toast.error('Something went wrong')
+    }
+  }
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center border-b bg-card px-4 md:px-6">
@@ -139,8 +172,6 @@ export function Navbar({ user }: NavbarProps) {
                 )
               })}
               <Separator className="my-4" />
-              
-              {/* 4. UPDATED: Mobile profile section now uses dynamic data */}
               <div className="px-3 py-2">
                 <p className="text-xs text-muted-foreground mb-2">Signed in as</p>
                 <div className="flex items-center gap-3">
@@ -153,13 +184,12 @@ export function Navbar({ user }: NavbarProps) {
                   </div>
                 </div>
               </div>
-
             </nav>
           </ScrollArea>
         </SheetContent>
       </Sheet>
 
-      {/* Search bar with keyboard hint */}
+      {/* Search bar */}
       <div className="flex flex-1 items-center gap-4">
         <div className="relative w-full max-w-md">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -178,10 +208,9 @@ export function Navbar({ user }: NavbarProps) {
       </div>
 
       <div className="flex items-center gap-2 md:gap-4">
-        {/* New request button */}
         <Button asChild variant="default" size="sm" className="hidden md:flex">
-          <Link href="/employee/requests/new">
-            <PlusCircle className="mr-2 h-4 w-4" />
+          <Link href="/employee/requests/">
+            <PlusCircle className="mr-2 h-4 w-4" />new
             New Request
           </Link>
         </Button>
@@ -193,7 +222,7 @@ export function Navbar({ user }: NavbarProps) {
               <Bell className="h-5 w-5" />
               {unreadCount > 0 && (
                 <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground">
-                  {unreadCount}
+                  {unreadCount > 99 ? '99+' : unreadCount}
                 </span>
               )}
             </Button>
@@ -207,21 +236,30 @@ export function Navbar({ user }: NavbarProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <ScrollArea className="h-72">
-              {notifications.map((notification) => (
-                <DropdownMenuItem
-                  key={notification.id}
-                  className={cn(
-                    'flex flex-col items-start gap-1 p-3 cursor-default',
-                    !notification.read && 'bg-muted/50'
-                  )}
-                >
-                  <div className="flex w-full items-center justify-between">
-                    <span className="font-medium">{notification.title}</span>
-                    <span className="text-xs text-muted-foreground">{notification.time}</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{notification.description}</p>
-                </DropdownMenuItem>
-              ))}
+              {loading ? (
+                <div className="p-4 text-center text-muted-foreground">Loading...</div>
+              ) : recentNotifications.length === 0 ? (
+                <div className="p-4 text-center text-muted-foreground">No notifications</div>
+              ) : (
+                recentNotifications.map((notification) => (
+                  <DropdownMenuItem
+                    key={notification.id}
+                    className={cn(
+                      'flex flex-col items-start gap-1 p-3 cursor-pointer',
+                      !notification.isRead && 'bg-muted/50'
+                    )}
+                    onClick={() => handleNotificationClick(notification)}
+                  >
+                    <div className="flex w-full items-center justify-between">
+                      <span className="font-medium text-sm">{notification.title}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground line-clamp-2">{notification.message}</p>
+                  </DropdownMenuItem>
+                ))
+              )}
             </ScrollArea>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
@@ -232,7 +270,7 @@ export function Navbar({ user }: NavbarProps) {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* 5. UPDATED: Desktop User dropdown uses dynamic data */}
+        {/* User dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="flex items-center gap-2 px-2">
@@ -267,7 +305,7 @@ export function Navbar({ user }: NavbarProps) {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
+            <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
               Log out
             </DropdownMenuItem>
