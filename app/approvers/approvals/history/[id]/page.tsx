@@ -163,7 +163,6 @@ export default async function HistoryViewPage({ params }: { params: Promise<{ id
           </Card>
         </div>
 
-        {/* Approval Timeline (read‑only) - make it scrollable on mobile */}
         <div className="mb-6 sm:mb-10">
           <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm overflow-hidden">
             <div className="bg-slate-50/50 border-b p-2 sm:p-3 px-4 sm:px-6 flex items-center gap-2">
@@ -197,7 +196,6 @@ export default async function HistoryViewPage({ params }: { params: Promise<{ id
           </Card>
         </div>
 
-        {/* Documents – responsive scaling */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 sm:gap-8">
           <div className="xl:col-span-2 space-y-6">
             <Card className="border-0 shadow-xl overflow-hidden">
@@ -226,8 +224,7 @@ export default async function HistoryViewPage({ params }: { params: Promise<{ id
               </div>
               <ScrollArea className="h-[calc(100vh-350px)] min-h-[600px] overflow-auto">
                 <div className="bg-slate-100 dark:bg-slate-900/50 p-3 sm:p-6 flex flex-col items-center gap-6 sm:gap-10">
-                  {/* Responsive document container with scaling */}
-                  <div className="w-full overflow-x-auto flex justify-center">
+                  <div className=" mr-48 overflow-x-auto flex justify-center">
                     <div className="origin-top scale-[0.85] sm:scale-100 transition-transform">
                       <div className="shadow-2xl bg-white rounded-md overflow-hidden border border-slate-200">
                         <TravelOrderDocument data={travelOrder} />
@@ -236,18 +233,14 @@ export default async function HistoryViewPage({ params }: { params: Promise<{ id
                   </div>
                   {travelOrder.employmentStatus !== 'PERMANENT' && (
                     <>
-                      <div className="w-full overflow-x-auto flex justify-center">
+                      <div className="w-full mr-32 overflow-x-auto flex justify-center">
                         <div className="origin-top scale-[0.85] sm:scale-100 transition-transform">
-                          <div className="shadow-2xl bg-white rounded-md overflow-hidden border border-slate-200">
                             <ProposedItineraryDocument data={travelOrder} />
-                          </div>
                         </div>
                       </div>
-                      <div className="w-full overflow-x-auto flex justify-center">
+                      <div className="w-full mr-32 overflow-x-auto flex justify-center">
                         <div className="origin-top scale-[0.85] sm:scale-100 transition-transform">
-                          <div className="shadow-2xl bg-white rounded-md overflow-hidden border border-slate-200">
                             <CertificationDocument data={travelOrder} />
-                          </div>
                         </div>
                       </div>
                     </>

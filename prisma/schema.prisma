@@ -50,16 +50,17 @@ model User {
   employmentStatus EmploymentStatus?
   division         String?
   officialStation  String?
+  savedSignature   String?
   password         String
   role             Role             @default(STAFF)
 
   // Relations
-  travelOrders     TravelOrderRequest[]  // requests created by this user
-  approvals        Approval[]            // approvals performed
-  auditLogs        AuditLog[]            // actions logged
-  notifications    Notification[]        // notifications received
-  hrProcessedOrders TravelOrderRequest[] @relation("HRAssignments") // travel orders processed by HR
-  attachments      Attachment[]          // files uploaded by this user
+  travelOrders     TravelOrderRequest[]  
+  approvals        Approval[]            
+  auditLogs        AuditLog[]           
+  notifications    Notification[]       
+  hrProcessedOrders TravelOrderRequest[] @relation("HRAssignments") 
+  attachments      Attachment[]         
 
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import SignatureCanvas from 'react-signature-canvas'
 import { Button } from '@/components/ui/button'
@@ -20,6 +20,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
 import { submitApproval } from '@/app/actions/approvals'
+import { saveSignature, getSavedSignature } from '@/app/actions/save-signature'
 
 interface SignatureModalProps {
   orderId: string
@@ -33,8 +34,23 @@ export function SignatureModal({ orderId, approvalId, userRole }: SignatureModal
   const [certified, setCertified] = useState(false)
   const [rejectReason, setRejectReason] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [savedSignature, setSavedSignature] = useState<string | null>(null)
+  const [loadingSaved, setLoadingSaved] = useState(false)
 
   const sigCanvas = useRef<SignatureCanvas>(null)
+
+  // Load saved signature when modal opens
+  useEffect(() => {
+    if (open) {
+      const loadSaved = async () => {
+        setLoadingSaved(true)
+        const saved = await getSavedSignature()
+        setSavedSignature(saved)
+        setLoadingSaved(false)
+      }
+      loadSaved()
+    }
+  }, [open])
 
   const handleClear = () => {
     sigCanvas.current?.clear()
@@ -47,9 +63,8 @@ export function SignatureModal({ orderId, approvalId, userRole }: SignatureModal
       return
     }
     const dataURL = sigCanvas.current?.toDataURL('image/png')
-    //@ts-ignore
-    setSignatureData(dataURL)
-    toast.success('Signature saved.')
+    setSignatureData(dataURL!)
+    toast.success('Signature saved temporarily.')
   }
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,6 +77,27 @@ export function SignatureModal({ orderId, approvalId, userRole }: SignatureModal
       toast.success('Signature uploaded.')
     }
     reader.readAsDataURL(file)
+  }
+
+  const handleUseSaved = () => {
+    if (savedSignature) {
+      setSignatureData(savedSignature)
+      toast.success('Using your saved signature')
+    }
+  }
+
+  const handleSaveToAccount = async () => {
+    if (!signatureData) {
+      toast.error('No signature to save.')
+      return
+    }
+    const result = await saveSignature(signatureData)
+    if (result.success) {
+      setSavedSignature(signatureData)
+      toast.success('Signature saved to your account.')
+    } else {
+      toast.error(result.error || 'Failed to save signature')
+    }
   }
 
   const handleApprove = async () => {
@@ -173,6 +209,23 @@ export function SignatureModal({ orderId, approvalId, userRole }: SignatureModal
               <p className="text-sm font-medium mb-2">Preview:</p>
               <img src={signatureData} alt="Signature preview" className="max-h-20 object-contain" />
             </div>
+          )}
+
+          {/* Saved signature section */}
+          {!loadingSaved && savedSignature && (
+            <div className="flex gap-2 items-center justify-between bg-muted/20 p-2 rounded-lg">
+              <span className="text-sm">Saved signature exists</span>
+              <Button type="button" variant="outline" size="sm" onClick={handleUseSaved}>
+                Use Saved
+              </Button>
+            </div>
+          )}
+
+          {/* Save current signature to account */}
+          {signatureData && (
+            <Button type="button" variant="secondary" size="sm" onClick={handleSaveToAccount} className="w-full">
+              Save this signature to my account
+            </Button>
           )}
 
           <div className="flex items-center space-x-2">
