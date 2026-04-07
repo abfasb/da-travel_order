@@ -20,7 +20,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
 import { submitApproval } from '@/app/actions/approvals'
-import { saveSignature, getSavedSignature } from '@/app/actions/save-signature'
+import { saveSignature, getSavedSignature } from '@/app/actions/approvals/save-signature'
 
 interface SignatureModalProps {
   orderId: string
