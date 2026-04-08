@@ -50,7 +50,7 @@ const routes: Route[] = [
     icon: ClipboardList,
     href: '/hr/orders',
     children: [
-      { label: 'All Orders',   icon: FileText,     href: '/hr/orders/all' },
+      { label: 'All Orders',   icon: FileText,     href: '/hr/orders/' },
       { label: 'Pending',      icon: Clock,        href: '/hr/orders/pending',  badge: '12' },
       { label: 'Approved',     icon: CheckCircle2, href: '/hr/orders/approved' },
       { label: 'Rejected',     icon: XCircle,      href: '/hr/orders/rejected' },
@@ -61,7 +61,7 @@ const routes: Route[] = [
     icon: BarChart3,
     href: '/hr/analytics',
     children: [
-      { label: 'Overview',     icon: PieChart,     href: '/hr/analytics/overview' },
+      { label: 'Overview',     icon: PieChart,     href: '/hr/analytics/' },
       { label: 'Trends',       icon: TrendingUp,   href: '/hr/analytics/trends' },
       { label: 'Travel Map',   icon: Map,          href: '/hr/analytics/map' },
     ],
@@ -71,8 +71,8 @@ const routes: Route[] = [
     icon: Users,
     href: '/hr/users',
     children: [
-      { label: 'All Users',    icon: Users,        href: '/hr/users/all' },
-      { label: 'Add User',     icon: UserPlus,     href: '/hr/users/add' },
+      { label: 'All Users',    icon: Users,        href: '/hr/users' },
+      { label: 'Add User',     icon: UserPlus,     href: '/hr/users/new' },
       { label: 'Roles',        icon: ShieldCheck,  href: '/hr/users/roles' },
       { label: 'Permissions',  icon: Settings2,    href: '/hr/users/permissions' },
     ],

@@ -22,7 +22,6 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
-// ========== Helper Functions ==========
 const getStatusConfig = (status: string) => {
   const configs: Record<string, { color: string, bg: string, border: string, icon: any, label: string }> = {
     'PENDING': { color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-200', icon: Hourglass, label: 'Pending Review' },
@@ -83,7 +82,6 @@ const ApprovalStep = ({
 
   return (
     <div className="relative flex gap-4 group">
-      {/* Left column: icon + vertical line */}
       <div className="flex flex-col items-center">
         <div className={`
           w-11 h-11 rounded-full flex items-center justify-center border-2 transition-all duration-300 shadow-sm
@@ -94,7 +92,6 @@ const ApprovalStep = ({
         {!isLast && <div className="w-0.5 flex-1 bg-gradient-to-b from-slate-300 to-slate-100 mt-2" />}
       </div>
 
-      {/* Right column: content */}
       <div className={`flex-1 mb-7 rounded-xl border p-5 transition-all duration-200 hover:shadow-md ${
         isPending ? 'bg-white' : isApproved ? 'bg-emerald-50/40' : 'bg-rose-50/40'
       }`}>
@@ -386,7 +383,6 @@ export default async function TravelOrderPage({ params }: PageProps) {
                   </div>
                 )}
               </div>
-              {/* Progress Bar */}
               {!isRejected && !isCompleted && totalOfficials > 0 && (
                 <div className="mt-4">
                   <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -399,7 +395,6 @@ export default async function TravelOrderPage({ params }: PageProps) {
               )}
             </CardHeader>
             <CardContent className="pt-6">
-              {/* Rejection banner */}
               {isRejected && travelOrder.rejectionReason && (
                 <div className="mb-6 p-5 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3 shadow-sm">
                   <XCircle className="w-6 h-6 text-rose-600 mt-0.5 flex-shrink-0" />
