@@ -65,7 +65,6 @@ export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) 
       <div className="min-h-screen py-8 flex justify-center print:bg-white print:py-0 print:block">
         <div className="bg-white w-[210mm] h-[297mm] shadow-xl p-[15mm] px-[15mm] font-serif text-black print:shadow-none print:w-full print:h-[297mm] box-border print:overflow-hidden relative">
 
-          {/* Header */}
           <div className="flex justify-between items-start mb-2">
             <div className="w-[70%] relative h-20">
               <Image
