@@ -41,14 +41,14 @@ export function TravelOrderFilters({ employees }: { employees: Employee[] }) {
 
   const handleMonthChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (value) params.set('month', value);
+    if (value && value !== 'ALL') params.set('month', value);
     else params.delete('month');
     router.push(`/division-head/travel-orders?${params.toString()}`);
   };
 
   const handleYearChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (value) params.set('year', value);
+    if (value && value !== 'ALL') params.set('year', value);
     else params.delete('year');
     router.push(`/division-head/travel-orders?${params.toString()}`);
   };
@@ -60,6 +60,11 @@ export function TravelOrderFilters({ employees }: { employees: Employee[] }) {
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
+
+  // Get current values, default to 'ALL' if not set
+  const currentStatus = searchParams.get('status') || 'ALL';
+  const currentMonth = searchParams.get('month') || 'ALL';
+  const currentYearValue = searchParams.get('year') || 'ALL';
 
   return (
     <div className="space-y-4">
@@ -79,10 +84,7 @@ export function TravelOrderFilters({ employees }: { employees: Employee[] }) {
 
         <div className="w-40">
           <label className="text-sm font-medium mb-1 block">Status</label>
-          <Select
-            value={searchParams.get('status') || 'ALL'}
-            onValueChange={handleStatusChange}
-          >
+          <Select value={currentStatus} onValueChange={handleStatusChange}>
             <SelectTrigger>
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
@@ -99,15 +101,12 @@ export function TravelOrderFilters({ employees }: { employees: Employee[] }) {
 
         <div className="w-32">
           <label className="text-sm font-medium mb-1 block">Month</label>
-          <Select
-            value={searchParams.get('month') || ''}
-            onValueChange={handleMonthChange}
-          >
+          <Select value={currentMonth} onValueChange={handleMonthChange}>
             <SelectTrigger>
               <SelectValue placeholder="Month" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All</SelectItem>
+              <SelectItem value="ALL">All</SelectItem>
               {Array.from({ length: 12 }, (_, i) => (
                 <SelectItem key={i + 1} value={String(i + 1)}>
                   {new Date(0, i).toLocaleString('default', { month: 'long' })}
@@ -119,15 +118,12 @@ export function TravelOrderFilters({ employees }: { employees: Employee[] }) {
 
         <div className="w-28">
           <label className="text-sm font-medium mb-1 block">Year</label>
-          <Select
-            value={searchParams.get('year') || ''}
-            onValueChange={handleYearChange}
-          >
+          <Select value={currentYearValue} onValueChange={handleYearChange}>
             <SelectTrigger>
               <SelectValue placeholder="Year" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All</SelectItem>
+              <SelectItem value="ALL">All</SelectItem>
               {years.map((y) => (
                 <SelectItem key={y} value={String(y)}>{y}</SelectItem>
               ))}

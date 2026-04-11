@@ -53,7 +53,6 @@ export default async function TravelOrdersPage({
     orderBy: { createdAt: 'desc' },
   });
 
-  // Get unique employees for filter dropdown
   const employees = await prisma.user.findMany({
     where: { division, role: 'STAFF' },
     select: { firstName: true, lastName: true, id: true },

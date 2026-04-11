@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { hash } from 'bcryptjs'
 import { revalidatePath } from 'next/cache'
-import { Role, EmploymentStatus } from '@prisma/client'
+import { Role } from '@prisma/client'
 
 type CreateUserInput = {
   firstName: string
@@ -13,18 +13,15 @@ type CreateUserInput = {
   mobileNumber: string
   role: Role
   password: string
-  employmentStatus?: EmploymentStatus
-  division?: string
-  province?: string
-  officialStation?: string
+  division?: string  // only for DIVISION_HEAD
 }
 
 export async function createUser(data: CreateUserInput) {
   try {
     const hashedPassword = await hash(data.password, 10)
 
-    //@ts-ignore
-    const requiresFullProfile = data.role === 'STAFF' || data.role === 'DIVISION_HEAD'
+    // @ts-ignore
+    const division = data.role === 'DIVISION_HEAD' ? data.division : null
 
     await prisma.user.create({
       data: {
@@ -35,10 +32,7 @@ export async function createUser(data: CreateUserInput) {
         mobileNumber: data.mobileNumber,
         role: data.role,
         password: hashedPassword,
-        employmentStatus: requiresFullProfile ? data.employmentStatus : null,
-        division: requiresFullProfile ? data.division : null,
-        province: requiresFullProfile ? data.province : null,
-        officialStation: requiresFullProfile ? data.officialStation : null,
+        division: division,
       },
     })
 

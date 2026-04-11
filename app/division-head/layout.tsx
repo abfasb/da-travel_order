@@ -10,6 +10,7 @@ export default async function DivisionHeadLayout({
 }) {
   const user = await getCurrentUser();
 
+  //@ts-ignore
   if (!user || user.role !== 'DIVISION_HEAD') {
     redirect('/login');
   }
