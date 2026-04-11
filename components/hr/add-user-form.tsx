@@ -16,7 +16,6 @@ import {
 import { toast } from 'sonner'
 import { createUser } from '@/app/actions/hr/users'
 
-// Division choices from spec
 const DIVISIONS = [
   { value: 'regulatory', label: 'Regulatory Division' },
   { value: 'laboratory', label: 'Integrated Laboratory Division' },
@@ -30,7 +29,6 @@ const DIVISIONS = [
   { value: 'procurement', label: 'Procurement of Goods and Infrastructure' },
 ] as const
 
-// Only these roles can be created by HR
 const ALLOWED_ROLES = [
   'DIVISION_HEAD',
   'APCO',
@@ -39,7 +37,6 @@ const ALLOWED_ROLES = [
   'REGIONAL_EXECUTIVE',
 ] as const
 
-// Base schema (common fields)
 const baseSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
