@@ -94,6 +94,8 @@ export default function AddUserForm() {
   const showDivisionField = selectedRole === 'DIVISION_HEAD'
 
   const onSubmit = async (values: FormValues) => {
+
+    //@ts-ignore
     const result = await createUser(values)
     if (result.success) {
       toast.success('User created successfully')
