@@ -16,6 +16,7 @@ enum EmploymentStatus {
 
 enum Role {
   STAFF
+  DIVISION_HEAD
   APCO
   CHIEF_AGRICULTURIST
   CHIEF_ADMINISTRATIVE

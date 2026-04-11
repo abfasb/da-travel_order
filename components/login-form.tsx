@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { loginUser } from "@/app/actions/login"; // Adjust path if your action is somewhere else
+import { loginUser } from "@/app/actions/login"; 
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -57,6 +57,10 @@ export function LoginForm({
         targetRoute = "/admin/dashboard";
       } else if (userRole === "HR") {
         targetRoute = "/hr/dashboard";
+      }
+      //@ts-ignore
+      else if (userRole === "DIVISION_HEAD") {
+        targetRoute = "/division-head/dashboard";
       } else if (
         userRole === "CHIEF_AGRICULTURIST" ||
         userRole === "CHIEF_ADMINISTRATIVE" ||
@@ -64,7 +68,7 @@ export function LoginForm({
         userRole === "APCO"
       ) {
         targetRoute = "/approvers/approvals"; 
-      }
+      } 
 
       router.push(targetRoute);
       
