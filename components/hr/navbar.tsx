@@ -13,8 +13,14 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
+import { useEffect, useState } from 'react'
 
 export default function Navbar() {
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+if (!mounted) return null; 
   return (
     <>
       <style>{`

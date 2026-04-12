@@ -114,6 +114,11 @@ export default function OrdersTable({ initialOrders }: { initialOrders: Order[] 
     setProcessingId(null)
   }
 
+  const handlePrint = (orderId: string) => {
+    // Open the print-friendly page in a new tab
+    window.open(`/hr/orders/${orderId}/print`, '_blank')
+  }
+
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('en-US', {
       month: 'short',
@@ -197,17 +202,23 @@ export default function OrdersTable({ initialOrders }: { initialOrders: Order[] 
                           size="sm"
                           onClick={() => handleAssignNumber(order.id)}
                           disabled={processingId === order.id}
+                          title="Assign Travel Order Number"
                         >
                           <DownloadCloudIcon className="h-4 w-4" />
                         </Button>
                       )}
-                      <Button variant="ghost" size="sm" asChild>
+                      <Button variant="ghost" size="sm" asChild title="View Details">
                         <Link href={`/hr/orders/${order.id}`}>
                           <Eye className="h-4 w-4" />
                         </Link>
                       </Button>
                       {order.travelOrderNumber && order.status === 'COMPLETED' && (
-                        <Button variant="ghost" size="sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handlePrint(order.id)}
+                          title="Print Travel Order"
+                        >
                           <Printer className="h-4 w-4" />
                         </Button>
                       )}

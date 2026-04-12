@@ -35,7 +35,7 @@ export default function ProposedItineraryDocument({ data }: { data: any }) {
 
       <div className="flex justify-center p-8 bg-white">
         <div 
-          className="bg-white box-border shadow-xl relative overflow-hidden"
+          className="bg-white box-border relative overflow-hidden"
           style={{ 
             width: '210mm', 
             minHeight: '297mm',
