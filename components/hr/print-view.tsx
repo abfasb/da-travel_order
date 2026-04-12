@@ -15,7 +15,7 @@ export default function PrintView({ order }: { order: any }) {
       hasPrinted.current = true
       const timer = setTimeout(() => {
         window.print()
-      }, 800) // Slightly longer delay to ensure images/logos load
+      }, 800) 
       return () => clearTimeout(timer)
     }
   }, [])
@@ -28,14 +28,31 @@ export default function PrintView({ order }: { order: any }) {
         @media print {
           @page {
             size: A4;
-            margin: 0; /* Let the components handle their own padding */
+            margin: 0; 
           }
+
+          html, body {
+            overflow: hidden !important;
+            height: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+            
+
+         
+        * {
+          -ms-overflow-style: none !important;  /* IE and Edge */
+          scrollbar-width: none !important;     /* Firefox */
+        }
+
+        *::-webkit-scrollbar {
+          display: none !important;            
+        }
 
           body {
             background: white !important;
           }
 
-          /* Force the container to take the full width of the paper */
           .print-content {
             width: 100% !important;
             max-width: none !important;
@@ -53,16 +70,18 @@ export default function PrintView({ order }: { order: any }) {
           }
 
           .page-break {
-            page-break-before: always;
-            display: block;
-            height: 0;
+            overflow: hidden;
+            break-before: page;
+            clear: both;
           }
         }
 
         .print-content {
+          overflow: visible !important; /* Ensure content isn't clipped */
+          position: static !important;
           background: #f5f5f5;
-          min-height: 100vh;
-          padding: 2rem 0;
+          min-height: 90vh;
+          padding: 0 0;
         }
       `}</style>
 
@@ -79,9 +98,9 @@ export default function PrintView({ order }: { order: any }) {
           
           {!isPermanent && (
             <>
-              <div className="page-break" />
+              <div className="" />
               <ProposedItineraryDocument data={order} />
-              <div className="page-break" />
+              <div className="" />
               <CertificationDocument data={order} />
             </>
           )}

@@ -3,13 +3,10 @@ export default function PrintLayout({ children }: { children: React.ReactNode })
     <>
       <style>{`
         @media print {
-          /* 1. Hide everything that isn't the print content */
-          aside, .sidebar, nav, .print-button, footer {
+          aside, .sidebar, nav, header, .print-button, footer {
             display: none !important;
           }
 
-          /* 2. Reset the layout containers */
-          /* If your dashboard uses a main tag or a wrapper with margins */
           main, .main-content, #root, .layout-wrapper {
             margin: 0 !important;
             padding: 0 !important;

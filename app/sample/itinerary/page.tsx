@@ -35,16 +35,16 @@ export default function ProposedItineraryDocument({ data }: { data: any }) {
 
       <div className="flex justify-center p-8 bg-white">
         <div 
-          className="bg-white box-border relative overflow-hidden"
+          className="bg-white box-border shadow-xl print:shadow-none relative overflow-hidden"
           style={{ 
             width: '210mm', 
-            minHeight: '297mm',
+            minHeight: '287mm',
             padding: '0',    
             fontFamily: '"Times New Roman", Times, serif',
             color: 'black'
           }}
         >
-          <header className="w-full">
+          <div className="w-full">
             <Image 
               src={logo} 
               alt="Department of Agriculture Header Banner" 
@@ -53,7 +53,7 @@ export default function ProposedItineraryDocument({ data }: { data: any }) {
               height={200} 
               priority
             />
-          </header>
+          </div>
 
           <div style={{ padding: '10mm 20mm 20mm 20mm' }}>
             <div className="text-center mb-10">
