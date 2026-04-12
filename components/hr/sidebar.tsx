@@ -6,37 +6,21 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import {
   LayoutDashboard,
-  ClipboardList,
-  BarChart3,
-  Leaf,
+  FileText,
   Users,
+  BarChart3,
+  Settings,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
-  FileText,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  PieChart,
-  TrendingUp,
-  Map,
   UserPlus,
-  ShieldCheck,
-  Settings2,
+  List,
 } from 'lucide-react'
-
-type SubRoute = {
-  label: string
-  icon: React.ElementType
-  href: string
-  badge?: string
-}
 
 type Route = {
   label: string
   icon: React.ElementType
   href: string
-  children?: SubRoute[]
+  children?: { label: string; icon: React.ElementType; href: string }[]
 }
 
 const routes: Route[] = [
@@ -47,35 +31,27 @@ const routes: Route[] = [
   },
   {
     label: 'Travel Orders',
-    icon: ClipboardList,
+    icon: FileText,
     href: '/hr/orders',
-    children: [
-      { label: 'All Orders',   icon: FileText,     href: '/hr/orders/' },
-      { label: 'Pending',      icon: Clock,        href: '/hr/orders/pending',  badge: '12' },
-      { label: 'Approved',     icon: CheckCircle2, href: '/hr/orders/approved' },
-      { label: 'Rejected',     icon: XCircle,      href: '/hr/orders/rejected' },
-    ],
-  },
-  {
-    label: 'Analytics',
-    icon: BarChart3,
-    href: '/hr/analytics',
-    children: [
-      { label: 'Overview',     icon: PieChart,     href: '/hr/analytics/' },
-      { label: 'Trends',       icon: TrendingUp,   href: '/hr/analytics/trends' },
-      { label: 'Travel Map',   icon: Map,          href: '/hr/analytics/map' },
-    ],
   },
   {
     label: 'User Management',
     icon: Users,
     href: '/hr/users',
     children: [
-      { label: 'All Users',    icon: Users,        href: '/hr/users' },
-      { label: 'Add User',     icon: UserPlus,     href: '/hr/users/new' },
-      { label: 'Roles',        icon: ShieldCheck,  href: '/hr/users/roles' },
-      { label: 'Permissions',  icon: Settings2,    href: '/hr/users/permissions' },
+      { label: 'All Users', icon: List, href: '/hr/users' },
+      { label: 'Add User', icon: UserPlus, href: '/hr/users/new' },
     ],
+  },
+  {
+    label: 'Analytics',
+    icon: BarChart3,
+    href: '/hr/analytics',
+  },
+  {
+    label: 'Settings',
+    icon: Settings,
+    href: '/hr/settings',
   },
 ]
 
@@ -83,7 +59,7 @@ export function Sidebar() {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
-    '/hr/orders': true,
+    '/hr/users': false,
   })
 
   const toggleMenu = (href: string) => {
@@ -93,285 +69,317 @@ export function Sidebar() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
-        .sb {
-          font-family: 'DM Sans', sans-serif;
+        .hr-sidebar {
+          font-family: 'Inter', sans-serif;
           position: relative;
           display: none;
           flex-direction: column;
-          width: 240px;
+          width: 260px;
           height: 100vh;
-          background: #0c0e14;
-          border-right: 1px solid rgba(255,255,255,0.055);
-          transition: width 0.26s cubic-bezier(.4,0,.2,1);
+          background: #0a0c10;
+          border-right: 1px solid rgba(255,255,255,0.05);
+          transition: width 0.25s ease;
           overflow: hidden;
           flex-shrink: 0;
         }
-        @media (min-width: 768px) { .sb { display: flex; } }
-        .sb.sb--collapsed { width: 64px; }
+        @media (min-width: 768px) { .hr-sidebar { display: flex; } }
+        .hr-sidebar.collapsed { width: 72px; }
 
-        .sb::before {
-          content: '';
-          position: absolute; inset: 0;
-          background-image:
-            linear-gradient(rgba(255,255,255,0.013) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.013) 1px, transparent 1px);
-          background-size: 24px 24px;
-          pointer-events: none; z-index: 0;
-        }
-        .sb::after {
-          content: '';
-          position: absolute;
-          top: -60px; left: -50px;
-          width: 220px; height: 220px;
-          background: radial-gradient(circle, rgba(74,222,128,0.07) 0%, transparent 70%);
-          pointer-events: none; z-index: 0;
-        }
-
-        /* ── Header ── */
-        .sb__header {
-          position: relative; z-index: 2;
-          display: flex; align-items: center; justify-content: space-between;
-          height: 64px; padding: 0 14px;
-          border-bottom: 1px solid rgba(255,255,255,0.055);
+        /* Header */
+        .sidebar-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          height: 64px;
+          padding: 0 16px;
+          border-bottom: 1px solid rgba(255,255,255,0.05);
           flex-shrink: 0;
         }
-        .sb__brand { display: flex; align-items: center; gap: 10px; min-width: 0; overflow: hidden; }
-        .sb__logo {
-          width: 32px; height: 32px; border-radius: 9px;
-          background: linear-gradient(135deg, #15803d 0%, #4ade80 100%);
-          display: flex; align-items: center; justify-content: center;
+        .sidebar-brand {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          overflow: hidden;
+        }
+        .sidebar-logo {
+          width: 36px;
+          height: 36px;
+          border-radius: 8px;
+          background: rgba(34,197,94,0.15);
+          display: flex;
+          align-items: center;
+          justify-content: center;
           flex-shrink: 0;
-          box-shadow: 0 0 0 1px rgba(74,222,128,0.28), 0 4px 14px rgba(74,222,128,0.18);
         }
-        .sb__title-wrap {
-          overflow: hidden; white-space: nowrap;
-          transition: opacity 0.18s, width 0.26s cubic-bezier(.4,0,.2,1);
-          width: 130px; opacity: 1;
+        .sidebar-logo img {
+          width: 24px;
+          height: 24px;
+          object-fit: contain;
         }
-        .sb--collapsed .sb__title-wrap { width: 0; opacity: 0; }
-        .sb__title { font-size: 13.5px; font-weight: 600; color: #f1f5f9; letter-spacing: 0.01em; display: flex; align-items: center; gap: 6px; }
-        .sb__tag {
-          font-family: 'DM Mono', monospace; font-size: 10px; color: #4ade80;
-          background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.2);
-          border-radius: 4px; padding: 1px 5px; letter-spacing: 0.06em;
+        .sidebar-title {
+          font-weight: 600;
+          font-size: 16px;
+          color: #f1f5f9;
+          white-space: nowrap;
+          transition: opacity 0.15s;
+        }
+        .collapsed .sidebar-title {
+          opacity: 0;
+          width: 0;
+        }
+        .sidebar-badge {
+          font-size: 10px;
+          font-weight: 600;
+          color: #4ade80;
+          background: rgba(74,222,128,0.12);
+          padding: 2px 6px;
+          border-radius: 4px;
+          letter-spacing: 0.5px;
+          margin-left: 6px;
+        }
+        .collapsed .sidebar-badge { display: none; }
+
+        .sidebar-toggle {
+          width: 28px;
+          height: 28px;
+          border-radius: 6px;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.08);
+          color: rgba(255,255,255,0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.15s;
+          flex-shrink: 0;
+        }
+        .sidebar-toggle:hover {
+          background: rgba(255,255,255,0.08);
+          color: #fff;
+          border-color: rgba(255,255,255,0.15);
         }
 
-        /* ── Toggle button ── */
-        .sb__toggle {
-          position: relative; z-index: 2;
-          width: 24px; height: 24px; border-radius: 6px;
-          border: 1px solid rgba(255,255,255,0.1);
-          background: rgba(255,255,255,0.04);
-          color: rgba(255,255,255,0.4);
-          display: flex; align-items: center; justify-content: center;
-          cursor: pointer; flex-shrink: 0;
-          transition: all 0.15s ease;
+        /* Navigation */
+        .sidebar-nav {
+          flex: 1;
+          padding: 16px 8px;
+          overflow-y: auto;
+          overflow-x: hidden;
         }
-        .sb__toggle:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8); border-color: rgba(255,255,255,0.18); }
-        .sb--collapsed .sb__toggle { margin: 0 auto; }
+        .nav-section-title {
+          font-size: 11px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: rgba(255,255,255,0.25);
+          padding: 8px 12px;
+          white-space: nowrap;
+          transition: opacity 0.15s;
+        }
+        .collapsed .nav-section-title { opacity: 0; }
 
-        /* ── Nav ── */
-        .sb__nav {
-          position: relative; z-index: 1;
-          flex: 1; padding: 10px 8px;
-          display: flex; flex-direction: column; gap: 1px;
-          overflow-y: auto; overflow-x: hidden;
-          scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.07) transparent;
-        }
-        .sb__section-label {
-          font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
-          color: rgba(255,255,255,0.18); padding: 8px 8px 4px;
-          white-space: nowrap; overflow: hidden;
-          transition: opacity 0.18s;
-        }
-        .sb--collapsed .sb__section-label { opacity: 0; }
-
-        /* ── Parent row ── */
-        .sb__item { position: relative; }
-        .sb__row {
-          display: flex; align-items: center; gap: 9px;
-          padding: 7px 8px; border-radius: 8px;
+        .nav-item { position: relative; margin-bottom: 2px; }
+        .nav-link {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 10px 12px;
+          border-radius: 8px;
+          color: rgba(255,255,255,0.55);
+          font-size: 14px;
+          font-weight: 500;
+          text-decoration: none;
+          transition: all 0.15s;
+          white-space: nowrap;
+          cursor: pointer;
           border: 1px solid transparent;
-          cursor: pointer; text-decoration: none;
-          color: rgba(255,255,255,0.42);
-          font-size: 13px; font-weight: 500;
-          transition: all 0.14s ease;
-          white-space: nowrap; position: relative;
-          user-select: none;
         }
-        .sb__row:hover { color: rgba(255,255,255,0.82); background: rgba(255,255,255,0.045); border-color: rgba(255,255,255,0.07); }
-        .sb__row.active { color: #f1f5f9; background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.18); }
-        .sb__row.active::before {
-          content: '';
-          position: absolute; left: -8px; top: 50%; transform: translateY(-50%);
-          width: 3px; height: 16px;
-          background: linear-gradient(180deg, #4ade80, #16a34a);
-          border-radius: 0 3px 3px 0;
-        }
-        .sb__icon {
-          width: 28px; height: 28px; border-radius: 7px;
+        .nav-link:hover {
           background: rgba(255,255,255,0.04);
-          display: flex; align-items: center; justify-content: center;
-          flex-shrink: 0; transition: all 0.14s ease;
+          color: rgba(255,255,255,0.85);
         }
-        .sb__row:hover .sb__icon { background: rgba(255,255,255,0.07); }
-        .sb__row.active .sb__icon { background: rgba(74,222,128,0.14); color: #4ade80; box-shadow: 0 0 8px rgba(74,222,128,0.14); }
-        .sb__label { flex: 1; overflow: hidden; white-space: nowrap; transition: opacity 0.18s, width 0.26s; }
-        .sb--collapsed .sb__label { opacity: 0; width: 0; }
-        .sb__chevron { margin-left: auto; color: rgba(255,255,255,0.25); flex-shrink: 0; transition: transform 0.22s cubic-bezier(.4,0,.2,1), opacity 0.18s; }
-        .sb__chevron.open { transform: rotate(180deg); }
-        .sb--collapsed .sb__chevron { opacity: 0; }
+        .nav-link.active {
+          background: rgba(34,197,94,0.12);
+          color: #4ade80;
+          border-color: rgba(34,197,94,0.25);
+        }
+        .nav-icon {
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .nav-label {
+          flex: 1;
+          transition: opacity 0.15s;
+        }
+        .collapsed .nav-label { opacity: 0; width: 0; }
 
-        /* ── Sub-menu ── */
-        .sb__sub { overflow: hidden; max-height: 0; opacity: 0; transition: max-height 0.3s cubic-bezier(.4,0,.2,1), opacity 0.22s ease; }
-        .sb__sub.open { max-height: 280px; opacity: 1; }
-        .sb--collapsed .sb__sub { max-height: 0 !important; opacity: 0 !important; }
+        .nav-chevron {
+          margin-left: auto;
+          color: rgba(255,255,255,0.3);
+          transition: transform 0.2s;
+          flex-shrink: 0;
+        }
+        .nav-chevron.open { transform: rotate(180deg); }
+        .collapsed .nav-chevron { display: none; }
 
-        .sb__sub-inner {
-          padding: 3px 0 5px 13px;
-          display: flex; flex-direction: column; gap: 1px;
-          position: relative;
+        /* Submenu */
+        .nav-submenu {
+          overflow: hidden;
+          max-height: 0;
+          opacity: 0;
+          transition: max-height 0.25s ease, opacity 0.2s;
+          margin-left: 36px;
         }
-        .sb__sub-inner::before {
-          content: '';
-          position: absolute; left: 21px; top: 4px; bottom: 4px; width: 1px;
-          background: linear-gradient(180deg, transparent, rgba(255,255,255,0.09) 15%, rgba(255,255,255,0.09) 85%, transparent);
+        .nav-submenu.open {
+          max-height: 150px;
+          opacity: 1;
+        }
+        .collapsed .nav-submenu { display: none; }
+
+        .sub-link {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 8px 12px 8px 16px;
+          border-radius: 6px;
+          color: rgba(255,255,255,0.4);
+          font-size: 13px;
+          text-decoration: none;
+          transition: all 0.15s;
+          white-space: nowrap;
+          border-left: 1px solid rgba(255,255,255,0.1);
+          margin-left: 8px;
+        }
+        .sub-link:hover {
+          color: rgba(255,255,255,0.8);
+          background: rgba(255,255,255,0.03);
+        }
+        .sub-link.active {
+          color: #4ade80;
+          background: rgba(34,197,94,0.08);
+          border-left-color: #4ade80;
         }
 
-        .sb__sub-row {
-          display: flex; align-items: center; gap: 8px;
-          padding: 6px 8px 6px 16px; border-radius: 7px;
-          border: 1px solid transparent; text-decoration: none;
-          color: rgba(255,255,255,0.35); font-size: 12.5px; font-weight: 450;
-          transition: all 0.13s ease; white-space: nowrap; position: relative;
+        /* Tooltip for collapsed */
+        .nav-tooltip {
+          position: absolute;
+          left: 80px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: #1a1e2a;
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 6px;
+          padding: 6px 12px;
+          font-size: 13px;
+          font-weight: 500;
+          color: #fff;
+          white-space: nowrap;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.15s;
+          z-index: 100;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
-        .sb__sub-row::before {
-          content: ''; position: absolute; left: 6px; top: 50%; transform: translateY(-50%);
-          width: 6px; height: 1px; background: rgba(255,255,255,0.14);
-          transition: background 0.13s;
+        .collapsed .nav-item:hover .nav-tooltip {
+          opacity: 1;
+          pointer-events: auto;
         }
-        .sb__sub-row:hover { color: rgba(255,255,255,0.78); background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.06); }
-        .sb__sub-row:hover::before { background: rgba(74,222,128,0.5); }
-        .sb__sub-row.active { color: #4ade80; background: rgba(74,222,128,0.07); border-color: rgba(74,222,128,0.15); font-weight: 500; }
-        .sb__sub-row.active::before { background: #4ade80; }
-        .sb__sub-icon { display: flex; align-items: center; opacity: 0.7; }
-        .sb__sub-row.active .sb__sub-icon { opacity: 1; color: #4ade80; }
 
-        .sb__badge {
-          margin-left: auto; font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500;
-          color: #fbbf24; background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.2);
-          border-radius: 4px; padding: 1px 5px; letter-spacing: 0.04em; flex-shrink: 0;
-          transition: opacity 0.18s;
+        /* Footer */
+        .sidebar-footer {
+          padding: 12px 16px;
+          border-top: 1px solid rgba(255,255,255,0.05);
+          flex-shrink: 0;
         }
-        .sb--collapsed .sb__badge { opacity: 0; }
-
-        /* ── Tooltip (collapsed mode) ── */
-        .sb__tooltip {
-          position: absolute; left: calc(100% + 10px); top: 50%;
-          transform: translateY(-50%) translateX(-6px);
-          background: #1e2330; border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 7px; padding: 5px 10px;
-          font-size: 12px; font-weight: 500; color: #f1f5f9;
-          white-space: nowrap; opacity: 0; pointer-events: none;
-          transition: opacity 0.15s, transform 0.15s; z-index: 999;
-          box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        .version-text {
+          font-size: 11px;
+          color: rgba(255,255,255,0.2);
+          text-align: center;
+          white-space: nowrap;
         }
-        .sb--collapsed .sb__item:hover .sb__tooltip { opacity: 1; pointer-events: auto; transform: translateY(-50%) translateX(0); }
-
-        /* ── Footer ── */
-        .sb__footer { position: relative; z-index: 2; padding: 10px 8px; border-top: 1px solid rgba(255,255,255,0.055); flex-shrink: 0; }
-        .sb__version { font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.18); text-align: center; letter-spacing: 0.05em; white-space: nowrap; overflow: hidden; transition: opacity 0.18s; }
-        .sb--collapsed .sb__version { opacity: 0; }
+        .collapsed .version-text { opacity: 0; }
       `}</style>
 
-      <div className={cn('sb', collapsed && 'sb--collapsed')}>
-
+      <div className={cn('hr-sidebar', collapsed && 'collapsed')}>
         {/* Header */}
-        <div className="sb__header">
-          <div className="sb__brand">
-            <div className="sb__logo">
-              <Leaf size={14} strokeWidth={2.5} color="#fff" />
+        <div className="sidebar-header">
+          <div className="sidebar-brand">
+            <div className="sidebar-logo">
+              <img src="https://isu.edu.ph/wp-content/uploads/2019/03/DA.png" alt="DA" />
             </div>
-            <div className="sb__title-wrap">
-              <div className="sb__title">TOMS <span className="sb__tag">HR</span></div>
+            <div className="sidebar-title">
+              TOMS <span className="sidebar-badge">HR</span>
             </div>
           </div>
           <button
-            className="sb__toggle"
+            className="sidebar-toggle"
             onClick={() => setCollapsed(v => !v)}
-            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            {collapsed
-              ? <ChevronRight size={13} strokeWidth={2.5} />
-              : <ChevronLeft  size={13} strokeWidth={2.5} />}
+            {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
           </button>
         </div>
 
         {/* @ts-ignore */}
-        <nav className="sb__nav">
-          <div className="sb__section-label">Main Menu</div>
-
+        <nav className="sidebar-nav">
+          <div className="nav-section-title">Main</div>
           {routes.map((route) => {
-            const isParentActive = pathname === route.href || route.children?.some(c => pathname === c.href)
-            const isOpen         = !!openMenus[route.href]
-            const hasChildren    = !!route.children?.length
+            const hasChildren = route.children && route.children.length > 0
+            const isActive = pathname === route.href || (hasChildren && route.children!.some(c => pathname === c.href))
+            const isOpen = openMenus[route.href] || (hasChildren && route.children!.some(c => pathname === c.href))
 
             return (
-              <div className="sb__item" key={route.href}>
-                <span className="sb__tooltip">{route.label}</span>
-
+              <div className="nav-item" key={route.href}>
+                <span className="nav-tooltip">{route.label}</span>
                 {hasChildren ? (
-                  <div
-                    className={cn('sb__row', isParentActive && 'active')}
-                    onClick={() => !collapsed && toggleMenu(route.href)}
-                  >
-                    <div className="sb__icon">
+                  <>
+                    <div
+                      className={cn('nav-link', isActive && 'active')}
+                      onClick={() => !collapsed && toggleMenu(route.href)}
+                    >
+                      <span className="nav-icon">
         {/* @ts-ignore */}
-                      <route.icon size={14} strokeWidth={2} />
+                        <route.icon size={18} strokeWidth={1.8} />
+                      </span>
+                      <span className="nav-label">{route.label}</span>
+                      <ChevronRight size={14} className={cn('nav-chevron', isOpen && 'open')} />
                     </div>
-                    <span className="sb__label">{route.label}</span>
-                    <ChevronDown size={13} strokeWidth={2} className={cn('sb__chevron', isOpen && 'open')} />
-                  </div>
-                ) : (
-                  <Link href={route.href} className={cn('sb__row', pathname === route.href && 'active')}>
-                    <div className="sb__icon">
-        {/* @ts-ignore */}
-                      <route.icon size={14} strokeWidth={2} />
-                    </div>
-                    <span className="sb__label">{route.label}</span>
-                  </Link>
-                )}
-
-                {hasChildren && (
-                  <div className={cn('sb__sub', isOpen && !collapsed && 'open')}>
-                    <div className="sb__sub-inner">
+                    <div className={cn('nav-submenu', isOpen && !collapsed && 'open')}>
                       {route.children!.map((child) => (
                         <Link
                           key={child.href}
                           href={child.href}
-                          className={cn('sb__sub-row', pathname === child.href && 'active')}
+                          className={cn('sub-link', pathname === child.href && 'active')}
                         >
-                          <span className="sb__sub-icon">
         {/* @ts-ignore */}
-                            <child.icon size={12} strokeWidth={2} />
-                          </span>
+                          <child.icon size={14} strokeWidth={1.5} />
                           {child.label}
-                          {child.badge && <span className="sb__badge">{child.badge}</span>}
                         </Link>
                       ))}
                     </div>
-                  </div>
+                  </>
+                ) : (
+                  <Link href={route.href} className={cn('nav-link', pathname === route.href && 'active')}>
+                    <span className="nav-icon">
+        {/* @ts-ignore */}
+                      <route.icon size={18} strokeWidth={1.8} />
+                    </span>
+                    <span className="nav-label">{route.label}</span>
+                  </Link>
                 )}
               </div>
             )
           })}
         </nav>
 
-        {/* @ts-ignore */}
-        <div className="sb__footer">
-          <div className="sb__version">v2.4.1 · Enterprise</div>
+        {/* Footer */}
+        <div className="sidebar-footer">
+          <div className="version-text">TOMS v1.0 · DA MIMAROPA</div>
         </div>
       </div>
     </>

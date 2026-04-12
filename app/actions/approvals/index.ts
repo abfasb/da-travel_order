@@ -67,7 +67,7 @@ export async function submitApproval({
       },
     })
 
-    revalidatePath('/approvals')
+    revalidatePath('/approvers/approvals');
     return { success: true }
   } catch (error) {
     console.error('Approval error:', error)
