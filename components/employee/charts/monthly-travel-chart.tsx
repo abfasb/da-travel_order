@@ -8,51 +8,54 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart'
 
-const chartData = [
-  { month: 'Jan', trips: 4 },
-  { month: 'Feb', trips: 3 },
-  { month: 'Mar', trips: 5 },
-  { month: 'Apr', trips: 2 },
-  { month: 'May', trips: 6 },
-  { month: 'Jun', trips: 4 },
-  { month: 'Jul', trips: 7 },
-  { month: 'Aug', trips: 5 },
-  { month: 'Sep', trips: 3 },
-  { month: 'Oct', trips: 4 },
-  { month: 'Nov', trips: 2 },
-  { month: 'Dec', trips: 3 },
-]
+interface MonthlyTrendChartProps {
+  data: { month: string; count: number }[]
+}
 
 const chartConfig = {
   trips: {
     label: 'Number of Trips',
-    color: '#2F6B3E',
+    color: '#10b981', 
   },
 } satisfies ChartConfig
 
-export function MonthlyTrendChart() {
+export function MonthlyTrendChart({ data }: MonthlyTrendChartProps) {
+  const chartData = data.map(item => ({
+    month: item.month,
+    trips: item.count,
+  }))
+
+  if (chartData.length === 0) {
+    return (
+      <div className="h-full flex items-center justify-center text-slate-500">
+        No travel data available yet.
+      </div>
+    )
+  }
+
   return (
     <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
       <LineChart
         data={chartData}
-        margin={{ top: 20, right: 20, left: 20, bottom: 20 }}
+        margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
       >
-        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
         <XAxis
           dataKey="month"
           tickLine={false}
           axisLine={false}
           tickMargin={10}
-          className="text-xs"
+          className="text-xs fill-slate-500"
         />
         <YAxis
           tickLine={false}
           axisLine={false}
           tickMargin={10}
-          className="text-xs"
+          className="text-xs fill-slate-500"
+          allowDecimals={false}
         />
         <ChartTooltip
-          cursor={false}
+          cursor={{ stroke: '#cbd5e1', strokeWidth: 1 }}
           content={<ChartTooltipContent indicator="line" />}
         />
         <Line
@@ -60,8 +63,8 @@ export function MonthlyTrendChart() {
           dataKey="trips"
           stroke="var(--color-trips)"
           strokeWidth={3}
-          dot={{ fill: 'var(--color-trips)', r: 4 }}
-          activeDot={{ r: 6 }}
+          dot={{ fill: 'var(--color-trips)', r: 4, strokeWidth: 0 }}
+          activeDot={{ r: 6, fill: 'var(--color-trips)' }}
         />
       </LineChart>
     </ChartContainer>

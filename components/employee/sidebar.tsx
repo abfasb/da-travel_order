@@ -11,11 +11,13 @@ import {
   BarChart3,
   Bell,
   User,
+  Leaf,
   ChevronLeft,
   ChevronRight,
+  PlusCircle,
   LogOut,
   Settings,
-  Users,
+  Calendar
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -26,24 +28,53 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { getUnreadCount } from '@/app/actions/notifications'
 
 const routes = [
-  { label: 'Dashboard', icon: LayoutDashboard, href: '/employee/dashboard' },
-  { label: 'Travel Requests', icon: ClipboardList, href: '/employee/requests' },
-  { label: 'Travel History', icon: History, href: '/employee/history' },
-  { label: 'Analytics', icon: BarChart3, href: '/employee/analytics' },
-  { label: 'CSO', icon: Users, href: '/employee/cso' },
-  { label: 'Notifications', icon: Bell, href: '/employee/notifications' },
-  { label: 'Profile', icon: User, href: '/employee/profile' },
+  {
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+    href: '/employee/dashboard',
+  },
+  {
+    label: 'Travel Requests',
+    icon: ClipboardList,
+    href: '/employee/requests',
+    badge: 3, 
+  },
+  {
+    label: 'Travel History',
+    icon: History,
+    href: '/employee/history',
+  },
+  {
+    label: 'Analytics',
+    icon: BarChart3,
+    href: '/employee/analytics',
+  },
+  {
+    label: 'Calendar',
+    icon: Calendar,
+    href: '/employee/calendar',
+  },
+  {
+    label: 'Notifications',
+    icon: Bell,
+    href: '/employee/notifications',
+    badge: 5,
+  },
+  {
+    label: 'Profile',
+    icon: User,
+    href: '/employee/profile',
+  },
 ]
 
 interface SidebarProps {
   defaultCollapsed?: boolean
   user: {
-    firstName: string
-    lastName: string
-    division: string
+    firstName: string;
+    lastName: string;
+    division: string;
   }
 }
 
@@ -51,23 +82,12 @@ export function Sidebar({ defaultCollapsed = false, user }: SidebarProps) {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(defaultCollapsed)
   const [mounted, setMounted] = useState(false)
-  const [unreadCount, setUnreadCount] = useState(0)
 
-  const initials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
-  const fullName = `${user.firstName} ${user.lastName}`
+  // 2. ADDED: Dynamically generate initials and full name
+  const initials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
+  const fullName = `${user.firstName} ${user.lastName}`;
 
-  // Fetch unread count
-  useEffect(() => {
-    const fetchCount = async () => {
-      const count = await getUnreadCount()
-      setUnreadCount(count)
-    }
-    fetchCount()
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchCount, 30000)
-    return () => clearInterval(interval)
-  }, [])
-
+  // Prevent hydration mismatch
   useEffect(() => {
     setMounted(true)
     const saved = localStorage.getItem('sidebar-collapsed')
@@ -94,11 +114,7 @@ export function Sidebar({ defaultCollapsed = false, user }: SidebarProps) {
           collapsed ? 'justify-center' : 'gap-2'
         )}
       >
-        <img
-          src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMVJJK1z4PWdaWJG9ArC6U45RvjxMJsEZVKQ&s'
-          alt='DA Logo'
-          className="h-12 w-12 text-primary shrink-0"
-        />
+        <img src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMVJJK1z4PWdaWJG9ArC6U45RvjxMJsEZVKQ&s' alt='DA Logo' className="h-12 w-12 text-primary shrink-0" />
         {!collapsed && (
           <span className="text-lg font-semibold whitespace-nowrap">TOMS · Employee</span>
         )}
@@ -107,7 +123,6 @@ export function Sidebar({ defaultCollapsed = false, user }: SidebarProps) {
       <nav className="flex-1 space-y-1 p-3">
         {routes.map((route) => {
           const isActive = pathname === route.href
-          const showBadge = route.label === 'Notifications' && unreadCount > 0
           return (
             <TooltipProvider key={route.href} delayDuration={0}>
               <Tooltip>
@@ -126,9 +141,9 @@ export function Sidebar({ defaultCollapsed = false, user }: SidebarProps) {
                     {!collapsed && (
                       <>
                         <span className="flex-1">{route.label}</span>
-                        {showBadge && (
+                        {route.badge && (
                           <Badge variant="outline" className="ml-auto bg-primary/10 text-primary">
-                            {unreadCount}
+                            {route.badge}
                           </Badge>
                         )}
                       </>
@@ -138,9 +153,9 @@ export function Sidebar({ defaultCollapsed = false, user }: SidebarProps) {
                 {collapsed && (
                   <TooltipContent side="right" className="flex items-center gap-2">
                     <span>{route.label}</span>
-                    {showBadge && (
+                    {route.badge && (
                       <Badge variant="outline" className="bg-primary/10 text-primary">
-                        {unreadCount}
+                        {route.badge}
                       </Badge>
                     )}
                   </TooltipContent>
@@ -151,6 +166,7 @@ export function Sidebar({ defaultCollapsed = false, user }: SidebarProps) {
         })}
       </nav>
 
+      {/* Bottom section: user & settings */}
       <div className="border-t p-3">
         {collapsed ? (
           <TooltipProvider delayDuration={0}>
@@ -158,11 +174,13 @@ export function Sidebar({ defaultCollapsed = false, user }: SidebarProps) {
               <TooltipTrigger asChild>
                 <Button variant="ghost" size="icon" className="w-full h-10">
                   <Avatar className="h-8 w-8">
+                    {/* 3. Dynamic Initials */}
                     <AvatarFallback>{initials}</AvatarFallback>
                   </Avatar>
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="right">
+                {/* 4. Dynamic Name and Division */}
                 <p>{fullName}</p>
                 <p className="text-xs text-muted-foreground">{user.division}</p>
               </TooltipContent>
@@ -171,15 +189,23 @@ export function Sidebar({ defaultCollapsed = false, user }: SidebarProps) {
         ) : (
           <div className="flex items-center gap-3 px-2 py-2">
             <Avatar className="h-8 w-8">
+              {/* 3. Dynamic Initials */}
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
+              {/* 4. Dynamic Name and Division */}
               <p className="text-sm font-medium truncate">{fullName}</p>
               <p className="text-xs text-muted-foreground truncate">{user.division}</p>
             </div>
           </div>
         )}
-        <Button variant="ghost" size="icon" className="mt-2 w-full" onClick={toggleSidebar}>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className="mt-2 w-full"
+          onClick={toggleSidebar}
+        >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>
       </div>
