@@ -1,11 +1,12 @@
-'use client';
+'use client'
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { ReactNode, useState } from 'react';
+import { ThemeProvider as NextThemesProvider } from 'next-themes'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import { ReactNode, useState } from 'react'
 
 export function Providers({ children }: { children: ReactNode }) {
-  const [queryClient] = useState(
+   const [queryClient] = useState(
     () =>
       new QueryClient({
         defaultOptions: {
@@ -19,9 +20,11 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        {children}
-      </TooltipProvider>
+      <NextThemesProvider attribute="class" defaultTheme="light" enableSystem={false}>
+        <TooltipProvider>
+          {children}
+        </TooltipProvider>
+      </NextThemesProvider>
     </QueryClientProvider>
-  );
+  )
 }

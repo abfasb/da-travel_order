@@ -60,13 +60,13 @@ export function DivisionHeadSidebar({ user }: SidebarProps) {
   ];
 
   return (
-    <Sidebar className="border-r border-slate-200 bg-white">
-      <SidebarHeader className="border-b border-slate-200 px-4 py-3">
+    <Sidebar className="border-r border-border bg-background">
+      <SidebarHeader className="border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
-          <Building2 className="h-6 w-6 text-emerald-600" />
+          <Building2 className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
           <div>
-            <h2 className="text-sm font-bold text-slate-900">DA MIMAROPA</h2>
-            <p className="text-xs text-slate-500">{divisionName}</p>
+            <h2 className="text-sm font-bold text-foreground">DA MIMAROPA</h2>
+            <p className="text-xs text-muted-foreground">{divisionName}</p>
           </div>
         </div>
       </SidebarHeader>
@@ -93,18 +93,18 @@ export function DivisionHeadSidebar({ user }: SidebarProps) {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-slate-200 p-4">
+      <SidebarFooter className="border-t border-border p-4">
         <div className="flex items-center gap-3 mb-3">
-          <Avatar className="h-9 w-9 bg-emerald-100 text-emerald-700">
+          <Avatar className="h-9 w-9 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
             <AvatarFallback>
               {user.firstName[0]}{user.lastName[0]}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-slate-900 truncate">
+            <p className="text-sm font-medium text-foreground truncate">
               {user.firstName} {user.lastName}
             </p>
-            <p className="text-xs text-slate-500">Division Head</p>
+            <p className="text-xs text-muted-foreground">Division Head</p>
           </div>
         </div>
         <form action={logout}>

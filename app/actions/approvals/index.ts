@@ -28,7 +28,6 @@ export async function submitApproval({
   certificationCheck?: boolean
 }) {
   try {
-    // Get current user from session
     const cookieStore = await cookies()
     const userId = cookieStore.get('auth_session')?.value
     if (!userId) {
@@ -39,7 +38,15 @@ export async function submitApproval({
       where: { id: approvalId },
       include: { 
         travelOrder: {
-          include: { user: { select: { firstName: true, lastName: true } } }
+          include: { 
+            user: { 
+              select: { 
+                firstName: true, 
+                lastName: true, 
+                division: true 
+              } 
+            } 
+          }
         }
       },
     })
@@ -50,6 +57,7 @@ export async function submitApproval({
 
     const { ipAddress, userAgent } = await getRequestMetadata()
     const travelOrderNumber = approval.travelOrder.travelOrderNumber || 'Draft'
+    const staffDivision = approval.travelOrder.user.division
 
     await prisma.$transaction(async (tx) => {
       // Update approval status
@@ -71,7 +79,7 @@ export async function submitApproval({
         })
       }
 
-      // Check if all approvals are done
+      // If approved, check if all approvals are complete
       if (action === 'APPROVE') {
         const allApprovals = await tx.approval.findMany({
           where: { travelOrderId: approval.travelOrderId },
@@ -80,7 +88,7 @@ export async function submitApproval({
         if (allApproved) {
           await tx.travelOrderRequest.update({
             where: { id: approval.travelOrderId },
-            data: { status: 'APPROVED' }, // ready for HR
+            data: { status: 'APPROVED' }, 
           })
         }
       }
@@ -97,7 +105,7 @@ export async function submitApproval({
         },
       })
 
-      // Create notification for employee
+      // Notify employee
       await tx.notification.create({
         data: {
           userId: approval.travelOrder.userId,
@@ -107,8 +115,32 @@ export async function submitApproval({
             ? `Your travel order has been approved by ${approval.approverRole}.`
             : `Your travel order was rejected. Reason: ${comment || 'No reason provided'}`,
           link: `/employee/requests/${approval.travelOrderId}`,
+          travelOrderId: approval.travelOrderId,
         },
       })
+
+      // ✅ NEW: Notify Division Head on rejection
+      if (action === 'REJECT' && staffDivision) {
+        const divisionHead = await tx.user.findFirst({
+          where: { 
+            division: staffDivision, 
+            role: 'DIVISION_HEAD' 
+          },
+        })
+
+        if (divisionHead) {
+          await tx.notification.create({
+            data: {
+              userId: divisionHead.id,
+              type: 'REJECTION',
+              title: 'Travel order rejected',
+              message: `Travel order ${travelOrderNumber} for ${approval.travelOrder.user.firstName} ${approval.travelOrder.user.lastName} was rejected by ${approval.approverRole}.${comment ? ` Reason: ${comment}` : ''}`,
+              link: `/division-head/travel-orders/${approval.travelOrderId}`,
+              travelOrderId: approval.travelOrderId,
+            },
+          })
+        }
+      }
     })
 
     revalidatePath('/approvers/approvals')
@@ -117,4 +149,4 @@ export async function submitApproval({
     console.error('Approval error:', error)
     return { success: false, error: 'Failed to process approval.' }
   }
-} 
+}

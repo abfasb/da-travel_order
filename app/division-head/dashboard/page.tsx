@@ -81,15 +81,14 @@ export default async function DivisionHeadDashboard() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">Dashboard</h1>
-        <p className="text-slate-500">Welcome back, {user.firstName}!</p>
+        <p className="text-slate-500 dark:text-white">Welcome back, {user.firstName}!</p>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {statCards.map((card) => (
           <Card key={card.title} className="border-0 shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">{card.title}</CardTitle>
+              <CardTitle className="text-sm font-medium text-slate-600 dark:text-white">{card.title}</CardTitle>
               <div className={`rounded-full p-2 ${card.color}`}>
                 <card.icon className="h-4 w-4" />
               </div>

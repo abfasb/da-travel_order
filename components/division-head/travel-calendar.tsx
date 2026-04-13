@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import { format, parse, startOfWeek, getDay } from 'date-fns'
-import { Calendar, dateFnsLocalizer, Views, Event, View, NavigateAction } from 'react-big-calendar'
+import { Calendar, dateFnsLocalizer, Views, Event, View } from 'react-big-calendar'
 import { enUS } from 'date-fns/locale'
 //@ts-ignore
 import 'react-big-calendar/lib/css/react-big-calendar.css'
@@ -146,12 +146,12 @@ function CustomToolbar({ date, view, onNavigate, onView, views }: any) {
       </div>
 
       <div className="flex items-center gap-3">
-        {/* Status Legend (simplified) */}
+        {/* Status Legend */}
         <div className="hidden lg:flex items-center gap-2 mr-2">
           {Object.entries(statusLabels).slice(0, 4).map(([key, label]) => (
             <div key={key} className="flex items-center gap-1">
               <span className="w-3 h-3 rounded-full" style={{ backgroundColor: statusColors[key] }} />
-              <span className="text-xs text-slate-500">{label}</span>
+              <span className="text-xs text-muted-foreground">{label}</span>
             </div>
           ))}
         </div>
@@ -223,35 +223,37 @@ export function TravelCalendar({ orders }: { orders: TravelOrder[] }) {
       <style jsx global>{`
         .rbc-calendar {
           font-family: 'Inter', sans-serif;
-          background: white;
+          background: hsl(var(--background));
+          color: hsl(var(--foreground));
         }
         .rbc-header {
           padding: 12px 4px;
           font-weight: 600;
           font-size: 12px;
-          color: #64748b;
-          border-bottom: 1px solid #e2e8f0;
-          background: #f8fafc;
+          color: hsl(var(--muted-foreground));
+          border-bottom: 1px solid hsl(var(--border));
+          background: hsl(var(--muted));
           text-transform: uppercase;
           letter-spacing: 0.03em;
         }
         .rbc-month-view,
         .rbc-time-view {
-          border: none;
-          border-radius: 0;
+          border: 1px solid hsl(var(--border));
+          border-radius: 8px;
+          overflow: hidden;
         }
         .rbc-month-row {
           border: none;
-          border-bottom: 1px solid #f1f5f9;
+          border-bottom: 1px solid hsl(var(--border));
         }
         .rbc-day-bg {
-          border-right: 1px solid #f1f5f9;
+          border-right: 1px solid hsl(var(--border));
         }
         .rbc-today {
-          background-color: #f0fdf4 !important;
+          background-color: hsl(var(--accent)) !important;
         }
         .rbc-off-range-bg {
-          background: #fafafa;
+          background: hsl(var(--muted) / 0.5);
         }
         .rbc-event {
           border-radius: 4px !important;
@@ -265,29 +267,49 @@ export function TravelCalendar({ orders }: { orders: TravelOrder[] }) {
           margin-bottom: 0;
         }
         .rbc-agenda-view table {
-          border: none;
+          border: 1px solid hsl(var(--border));
+          border-radius: 8px;
+          overflow: hidden;
         }
         .rbc-agenda-view table thead > tr > th {
-          background: #f8fafc;
+          background: hsl(var(--muted));
           font-weight: 600;
-          color: #475569;
+          color: hsl(var(--muted-foreground));
           padding: 12px 16px;
-          border-bottom: 1px solid #e2e8f0;
+          border-bottom: 1px solid hsl(var(--border));
         }
         .rbc-agenda-view table tbody > tr > td {
           padding: 10px 16px;
-          border-bottom: 1px solid #f1f5f9;
+          border-bottom: 1px solid hsl(var(--border));
         }
         .rbc-agenda-view table tbody > tr:hover {
-          background: #f8fafc;
+          background: hsl(var(--muted) / 0.5);
         }
         .rbc-show-more {
-          color: #10b981;
+          color: hsl(var(--primary));
           font-weight: 500;
           font-size: 11px;
         }
         .rbc-show-more:hover {
-          color: #059669;
+          color: hsl(var(--primary) / 0.8);
+        }
+
+        /* Toolbar button overrides */
+        .rbc-toolbar button {
+          color: hsl(var(--foreground));
+          background: hsl(var(--background));
+          border: 1px solid hsl(var(--border));
+        }
+        .rbc-toolbar button:hover {
+          background: hsl(var(--muted));
+        }
+        .rbc-toolbar button.rbc-active {
+          background: hsl(var(--primary));
+          border-color: hsl(var(--primary));
+          color: hsl(var(--primary-foreground));
+        }
+        .rbc-toolbar button.rbc-active:hover {
+          background: hsl(var(--primary) / 0.9);
         }
       `}</style>
 
@@ -320,7 +342,6 @@ export function TravelCalendar({ orders }: { orders: TravelOrder[] }) {
   )
 }
 
-// EventDetailsDialog remains the same as before but with improved styling
 function EventDetailsDialog({
   open,
   onOpenChange,
@@ -365,63 +386,63 @@ function EventDetailsDialog({
 
         <div className="space-y-4 py-2">
           <div className="flex items-start gap-3">
-            <div className="p-1.5 rounded-lg bg-slate-100">
-              <User className="h-4 w-4 text-slate-600" />
+            <div className="p-1.5 rounded-lg bg-muted">
+              <User className="h-4 w-4 text-muted-foreground" />
             </div>
             <div>
-              <p className="font-medium">
+              <p className="font-medium text-foreground">
                 {order.user.firstName} {order.user.lastName}
               </p>
-              <p className="text-sm text-slate-500">{order.user.employmentStatus}</p>
+              <p className="text-sm text-muted-foreground">{order.user.employmentStatus}</p>
             </div>
           </div>
 
           <div className="flex items-start gap-3">
-            <div className="p-1.5 rounded-lg bg-slate-100">
-              <MapPin className="h-4 w-4 text-slate-600" />
+            <div className="p-1.5 rounded-lg bg-muted">
+              <MapPin className="h-4 w-4 text-muted-foreground" />
             </div>
             <div>
-              <p className="font-medium">{order.destinationProvince}</p>
-              <p className="text-sm text-slate-500">{order.specificLocation}</p>
+              <p className="font-medium text-foreground">{order.destinationProvince}</p>
+              <p className="text-sm text-muted-foreground">{order.specificLocation}</p>
             </div>
           </div>
 
           <div className="flex items-start gap-3">
-            <div className="p-1.5 rounded-lg bg-slate-100">
-              <CalendarIcon className="h-4 w-4 text-slate-600" />
+            <div className="p-1.5 rounded-lg bg-muted">
+              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium w-20">Departure</span>
-                <span className="text-sm">{format(new Date(order.departureDate), 'PPP')}</span>
+                <span className="text-sm font-medium w-20 text-foreground">Departure</span>
+                <span className="text-sm text-muted-foreground">{format(new Date(order.departureDate), 'PPP')}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium w-20">Return</span>
-                <span className="text-sm">{format(new Date(order.returnDate), 'PPP')}</span>
+                <span className="text-sm font-medium w-20 text-foreground">Return</span>
+                <span className="text-sm text-muted-foreground">{format(new Date(order.returnDate), 'PPP')}</span>
               </div>
             </div>
           </div>
 
           <div className="flex items-start gap-3">
-            <div className="p-1.5 rounded-lg bg-slate-100">
-              <Briefcase className="h-4 w-4 text-slate-600" />
+            <div className="p-1.5 rounded-lg bg-muted">
+              <Briefcase className="h-4 w-4 text-muted-foreground" />
             </div>
             <div>
-              <p className="font-medium text-sm">Purpose</p>
-              <p className="text-sm text-slate-600">{order.purpose}</p>
+              <p className="font-medium text-sm text-foreground">Purpose</p>
+              <p className="text-sm text-muted-foreground">{order.purpose}</p>
             </div>
           </div>
 
 { /* @ts-ignore */}
           {order.objectives && (
             <div className="flex items-start gap-3">
-              <div className="p-1.5 rounded-lg bg-slate-100">
-                <FileText className="h-4 w-4 text-slate-600" />
+              <div className="p-1.5 rounded-lg bg-muted">
+                <FileText className="h-4 w-4 text-muted-foreground" />
               </div>
               <div>
-                <p className="font-medium text-sm">Objectives</p>
+                <p className="font-medium text-sm text-foreground">Objectives</p>
 { /* @ts-ignore */}
-                <p className="text-sm text-slate-600 whitespace-pre-wrap">{order.objectives}</p>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{order.objectives}</p>
               </div>
             </div>
           )}

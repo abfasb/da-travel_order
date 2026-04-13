@@ -2,9 +2,26 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { cookies, headers } from 'next/headers'
+
+async function getRequestMetadata() {
+  const headersList = await headers()
+  const forwardedFor = headersList.get('x-forwarded-for')
+  const ipAddress = forwardedFor?.split(',')[0]?.trim() || 
+                    headersList.get('x-real-ip') || 
+                    'unknown'
+  const userAgent = headersList.get('user-agent') || undefined
+  return { ipAddress, userAgent }
+}
 
 export async function completeTravelOrder(orderId: string, travelNumber: string) {
   try {
+    const cookieStore = await cookies()
+    const hrUserId = cookieStore.get('auth_session')?.value
+    if (!hrUserId) {
+      return { success: false, error: 'Unauthorized' }
+    }
+
     const existing = await prisma.travelOrderRequest.findUnique({
       where: { travelOrderNumber: travelNumber },
     })
@@ -12,34 +29,72 @@ export async function completeTravelOrder(orderId: string, travelNumber: string)
       return { success: false, error: 'Travel order number already exists' }
     }
 
-    await prisma.travelOrderRequest.update({
-      where: { id: orderId },
-      data: {
-        status: 'COMPLETED',
-        travelOrderNumber: travelNumber,
-      },
-    })
+    const { ipAddress, userAgent } = await getRequestMetadata()
 
-    const order = await prisma.travelOrderRequest.findUnique({
-      where: { id: orderId },
-      select: { userId: true },
-    })
-    if (order) {
-      await prisma.notification.create({
+    await prisma.$transaction(async (tx) => {
+      const order = await tx.travelOrderRequest.update({
+        where: { id: orderId },
+        data: {
+          status: 'COMPLETED',
+          travelOrderNumber: travelNumber,
+          hrProcessedAt: new Date(),
+          hrUserId: hrUserId,
+        },
+        include: {
+          user: { select: { firstName: true, lastName: true, division: true } },
+        },
+      })
+
+      await tx.auditLog.create({
+        data: {
+          userId: hrUserId,
+          action: 'COMPLETE',
+          details: `Assigned travel number ${travelNumber} and completed order`,
+          ipAddress,
+          userAgent,
+          travelOrderId: orderId,
+        },
+      })
+
+      await tx.notification.create({
         data: {
           userId: order.userId,
-          type: 'HR_PROCESSING',
+          type: 'COMPLETED',
           title: 'Travel Order Completed',
           message: `Your travel order has been processed. Travel number: ${travelNumber}`,
           link: `/employee/requests/${orderId}`,
+          travelOrderId: orderId,
         },
       })
-    }
+
+      const staffDivision = order.user.division
+      if (staffDivision) {
+        const divisionHead = await tx.user.findFirst({
+          where: { 
+            division: staffDivision, 
+            role: 'DIVISION_HEAD' 
+          },
+        })
+
+        if (divisionHead) {
+          await tx.notification.create({
+            data: {
+              userId: divisionHead.id,
+              type: 'COMPLETED',
+              title: 'Travel order completed',
+              message: `Travel order ${travelNumber} for ${order.user.firstName} ${order.user.lastName} has been processed and completed.`,
+              link: `/division-head/travel-orders/${orderId}`,
+              travelOrderId: orderId,
+            },
+          })
+        }
+      }
+    })
 
     revalidatePath('/hr/orders')
     return { success: true }
   } catch (error) {
-    console.error(error)
+    console.error('Error completing travel order:', error)
     return { success: false, error: 'Failed to complete travel order' }
   }
 }

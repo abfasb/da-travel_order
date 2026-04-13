@@ -61,8 +61,8 @@ export default async function TravelOrdersPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Travel Orders</h1>
-        <p className="text-slate-500">Monitor and review travel requests from your division.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Travel Orders</h1>
+        <p className="text-slate-500 dark:text-white">Monitor and review travel requests from your division.</p>
       </div>
 
       <Card className="border-0 shadow-sm">
