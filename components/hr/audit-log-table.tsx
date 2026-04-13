@@ -73,7 +73,6 @@ export function AuditLogTable({ logs }: AuditLogTableProps) {
     to: undefined,
   })
 
-  // Extract unique actions and users for filters
   const uniqueActions = useMemo(() => {
     const actions = new Set(logs.map(log => log.action))
     return ['ALL', ...Array.from(actions)]
@@ -90,7 +89,6 @@ export function AuditLogTable({ logs }: AuditLogTableProps) {
 
   const filteredLogs = useMemo(() => {
     return logs.filter(log => {
-      // Search term
       const searchLower = searchTerm.toLowerCase()
       const matchesSearch =
         searchTerm === '' ||

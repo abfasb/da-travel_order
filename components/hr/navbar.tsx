@@ -1,6 +1,8 @@
 'use client'
 
-import { Bell, Search, Menu } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { Bell, Search, Menu, Maximize, Minimize, LogOut, User, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -12,15 +14,68 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { useEffect, useState } from 'react'
+import { logout } from '@/app/actions/logout'
+import { toast } from 'sonner'
+import Link from 'next/link'
 
-export default function Navbar() {
+interface NavbarProps {
+  user: {
+    id: string
+    firstName: string
+    lastName: string
+    email: string
+    role: string
+  } | null
+  notificationCount: number
+}
 
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+export function Navbar({ user, notificationCount }: NavbarProps) {
+  const router = useRouter()
+  const [mounted, setMounted] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [notifCount, setNotifCount] = useState(notificationCount)
 
-if (!mounted) return null; 
+  useEffect(() => {
+    setMounted(true)
+    // Check initial fullscreen state
+    setIsFullscreen(!!document.fullscreenElement)
+    
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement)
+    }
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  }, [])
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen()
+    } else {
+      document.exitFullscreen()
+    }
+  }
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/hr/orders?search=${encodeURIComponent(searchQuery)}`)
+    }
+  }
+
+  const handleLogout = async () => {
+    await logout()
+    toast.success('Logged out successfully')
+    router.push('/login')
+  }
+
+  if (!mounted) return null
+  if (!user) return null
+
+  const initials = `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+  const displayName = `${user.firstName} ${user.lastName}`
+  const roleDisplay = user.role === 'HR' ? 'HR Officer' : user.role
+
   return (
     <>
       <style>{`
@@ -39,7 +94,6 @@ if (!mounted) return null;
           z-index: 40;
         }
 
-        /* Subtle bottom line accent */
         .navbar-root::after {
           content: '';
           position: absolute;
@@ -117,7 +171,6 @@ if (!mounted) return null;
           box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.12);
         }
 
-        /* Keyboard shortcut badge */
         .navbar-search-kbd {
           position: absolute;
           right: 8px;
@@ -141,7 +194,6 @@ if (!mounted) return null;
           margin-left: auto;
         }
 
-        /* Divider */
         .navbar-divider {
           width: 1px;
           height: 24px;
@@ -149,7 +201,7 @@ if (!mounted) return null;
           margin: 0 4px;
         }
 
-        .navbar-bell-btn {
+        .navbar-icon-btn {
           position: relative;
           width: 36px;
           height: 36px;
@@ -164,7 +216,7 @@ if (!mounted) return null;
           transition: all 0.15s ease;
         }
 
-        .navbar-bell-btn:hover {
+        .navbar-icon-btn:hover {
           background: #f8fafc;
           color: #0f172a;
           border-color: #cbd5e1;
@@ -190,7 +242,6 @@ if (!mounted) return null;
           line-height: 1;
         }
 
-        /* Pulse animation on badge */
         .navbar-bell-badge::before {
           content: '';
           position: absolute;
@@ -263,59 +314,96 @@ if (!mounted) return null;
           line-height: 1.2;
           white-space: nowrap;
         }
-
-        .navbar-profile-caret {
-          color: #94a3b8;
-          margin-left: 2px;
-          transition: transform 0.15s ease;
-        }
       `}</style>
 
       <header className="navbar-root">
-        {/* Mobile menu */}
+        {/* Mobile menu button (can be connected to sidebar toggle) */}
         <button className="navbar-mobile-btn">
           <Menu size={16} strokeWidth={2} />
         </button>
 
-        {/* Search */}
-        <div className="navbar-search-wrap">
+        {/* Search Form */}
+        <form onSubmit={handleSearch} className="navbar-search-wrap">
           <span className="navbar-search-icon">
             <Search size={14} strokeWidth={2} />
           </span>
           <input
             className="navbar-search-input"
             placeholder="Search orders by number, employee..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
           <span className="navbar-search-kbd">⌘K</span>
-        </div>
+        </form>
 
-        {/* Right actions */}
         <div className="navbar-actions">
-          {/* Notification bell */}
-          <button className="navbar-bell-btn">
-            <Bell size={16} strokeWidth={2} />
-            <span className="navbar-bell-badge">3</span>
+          {/* Fullscreen Toggle */}
+          <button
+            className="navbar-icon-btn"
+            onClick={toggleFullscreen}
+            title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+          >
+            {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
           </button>
+
+          {/* Notifications */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="navbar-icon-btn">
+                <Bell size={16} strokeWidth={2} />
+                {notifCount > 0 && (
+                  <span className="navbar-bell-badge">{notifCount}</span>
+                )}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80">
+              <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <div className="max-h-64 overflow-y-auto">
+                {/* Notifications would be fetched and displayed here */}
+                <div className="p-4 text-center text-sm text-slate-500">
+                  View all notifications in the dedicated panel.
+                </div>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href="/hr/notifications" className="cursor-pointer">
+                  View all notifications
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <div className="navbar-divider" />
 
-          {/* Profile */}
+          {/* Profile Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="navbar-profile-btn">
-                <div className="navbar-avatar">HR</div>
+                <div className="navbar-avatar">{initials}</div>
                 <div className="navbar-profile-info">
-                  <div className="navbar-profile-name">Maria Santos</div>
-                  <div className="navbar-profile-role">HR Officer</div>
+                  <div className="navbar-profile-name">{displayName}</div>
+                  <div className="navbar-profile-role">{roleDisplay}</div>
                 </div>
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" style={{ fontFamily: "'DM Sans', sans-serif" }}>
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Log out</DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/hr/profile">
+                  <User className="mr-2 h-4 w-4" /> Profile
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/hr/settings">
+                  <Settings className="mr-2 h-4 w-4" /> Settings
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                <LogOut className="mr-2 h-4 w-4" /> Log out
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

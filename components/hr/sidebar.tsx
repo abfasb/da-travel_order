@@ -15,6 +15,7 @@ import {
   UserPlus,
   List,
   History,
+  Bell,
 } from 'lucide-react'
 
 type Route = {
@@ -55,6 +56,7 @@ const routes: Route[] = [
     href: '/hr/settings',
      children: [
     { label: 'Audit Logs', icon: History, href: '/hr/audit-logs' },
+    { label: 'Notifications', icon: Bell, href: '/hr/notifications' },
   ],
   },
 ]
@@ -91,7 +93,6 @@ export function Sidebar() {
         @media (min-width: 768px) { .hr-sidebar { display: flex; } }
         .hr-sidebar.collapsed { width: 72px; }
 
-        /* Header */
         .sidebar-header {
           display: flex;
           align-items: center;
@@ -165,7 +166,6 @@ export function Sidebar() {
           border-color: rgba(255,255,255,0.15);
         }
 
-        /* Navigation */
         .sidebar-nav {
           flex: 1;
           padding: 16px 8px;
@@ -253,7 +253,7 @@ export function Sidebar() {
           padding: 8px 12px 8px 16px;
           border-radius: 6px;
           color: rgba(255,255,255,0.4);
-          font-size: 13px;
+          font-size: 9px;
           text-decoration: none;
           transition: all 0.15s;
           white-space: nowrap;
