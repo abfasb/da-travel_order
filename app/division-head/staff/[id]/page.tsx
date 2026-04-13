@@ -18,7 +18,12 @@ export default async function StaffDetailPage({
     where: { id, division: currentUser?.division, role: 'STAFF' },
     include: {
       travelOrders: {
-        include: { approvals: true },
+        include: { 
+          approvals: true,
+           user: {
+            select: { firstName: true, lastName: true }, 
+          },
+         },
         orderBy: { createdAt: 'desc' },
       },
     },

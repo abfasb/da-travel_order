@@ -55,7 +55,6 @@ model User {
   password         String
   role             Role             @default(STAFF)
 
-  // Relations
   travelOrders     TravelOrderRequest[]  
   approvals        Approval[]            
   auditLogs        AuditLog[]           
