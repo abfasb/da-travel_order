@@ -16,6 +16,10 @@ import {
   List,
   History,
   Bell,
+  Clock,
+  CheckCircle,
+  Printer,
+  Archive,
 } from 'lucide-react'
 
 type Route = {
@@ -54,10 +58,10 @@ const routes: Route[] = [
     label: 'Settings',
     icon: Settings,
     href: '/hr/settings',
-     children: [
-    { label: 'Audit Logs', icon: History, href: '/hr/audit-logs' },
-    { label: 'Notifications', icon: Bell, href: '/hr/notifications' },
-  ],
+    children: [
+      { label: 'Audit Logs', icon: History, href: '/hr/audit-logs' },
+      { label: 'Notifications', icon: Bell, href: '/hr/notifications' },
+    ],
   },
 ]
 
@@ -66,6 +70,7 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
     '/hr/users': false,
+    '/hr/orders': true, // default open for quick access
   })
 
   const toggleMenu = (href: string) => {
@@ -97,21 +102,21 @@ export function Sidebar() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          height: 64px;
-          padding: 0 16px;
+          height: 60px;
+          padding: 0 14px;
           border-bottom: 1px solid rgba(255,255,255,0.05);
           flex-shrink: 0;
         }
         .sidebar-brand {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 10px;
           overflow: hidden;
         }
         .sidebar-logo {
-          width: 36px;
-          height: 36px;
-          border-radius: 8px;
+          width: 32px;
+          height: 32px;
+          border-radius: 7px;
           background: rgba(34,197,94,0.15);
           display: flex;
           align-items: center;
@@ -119,13 +124,13 @@ export function Sidebar() {
           flex-shrink: 0;
         }
         .sidebar-logo img {
-          width: 24px;
-          height: 24px;
+          width: 20px;
+          height: 20px;
           object-fit: contain;
         }
         .sidebar-title {
           font-weight: 600;
-          font-size: 16px;
+          font-size: 15px;
           color: #f1f5f9;
           white-space: nowrap;
           transition: opacity 0.15s;
@@ -135,20 +140,20 @@ export function Sidebar() {
           width: 0;
         }
         .sidebar-badge {
-          font-size: 10px;
+          font-size: 9px;
           font-weight: 600;
           color: #4ade80;
           background: rgba(74,222,128,0.12);
-          padding: 2px 6px;
+          padding: 2px 5px;
           border-radius: 4px;
           letter-spacing: 0.5px;
-          margin-left: 6px;
+          margin-left: 5px;
         }
         .collapsed .sidebar-badge { display: none; }
 
         .sidebar-toggle {
-          width: 28px;
-          height: 28px;
+          width: 26px;
+          height: 26px;
           border-radius: 6px;
           background: rgba(255,255,255,0.03);
           border: 1px solid rgba(255,255,255,0.08);
@@ -168,31 +173,31 @@ export function Sidebar() {
 
         .sidebar-nav {
           flex: 1;
-          padding: 16px 8px;
+          padding: 14px 6px;
           overflow-y: auto;
           overflow-x: hidden;
         }
         .nav-section-title {
-          font-size: 11px;
+          font-size: 10px;
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.05em;
           color: rgba(255,255,255,0.25);
-          padding: 8px 12px;
+          padding: 8px 10px 4px;
           white-space: nowrap;
           transition: opacity 0.15s;
         }
         .collapsed .nav-section-title { opacity: 0; }
 
-        .nav-item { position: relative; margin-bottom: 2px; }
+        .nav-item { position: relative; margin-bottom: 1px; }
         .nav-link {
           display: flex;
           align-items: center;
-          gap: 12px;
-          padding: 10px 12px;
-          border-radius: 8px;
+          gap: 10px;
+          padding: 8px 10px;
+          border-radius: 7px;
           color: rgba(255,255,255,0.55);
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 500;
           text-decoration: none;
           transition: all 0.15s;
@@ -210,8 +215,8 @@ export function Sidebar() {
           border-color: rgba(34,197,94,0.25);
         }
         .nav-icon {
-          width: 24px;
-          height: 24px;
+          width: 22px;
+          height: 22px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -238,10 +243,10 @@ export function Sidebar() {
           max-height: 0;
           opacity: 0;
           transition: max-height 0.25s ease, opacity 0.2s;
-          margin-left: 36px;
+          margin-left: 32px;
         }
         .nav-submenu.open {
-          max-height: 150px;
+          max-height: 250px;
           opacity: 1;
         }
         .collapsed .nav-submenu { display: none; }
@@ -249,16 +254,16 @@ export function Sidebar() {
         .sub-link {
           display: flex;
           align-items: center;
-          gap: 10px;
-          padding: 8px 12px 8px 16px;
-          border-radius: 6px;
+          gap: 8px;
+          padding: 6px 10px 6px 14px;
+          border-radius: 5px;
           color: rgba(255,255,255,0.4);
-          font-size: 9px;
+          font-size: 12px;
           text-decoration: none;
           transition: all 0.15s;
           white-space: nowrap;
           border-left: 1px solid rgba(255,255,255,0.1);
-          margin-left: 8px;
+          margin-left: 6px;
         }
         .sub-link:hover {
           color: rgba(255,255,255,0.8);
@@ -273,14 +278,14 @@ export function Sidebar() {
         /* Tooltip for collapsed */
         .nav-tooltip {
           position: absolute;
-          left: 80px;
+          left: 75px;
           top: 50%;
           transform: translateY(-50%);
           background: #1a1e2a;
           border: 1px solid rgba(255,255,255,0.1);
           border-radius: 6px;
-          padding: 6px 12px;
-          font-size: 13px;
+          padding: 5px 10px;
+          font-size: 12px;
           font-weight: 500;
           color: #fff;
           white-space: nowrap;
@@ -297,12 +302,12 @@ export function Sidebar() {
 
         /* Footer */
         .sidebar-footer {
-          padding: 12px 16px;
+          padding: 10px 14px;
           border-top: 1px solid rgba(255,255,255,0.05);
           flex-shrink: 0;
         }
         .version-text {
-          font-size: 11px;
+          font-size: 10px;
           color: rgba(255,255,255,0.2);
           text-align: center;
           white-space: nowrap;
@@ -311,7 +316,6 @@ export function Sidebar() {
       `}</style>
 
       <div className={cn('hr-sidebar', collapsed && 'collapsed')}>
-        {/* Header */}
         <div className="sidebar-header">
           <div className="sidebar-brand">
             <div className="sidebar-logo">
@@ -321,21 +325,17 @@ export function Sidebar() {
               TOMS <span className="sidebar-badge">HR</span>
             </div>
           </div>
-          <button
-            className="sidebar-toggle"
-            onClick={() => setCollapsed(v => !v)}
-          >
+          <button className="sidebar-toggle" onClick={() => setCollapsed(v => !v)}>
             {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
           </button>
         </div>
 
-        {/* @ts-ignore */}
         <nav className="sidebar-nav">
           <div className="nav-section-title">Main</div>
           {routes.map((route) => {
             const hasChildren = route.children && route.children.length > 0
-            const isActive = pathname === route.href || (hasChildren && route.children!.some(c => pathname === c.href))
-            const isOpen = openMenus[route.href] || (hasChildren && route.children!.some(c => pathname === c.href))
+            const isActive = pathname === route.href || (hasChildren && route.children!.some(c => pathname.startsWith(c.href)))
+            const isOpen = openMenus[route.href] || (hasChildren && route.children!.some(c => pathname.startsWith(c.href)))
 
             return (
               <div className="nav-item" key={route.href}>
@@ -347,11 +347,11 @@ export function Sidebar() {
                       onClick={() => !collapsed && toggleMenu(route.href)}
                     >
                       <span className="nav-icon">
-        {/* @ts-ignore */}
-                        <route.icon size={18} strokeWidth={1.8} />
+                        { /*@ts-ignore */}
+                        <route.icon size={16} strokeWidth={1.8} />
                       </span>
                       <span className="nav-label">{route.label}</span>
-                      <ChevronRight size={14} className={cn('nav-chevron', isOpen && 'open')} />
+                      <ChevronRight size={13} className={cn('nav-chevron', isOpen && 'open')} />
                     </div>
                     <div className={cn('nav-submenu', isOpen && !collapsed && 'open')}>
                       {route.children!.map((child) => (
@@ -360,8 +360,8 @@ export function Sidebar() {
                           href={child.href}
                           className={cn('sub-link', pathname === child.href && 'active')}
                         >
-        {/* @ts-ignore */}
-                          <child.icon size={14} strokeWidth={1.5} />
+                        { /*@ts-ignore */}
+                          <child.icon size={13} strokeWidth={1.5} />
                           {child.label}
                         </Link>
                       ))}
@@ -370,8 +370,8 @@ export function Sidebar() {
                 ) : (
                   <Link href={route.href} className={cn('nav-link', pathname === route.href && 'active')}>
                     <span className="nav-icon">
-        {/* @ts-ignore */}
-                      <route.icon size={18} strokeWidth={1.8} />
+                        { /*@ts-ignore */}
+                      <route.icon size={16} strokeWidth={1.8} />
                     </span>
                     <span className="nav-label">{route.label}</span>
                   </Link>
@@ -381,7 +381,6 @@ export function Sidebar() {
           })}
         </nav>
 
-        {/* Footer */}
         <div className="sidebar-footer">
           <div className="version-text">TOMS v1.0 · DA MIMAROPA</div>
         </div>
