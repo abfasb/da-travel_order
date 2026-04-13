@@ -229,7 +229,6 @@ export default function OrdersTable({ initialOrders }: { initialOrders: Order[] 
             </Table>
           </div>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <Pagination>
               <PaginationContent>

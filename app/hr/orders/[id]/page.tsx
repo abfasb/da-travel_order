@@ -33,7 +33,6 @@ const roleTitles: Record<string, string> = {
   REGIONAL_EXECUTIVE:    'Regional Executive Director',
 }
 
-/* ─── ApprovalStep (Light Theme) ───────────────────────── */
 const ApprovalStep = ({
   role, title, status, approver, placeSigned,
   signedAt, signatureData, comment, isLast, index,
@@ -344,7 +343,7 @@ export default async function HROrderDetailPage({ params }: PageProps) {
         }
         .od-card-title {
           display: flex; align-items: center; gap: 9px;
-          font-size: 14px; font-weight: 600; color: #0f172a;
+          font-size: 18px; font-weight: 600; color: #0f172a;
           margin: 0;
         }
         .od-card-icon {
@@ -490,13 +489,11 @@ export default async function HROrderDetailPage({ params }: PageProps) {
 
         <div className="od-body">
 
-          {/* ── Approval Workflow Card ── */}
           <div className="od-card">
             <div className="od-card-head">
-              <h2 className="od-card-title">
-                <span className="od-card-icon"><Award size={14} /></span>
+              <h1 className="od-card-title">
                 Approval Workflow
-              </h2>
+              </h1>
               {travelOrder.status !== 'REJECTED' && travelOrder.status !== 'COMPLETED' && (
                 <div className="od-prog-row" style={{ marginTop: 0, minWidth: 220 }}>
                   <div className="od-prog-track">
@@ -604,7 +601,6 @@ export default async function HROrderDetailPage({ params }: PageProps) {
               </h2>
             </div>
 
-            {/* Travel Order Form */}
             <div className="od-doc-card">
               <div className="od-doc-label">
                 <FileText size={12} />

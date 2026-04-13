@@ -1,8 +1,9 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { getRequestMetadata } from "@/lib/request-metadata";
 
 export async function submitTravelOrder(data: any) {
   try {
@@ -19,12 +20,16 @@ export async function submitTravelOrder(data: any) {
         officialStation: true,
         employmentStatus: true,
         division: true,
-      }
+        firstName: true,
+        lastName: true,
+      },
     });
 
     if (!user) {
       return { success: false, error: "User profile not found." };
     }
+
+    const { ipAddress, userAgent } = await getRequestMetadata();
 
     await prisma.$transaction(async (tx) => {
       const newTravelOrder = await tx.travelOrderRequest.create({
@@ -54,7 +59,7 @@ export async function submitTravelOrder(data: any) {
 
           status: "PENDING",
 
-          ...(user.employmentStatus !== "PERMANENT" && data.itineraryItems && data.itineraryItems.length > 0
+          ...(user.employmentStatus !== "PERMANENT" && data.itineraryItems?.length
             ? {
                 itineraryItems: {
                   create: data.itineraryItems.map((item: any) => ({
@@ -69,7 +74,6 @@ export async function submitTravelOrder(data: any) {
         },
       });
 
-      // Determine if user belongs to Field Operations Division (case‑insensitive)
       const isFieldOps = user.division?.toLowerCase().includes('field') ?? false;
       const roles = isFieldOps
         ? ["APCO", "CHIEF_AGRICULTURIST", "CHIEF_ADMINISTRATIVE", "REGIONAL_EXECUTIVE"]
@@ -79,7 +83,7 @@ export async function submitTravelOrder(data: any) {
         await tx.approval.create({
           data: {
             travelOrderId: newTravelOrder.id,
-            // @ts-ignore
+            //@ts-ignore
             approverRole: role,
             status: "PENDING",
           },
@@ -89,8 +93,10 @@ export async function submitTravelOrder(data: any) {
       await tx.auditLog.create({
         data: {
           userId: userId,
-          action: "CREATE_TRAVEL_ORDER",
-          details: `Travel order created for destination: ${data.destinationProvince}`,
+          action: "CREATE",
+          details: `Travel order created by ${user.firstName} ${user.lastName} for destination: ${data.destinationProvince}`,
+          ipAddress,
+          userAgent,
           travelOrderId: newTravelOrder.id,
         },
       });

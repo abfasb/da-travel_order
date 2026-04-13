@@ -14,6 +14,7 @@ import {
   ChevronRight,
   UserPlus,
   List,
+  History,
 } from 'lucide-react'
 
 type Route = {
@@ -52,6 +53,9 @@ const routes: Route[] = [
     label: 'Settings',
     icon: Settings,
     href: '/hr/settings',
+     children: [
+    { label: 'Audit Logs', icon: History, href: '/hr/audit-logs' },
+  ],
   },
 ]
 
