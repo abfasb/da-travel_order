@@ -33,7 +33,7 @@ export default function ProposedItineraryDocument({ data }: { data: any }) {
         }
       `}} />
 
-      <div className="flex justify-center p-8 bg-white">
+      <div className="flex justify-center p-8 bg-white dark:bg-black">
         <div 
           className="bg-white box-border shadow-xl print:shadow-none relative overflow-hidden"
           style={{ 
@@ -74,7 +74,6 @@ export default function ProposedItineraryDocument({ data }: { data: any }) {
                 </div>
               </div>
 
-              {/* Right column */}
               <div className="flex flex-col gap-y-4">
                 <div className="flex">
                   <span className="w-[22mm]">Date:</span>
@@ -136,15 +135,20 @@ export default function ProposedItineraryDocument({ data }: { data: any }) {
             <div className="grid grid-cols-2 gap-10" style={{ fontSize: '11pt', paddingLeft: '5mm', paddingRight: '5mm' }}>
               <div className="flex flex-col">
                 <span className="mb-2">Requested by:</span>
-                <span className="font-bold mt-8 uppercase">{data?.requestorName}</span>
-                <span className="ml-14">{data?.requestorPosition}</span>
+                {data?.requestorSignature && (
+                  <div className="">
+                    <img src={data.requestorSignature} alt="Signature" className="h-8 ml-12 object-contain" />
+                  </div>
+                )}
+                <span className="font-bold uppercase">{data?.requestorName}</span>
+                <span className="ml-10">{data?.requestorPosition}</span>
               </div>
 
               <div className="flex flex-col">
                 <span className="mb-2">Approved by:</span>
                 <div style={{ minHeight: '18px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
                   {signatureImage && (
-                    <img src={signatureImage} alt="Signature" className="h-8 ml-20 object-contain" />
+                    <img src={signatureImage} alt="Signature" className="h-8 ml-20 text- object-contain" />
                   )}
                 </div>
                 <span className="font-bold uppercase">{approverName}</span>

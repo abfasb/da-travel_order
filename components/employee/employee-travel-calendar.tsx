@@ -120,7 +120,7 @@ function CustomToolbar({ date, view, onNavigate, onView, views }: any) {
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
-        <span className="font-semibold text-base ml-2">{formattedDate}</span>
+        <span className="font-semibold text-base ml-2 text-foreground">{formattedDate}</span>
       </div>
 
       <div className="flex items-center gap-3">
@@ -190,31 +190,32 @@ export function EmployeeTravelCalendar({ orders }: { orders: TravelOrder[] }) {
       <style jsx global>{`
         .rbc-calendar {
           font-family: 'Inter', sans-serif;
-          background: white;
+          background: hsl(var(--background));
+          color: hsl(var(--foreground));
         }
         .rbc-header {
           padding: 12px 4px;
           font-weight: 600;
           font-size: 12px;
-          color: #64748b;
-          border-bottom: 1px solid #e2e8f0;
-          background: #f8fafc;
+          color: hsl(var(--muted-foreground));
+          border-bottom: 1px solid hsl(var(--border));
+          background: hsl(var(--muted));
         }
         .rbc-month-view,
         .rbc-time-view {
           border: none;
         }
         .rbc-month-row {
-          border-bottom: 1px solid #f1f5f9;
+          border-bottom: 1px solid hsl(var(--border));
         }
         .rbc-day-bg {
-          border-right: 1px solid #f1f5f9;
+          border-right: 1px solid hsl(var(--border));
         }
         .rbc-today {
-          background-color: #f0fdf4 !important;
+          background-color: hsl(var(--accent)) !important;
         }
         .rbc-off-range-bg {
-          background: #fafafa;
+          background: hsl(var(--muted) / 0.5);
         }
         .rbc-event {
           border-radius: 4px !important;
@@ -224,9 +225,27 @@ export function EmployeeTravelCalendar({ orders }: { orders: TravelOrder[] }) {
           opacity: 0.9;
         }
         .rbc-show-more {
-          color: #10b981;
+          color: hsl(var(--primary));
           font-weight: 500;
           font-size: 11px;
+        }
+
+        /* Toolbar button overrides for dark mode */
+        .rbc-toolbar button {
+          color: hsl(var(--foreground));
+          background: hsl(var(--background));
+          border: 1px solid hsl(var(--border));
+        }
+        .rbc-toolbar button:hover {
+          background: hsl(var(--muted));
+        }
+        .rbc-toolbar button.rbc-active {
+          background: hsl(var(--primary));
+          border-color: hsl(var(--primary));
+          color: hsl(var(--primary-foreground));
+        }
+        .rbc-toolbar button.rbc-active:hover {
+          background: hsl(var(--primary) / 0.9);
         }
       `}</style>
 
@@ -290,7 +309,7 @@ function EventDetailsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 text-foreground">
             Travel Order Details
             {getStatusBadge()}
           </DialogTitle>
@@ -301,53 +320,52 @@ function EventDetailsDialog({
 
         <div className="space-y-4 py-2">
           <div className="flex items-start gap-3">
-            <MapPin className="h-4 w-4 text-slate-400 mt-0.5" />
+            <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
             <div>
-              <p className="font-medium">{order.destinationProvince}</p>
-              <p className="text-sm text-slate-500">{order.specificLocation}</p>
+              <p className="font-medium text-foreground">{order.destinationProvince}</p>
+              <p className="text-sm text-muted-foreground">{order.specificLocation}</p>
             </div>
           </div>
 
           <div className="flex items-start gap-3">
-            <CalendarIcon className="h-4 w-4 text-slate-400 mt-0.5" />
+            <CalendarIcon className="h-4 w-4 text-muted-foreground mt-0.5" />
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium w-20">Departure</span>
-                <span className="text-sm">{format(new Date(order.departureDate), 'PPP')}</span>
+                <span className="text-sm font-medium w-20 text-foreground">Departure</span>
+                <span className="text-sm text-muted-foreground">{format(new Date(order.departureDate), 'PPP')}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium w-20">Return</span>
-                <span className="text-sm">{format(new Date(order.returnDate), 'PPP')}</span>
+                <span className="text-sm font-medium w-20 text-foreground">Return</span>
+                <span className="text-sm text-muted-foreground">{format(new Date(order.returnDate), 'PPP')}</span>
               </div>
             </div>
           </div>
 
           <div className="flex items-start gap-3">
-            <Briefcase className="h-4 w-4 text-slate-400 mt-0.5" />
+            <Briefcase className="h-4 w-4 text-muted-foreground mt-0.5" />
             <div>
-              <p className="font-medium text-sm">Purpose</p>
-              <p className="text-sm text-slate-600">{order.purpose}</p>
+              <p className="font-medium text-sm text-foreground">Purpose</p>
+              <p className="text-sm text-muted-foreground">{order.purpose}</p>
             </div>
           </div>
 
-{/*@ts-ignore */}
+{ /* @ts-ignore */}
           {order.objectives && (
             <div className="flex items-start gap-3">
-              <FileText className="h-4 w-4 text-slate-400 mt-0.5" />
+              <FileText className="h-4 w-4 text-muted-foreground mt-0.5" />
               <div>
-                <p className="font-medium text-sm">Objectives</p>
-{/*@ts-ignore */}
-
-                <p className="text-sm text-slate-600 whitespace-pre-wrap">{order.objectives}</p>
+                <p className="font-medium text-sm text-foreground">Objectives</p>
+{ /* @ts-ignore */}
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{order.objectives}</p>
               </div>
             </div>
           )}
 
           <div className="flex items-start gap-3">
-            <Clock className="h-4 w-4 text-slate-400 mt-0.5" />
+            <Clock className="h-4 w-4 text-muted-foreground mt-0.5" />
             <div>
-              <p className="font-medium text-sm">Status</p>
-              <p className="text-sm text-slate-600">{getStatusBadge()}</p>
+              <p className="font-medium text-sm text-foreground">Status</p>
+              <p className="text-sm text-muted-foreground">{getStatusBadge()}</p>
             </div>
           </div>
         </div>

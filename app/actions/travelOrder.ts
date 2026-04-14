@@ -56,6 +56,7 @@ export async function submitTravelOrder(data: any) {
           estimatedExpenses: data.estimatedExpenses,
           sourceOfFunds: data.sourceOfFunds,
           accompanyingPersonnel: data.accompanyingPersonnel || null,
+          requestorSignature: data.requestorSignature || null,
 
           status: "PENDING",
 

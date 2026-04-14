@@ -80,9 +80,9 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6 max-w-4xl">
+    <div className="container mx-auto py-12 px-4 md:px-6 w-full dark:bg-black">
       <div className="flex flex-col items-center justify-center">
-        <div className="w-full max-w-3xl">
+        <div className="w-full max-w-6xl">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <Bell className="h-6 w-6 text-primary" />

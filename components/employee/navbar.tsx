@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { useTheme } from 'next-themes'
 import {
   Bell,
   Search,
@@ -17,6 +18,8 @@ import {
   ClipboardList,
   BarChart3,
   Leaf,
+  Moon,
+  Sun,
 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { Button } from '@/components/ui/button'
@@ -65,6 +68,8 @@ interface Notification {
 export function Navbar({ user }: NavbarProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
   const [searchFocused, setSearchFocused] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
   const [recentNotifications, setRecentNotifications] = useState<Notification[]>([])
@@ -73,11 +78,15 @@ export function Navbar({ user }: NavbarProps) {
   const initials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
   const fullName = `${user.firstName} ${user.lastName}`
 
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const fetchNotifications = async () => {
     try {
       const [count, recent] = await Promise.all([
         getUnreadCount(),
-        getRecentNotifications(5) 
+        getRecentNotifications(5)
       ])
       setUnreadCount(count)
       setRecentNotifications(recent)
@@ -210,6 +219,19 @@ export function Navbar({ user }: NavbarProps) {
             New Request
           </Link>
         </Button>
+
+        {mounted && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            title="Toggle theme"
+          >
+            <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Toggle theme</span>
+          </Button>
+        )}
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

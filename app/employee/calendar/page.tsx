@@ -37,52 +37,64 @@ export default async function EmployeeCalendarPage() {
   const completedCount = travelOrders.filter(o => o.status === 'COMPLETED').length
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
+    <div className="p-6 lg:p-8 space-y-6 w-full mx-auto dark:bg-black">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">My Travel Calendar</h1>
-        <p className="text-slate-500">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground dark:text-white">My Travel Calendar</h1>
+        <p className="text-muted-foreground">
           View your upcoming and past travel orders in a calendar view.
         </p>
       </div>
 
-      {/* Simple Stats */}
+      {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-white">
+        {/* Upcoming Card */}
+        <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-blue-50/50 dark:from-blue-950/40 dark:to-blue-950/10">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600">Upcoming Travels</p>
-                <p className="text-3xl font-bold text-blue-700">{upcomingCount}</p>
+                <p className="text-sm font-medium text-muted-foreground">Upcoming Travels</p>
+                <p className="text-3xl font-bold text-blue-700 dark:text-blue-400">{upcomingCount}</p>
               </div>
-              <CalendarDays className="h-8 w-8 text-blue-200" />
+              <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900/30">
+                <CalendarDays className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-emerald-50 to-white">
+
+        {/* Active Now Card */}
+        <Card className="border-0 shadow-sm bg-gradient-to-br from-emerald-50 to-emerald-50/50 dark:from-emerald-950/40 dark:to-emerald-950/10">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600">Active Now</p>
-                <p className="text-3xl font-bold text-emerald-700">{activeCount}</p>
+                <p className="text-sm font-medium text-muted-foreground">Active Now</p>
+                <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">{activeCount}</p>
               </div>
-              <CalendarDays className="h-8 w-8 text-emerald-200" />
+              <div className="p-3 rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+                <CalendarDays className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-purple-50 to-white">
+
+        {/* Completed Card */}
+        <Card className="border-0 shadow-sm bg-gradient-to-br from-purple-50 to-purple-50/50 dark:from-purple-950/40 dark:to-purple-950/10">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600">Completed</p>
-                <p className="text-3xl font-bold text-purple-700">{completedCount}</p>
+                <p className="text-sm font-medium text-muted-foreground">Completed</p>
+                <p className="text-3xl font-bold text-purple-700 dark:text-purple-400">{completedCount}</p>
               </div>
-              <CalendarDays className="h-8 w-8 text-purple-200" />
+              <div className="p-3 rounded-full bg-purple-100 dark:bg-purple-900/30">
+                <CalendarDays className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="border-0 shadow-sm overflow-hidden">
+      {/* Calendar Card */}
+      <Card className="border-0 shadow-sm overflow-hidden bg-card">
         <CardContent className="p-0">
           <Suspense fallback={<CalendarSkeleton />}>
             <EmployeeTravelCalendar orders={travelOrders} />

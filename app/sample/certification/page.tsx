@@ -37,7 +37,7 @@ export default function CertificationDocument({ data }: { data: any }) {
         }
       `}} />
 
-      <div className="flex justify-center p-4 bg-white print:pl-8 print:mb-12">
+      <div className="flex justify-center p-4 bg-white dark:bg-black print:pl-8 print:mb-12">
         <div 
           className="bg-white shadow-xl p-4 print:mb-12 box-border relative overflow-hidden print:shadow-none"
           style={{ 

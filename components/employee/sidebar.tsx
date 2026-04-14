@@ -114,7 +114,7 @@ export function Sidebar({ defaultCollapsed = false, user }: SidebarProps) {
           collapsed ? 'justify-center' : 'gap-2'
         )}
       >
-        <img src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMVJJK1z4PWdaWJG9ArC6U45RvjxMJsEZVKQ&s' alt='DA Logo' className="h-12 w-12 text-primary shrink-0" />
+        <img src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMVJJK1z4PWdaWJG9ArC6U45RvjxMJsEZVKQ&s' alt='DA Logo' className="h-12 w-12 text-primary rounded-full shrink-0" />
         {!collapsed && (
           <span className="text-lg font-semibold whitespace-nowrap">TOMS · Employee</span>
         )}
