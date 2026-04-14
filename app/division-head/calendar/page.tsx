@@ -51,7 +51,7 @@ export default async function CalendarPage() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Travel Calendar</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Travel Calendar</h1>
         <p className="text-slate-500">
           Visualize all scheduled travel for your division. Click any event for details.
         </p>

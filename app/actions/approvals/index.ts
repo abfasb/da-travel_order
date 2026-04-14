@@ -79,21 +79,21 @@ export async function submitApproval({
         })
       }
 
-      // If approved, check if all approvals are complete
-      if (action === 'APPROVE') {
+     if (action === 'APPROVE') {
         const allApprovals = await tx.approval.findMany({
           where: { travelOrderId: approval.travelOrderId },
         })
+        
         const allApproved = allApprovals.every(a => a.status === 'APPROVED')
+        
         if (allApproved) {
           await tx.travelOrderRequest.update({
             where: { id: approval.travelOrderId },
-            data: { status: 'APPROVED' }, 
+            data: { status: 'HR_PROCESSING' }, 
           })
         }
       }
 
-      // Create audit log
       await tx.auditLog.create({
         data: {
           userId,
@@ -105,7 +105,6 @@ export async function submitApproval({
         },
       })
 
-      // Notify employee
       await tx.notification.create({
         data: {
           userId: approval.travelOrder.userId,
@@ -119,7 +118,6 @@ export async function submitApproval({
         },
       })
 
-      // ✅ NEW: Notify Division Head on rejection
       if (action === 'REJECT' && staffDivision) {
         const divisionHead = await tx.user.findFirst({
           where: { 
