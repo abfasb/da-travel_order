@@ -92,6 +92,7 @@ model TravelOrderRequest {
   estimatedExpenses      String
   sourceOfFunds          String
   accompanyingPersonnel  String?
+  requestorSignature     String?  
 
   // Additional detailed fields
   destinationSummary     String        @db.Text

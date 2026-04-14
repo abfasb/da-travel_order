@@ -13,10 +13,15 @@ export default function PrintView({ order }: { order: any }) {
   useEffect(() => {
     if (!hasPrinted.current) {
       hasPrinted.current = true
-      const timer = setTimeout(() => {
-        window.print()
-      }, 800)
-      return () => clearTimeout(timer)
+      // Use requestAnimationFrame to ensure DOM is fully rendered
+      const frame = requestAnimationFrame(() => {
+        setTimeout(() => {
+          window.print()
+        }, 300)
+      })
+      return () => {
+        cancelAnimationFrame(frame)
+      }
     }
   }, [])
 
@@ -25,80 +30,105 @@ export default function PrintView({ order }: { order: any }) {
   return (
     <>
       <style jsx global>{`
+        /* Reset all margins/paddings for print */
         @media print {
           @page {
             size: A4;
-            margin: 0;
+            margin: 12mm;
           }
 
           html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+
+            html, body {
             overflow: hidden !important;
             height: auto !important;
             margin: 0 !important;
             padding: 0 !important;
           }
+            
 
-          * {
-            -ms-overflow-style: none !important;
-            scrollbar-width: none !important;
-          }
+         
+        * {
+          -ms-overflow-style: none !important;  /* IE and Edge */
+          scrollbar-width: none !important;     /* Firefox */
+        }
 
-          *::-webkit-scrollbar {
+        *::-webkit-scrollbar {
+          display: none !important;            
+        }
+
+          /* Hide all UI chrome */
+          aside, .sidebar, nav, header, footer, .print-button, .no-print {
             display: none !important;
           }
 
-          body {
+          /* Ensure print content takes full width */
+          .print-content {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
             background: white !important;
           }
 
-          .print-content {
-            width: 100% !important;
-            max-width: none !important;
-            margin: 0 !important;
-            padding: 0 !important;
-          }
-
+          /* Remove shadows and borders from document containers */
           .print-content > div,
-          .print-content > section,
-          .print-content > article {
-            width: 100% !important;
-            max-width: none !important;
-            margin: 0 !important;
+          .print-content > section {
             box-shadow: none !important;
+            border: none !important;
+            background: white !important;
           }
 
+          /* Clean page breaks */
           .page-break {
-            overflow: hidden;
+            page-break-before: always;
             break-before: page;
-            clear: both;
+          }
+
+          /* Force hardware acceleration for smoother scrolling */
+          .print-content * {
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
           }
         }
 
+        /* Screen-only styles (visible before print) */
         .print-content {
-          overflow: visible !important;
-          position: static !important;
           background: #f5f5f5;
-          min-height: 90vh;
-          padding: 0 0;
+          min-height: 100vh;
+          padding: 20px 0;
+        }
+
+        .print-content > div {
+          margin: 0 auto;
+          background: white;
         }
       `}</style>
 
-      <div className="print-button fixed top-4 right-4 z-50 no-print">
+      {/* Manual print button */}
+      <div className="print-button fixed top-4 right-4 z-50">
         <Button onClick={() => window.print()} className="shadow-lg">
           <Printer className="mr-2 h-4 w-4" />
           Print Documents
         </Button>
       </div>
 
+      {/* Document container */}
       <div className="print-content">
-        <div className="mx-auto bg-white shadow-none print:shadow-none">
+        <div className="mx-auto max-w-none bg-white shadow-none">
           <TravelOrderDocument data={order} />
 
           {!isPermanent && (
             <>
-              <div className="page-break" />
+              <div className="" />
               <ProposedItineraryDocument data={order} />
-              <div className="page-break" />
+              <div className="" />
               <CertificationDocument data={order} />
             </>
           )}
