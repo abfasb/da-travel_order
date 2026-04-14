@@ -1,16 +1,28 @@
-"use client" 
+'use client'
 
+import { useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Printer } from 'lucide-react'
+import Link from 'next/link'
 
-export default function PrintButton() {
+interface PrintButtonProps {
+  status?: string
+}
+
+export default function PrintButton({ status }: PrintButtonProps) {
+  const params = useParams()
+  const id = params?.id as string
+
+  if (status !== 'COMPLETED') {
+    return null
+  }
+
   return (
-    <Button
-      onClick={() => window.print()}
-      className="bg-emerald-600 hover:bg-emerald-700 text-white"
-    >
-      <Printer className="w-4 h-4 mr-2" />
-      Print Document
+    <Button asChild variant="outline" size="sm" className="gap-2">
+      <Link href={`/employee/requests/${id}/print`} target="_blank">
+        <Printer className="h-4 w-4" />
+        Print
+      </Link>
     </Button>
   )
 }

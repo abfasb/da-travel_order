@@ -306,7 +306,7 @@ export default async function TravelOrderPage({ params }: PageProps) {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <PrintButton />
+              <PrintButton status={travelOrder.status} />
             </div>
           </div>
         </div>
