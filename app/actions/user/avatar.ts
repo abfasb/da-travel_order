@@ -88,7 +88,6 @@ export async function removeAvatar() {
       const pathParts = url.pathname.split('/')
       const filePath = pathParts.slice(pathParts.indexOf('avatars')).join('/')
 
-      // Delete from storage
       await supabase.storage.from('avatars').remove([filePath])
     }
 
