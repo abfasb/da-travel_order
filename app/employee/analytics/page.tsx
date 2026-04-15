@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { StatsCards } from '@/components/employee/charts/stats-cards'
-import { MonthlyTrendChart } from '@/components/employee/charts/monthly-travel-chart'
+import { MonthlyTrendChart } from '@/components/employee/charts/monthly-trend-chart'
 import { DestinationChart } from '@/components/employee/charts/destination-chart'
 import { StatusBreakdownChart } from '@/components/employee/charts/status-breakdown-chart'
 import { RecentTravelsTable } from '@/components/employee/charts/recent-travels-table'
@@ -25,20 +25,17 @@ export default async function AnalyticsPage() {
     redirect('/login')
   }
 
-  // Fetch all travel orders for this employee
   const travelOrders = await prisma.travelOrderRequest.findMany({
     where: { userId: user.id },
     orderBy: { createdAt: 'desc' },
   })
 
-  // Calculate stats
   const totalTravels = travelOrders.length
   const pendingCount = travelOrders.filter(o => o.status === 'PENDING' || o.status === 'REVIEWING').length
   const approvedCount = travelOrders.filter(o => o.status === 'APPROVED').length
   const completedCount = travelOrders.filter(o => o.status === 'COMPLETED').length
   const uniqueDestinations = new Set(travelOrders.map(o => o.destinationProvince)).size
 
-  // Monthly data for charts
   const monthlyData: Record<string, number> = {}
   const destinationData: Record<string, number> = {}
   const statusData: Record<string, number> = {
@@ -51,32 +48,27 @@ export default async function AnalyticsPage() {
   }
 
   travelOrders.forEach(order => {
-    // Monthly aggregation
     const month = order.createdAt.toLocaleString('default', { month: 'short' })
     monthlyData[month] = (monthlyData[month] || 0) + 1
 
-    // Destination aggregation
     destinationData[order.destinationProvince] = (destinationData[order.destinationProvince] || 0) + 1
 
-    // Status aggregation
     statusData[order.status] = (statusData[order.status] || 0) + 1
   })
 
-  // Convert to arrays for charts
   const monthlyChartData = Object.entries(monthlyData).map(([month, count]) => ({ month, count }))
   const destinationChartData = Object.entries(destinationData).map(([name, value]) => ({ name, value }))
   const statusChartData = Object.entries(statusData)
     .filter(([_, value]) => value > 0)
     .map(([name, value]) => ({ name, value }))
 
-  // Recent 5 orders for table
   const recentOrders = travelOrders.slice(0, 5)
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-6 lg:p-8 space-y-6 dark:bg-black">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Analytics Dashboard</h1>
-        <p className="text-slate-500">Overview of your travel activities and insights.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Analytics Dashboard</h1>
+        <p className="text-muted-foreground">Overview of your travel activities and insights.</p>
       </div>
 
       <Suspense fallback={<StatsCardsSkeleton />}>
@@ -104,13 +96,11 @@ export default async function AnalyticsPage() {
               </CardHeader>
               <CardContent className="h-80">
                 <Suspense fallback={<ChartSkeleton />}>
-            {/* @ts-ignore */}
                   <MonthlyTrendChart data={monthlyChartData} />
                 </Suspense>
               </CardContent>
             </Card>
 
-            {/* Destination Distribution */}
             <Card className="border-0 shadow-sm">
               <CardHeader>
                 <CardTitle>Travel by Destination</CardTitle>
@@ -124,7 +114,6 @@ export default async function AnalyticsPage() {
             </Card>
           </div>
 
-          {/* Status Breakdown */}
           <Card className="border-0 shadow-sm">
             <CardHeader>
               <CardTitle>Status Breakdown</CardTitle>
@@ -156,7 +145,6 @@ export default async function AnalyticsPage() {
   )
 }
 
-// Loading skeletons
 function StatsCardsSkeleton() {
   return (
     <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
