@@ -23,6 +23,7 @@ export default async function EmployeeLayout({
       firstName: true,
       lastName: true,
       division: true, 
+      avatarUrl: true,
     }
   })
 

@@ -36,7 +36,7 @@ const statusVariants: Record<string, any> = {
 export function RecentTravelsTable({ orders }: { orders: TravelOrder[] }) {
   if (orders.length === 0) {
     return (
-      <div className="text-center py-8 text-slate-500">
+      <div className="text-center py-8 text-muted-foreground">
         No travel orders yet. Create your first travel request!
       </div>
     )
@@ -57,12 +57,12 @@ export function RecentTravelsTable({ orders }: { orders: TravelOrder[] }) {
       <TableBody>
         {orders.map(order => (
           <TableRow key={order.id}>
-            <TableCell className="font-mono text-sm">
+            <TableCell className="font-mono text-sm text-foreground">
               {order.travelOrderNumber || 'Draft'}
             </TableCell>
-            <TableCell className="max-w-[200px] truncate">{order.purpose}</TableCell>
-            <TableCell>{order.destinationProvince}</TableCell>
-            <TableCell>
+            <TableCell className="max-w-[200px] truncate text-foreground">{order.purpose}</TableCell>
+            <TableCell className="text-foreground">{order.destinationProvince}</TableCell>
+            <TableCell className="text-foreground">
               {format(new Date(order.departureDate), 'MMM dd')} –{' '}
               {format(new Date(order.returnDate), 'MMM dd, yyyy')}
             </TableCell>

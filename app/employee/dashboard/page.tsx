@@ -99,7 +99,7 @@ export default async function DashboardPage() {
   const monthlyData = rawMonthly.reverse()
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-8">
       <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
 
       <div className="grid gap-4 md:grid-cols-3">

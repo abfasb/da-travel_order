@@ -65,7 +65,7 @@ export default async function AnalyticsPage() {
   const recentOrders = travelOrders.slice(0, 5)
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 dark:bg-black">
+    <div className="p-6 h-[180%] lg:p-8 space-y-6 dark:bg-black">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Analytics Dashboard</h1>
         <p className="text-muted-foreground">Overview of your travel activities and insights.</p>

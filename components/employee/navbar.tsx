@@ -39,7 +39,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
@@ -52,6 +52,7 @@ interface NavbarProps {
     firstName: string;
     lastName: string;
     division: string;
+    avatarUrl?: string | null;
   }
 }
 
@@ -181,6 +182,7 @@ export function Navbar({ user }: NavbarProps) {
                 <p className="text-xs text-muted-foreground mb-2">Signed in as</p>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-8 w-8">
+                    <AvatarImage src={user.avatarUrl || undefined} />
                     <AvatarFallback>{initials}</AvatarFallback>
                   </Avatar>
                   <div>
@@ -292,6 +294,7 @@ export function Navbar({ user }: NavbarProps) {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="flex items-center gap-2 px-2">
               <Avatar className="h-8 w-8">
+                <AvatarImage src={user.avatarUrl || undefined} />
                 <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
               <div className="hidden text-left lg:block">
