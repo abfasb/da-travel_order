@@ -3,6 +3,17 @@
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { cookies, headers } from 'next/headers'
+import nodemailer from 'nodemailer'
+
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_APP_PASSWORD,
+  },
+})
 
 async function getRequestMetadata() {
   const headersList = await headers()
@@ -31,8 +42,9 @@ export async function completeTravelOrder(orderId: string, travelNumber: string)
 
     const { ipAddress, userAgent } = await getRequestMetadata()
 
-    await prisma.$transaction(async (tx) => {
-      const order = await tx.travelOrderRequest.update({
+    // 2. We assign the transaction result to 'order' so we can use it for the email
+    const order = await prisma.$transaction(async (tx) => {
+      const updatedOrder = await tx.travelOrderRequest.update({
         where: { id: orderId },
         data: {
           status: 'COMPLETED',
@@ -41,7 +53,8 @@ export async function completeTravelOrder(orderId: string, travelNumber: string)
           hrUserId: hrUserId,
         },
         include: {
-          user: { select: { firstName: true, lastName: true, division: true } },
+          // ADDED: email: true to fetch the employee's email address
+          user: { select: { firstName: true, lastName: true, division: true, email: true } },
         },
       })
 
@@ -58,7 +71,7 @@ export async function completeTravelOrder(orderId: string, travelNumber: string)
 
       await tx.notification.create({
         data: {
-          userId: order.userId,
+          userId: updatedOrder.userId,
           type: 'COMPLETED',
           title: 'Travel Order Completed',
           message: `Your travel order has been processed. Travel number: ${travelNumber}`,
@@ -67,7 +80,7 @@ export async function completeTravelOrder(orderId: string, travelNumber: string)
         },
       })
 
-      const staffDivision = order.user.division
+      const staffDivision = updatedOrder.user.division
       if (staffDivision) {
         const divisionHead = await tx.user.findFirst({
           where: { 
@@ -82,14 +95,41 @@ export async function completeTravelOrder(orderId: string, travelNumber: string)
               userId: divisionHead.id,
               type: 'COMPLETED',
               title: 'Travel order completed',
-              message: `Travel order ${travelNumber} for ${order.user.firstName} ${order.user.lastName} has been processed and completed.`,
+              message: `Travel order ${travelNumber} for ${updatedOrder.user.firstName} ${updatedOrder.user.lastName} has been processed and completed.`,
               link: `/division-head/travel-orders/${orderId}`,
               travelOrderId: orderId,
             },
           })
         }
       }
+      
+      // Return the updated order so the email function can access it
+      return updatedOrder
     })
+
+    // 3. SEND EMAIL NOTIFICATION
+    try {
+      await transporter.sendMail({
+        from: `"HR Department" <${process.env.EMAIL_USER}>`,
+        to: order.user.email,
+        subject: `Travel Order Completed: ${travelNumber} ✈️`,
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <h2 style="color: #059669; margin-top: 0;">Travel Order Processed</h2>
+            <p>Hi <strong>${order.user.firstName}</strong>,</p>
+            <p>Your travel order has been officially processed and assigned the tracking number: <strong>${travelNumber}</strong>.</p>
+            <p>You can now view and print the official documents in your dashboard.</p>
+            <br/>
+            <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/employee/requests/${orderId}" 
+               style="display: inline-block; background-color: #059669; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+              View Travel Order
+            </a>
+          </div>
+        `
+      })
+    } catch (emailError) {
+      console.error('Failed to send Nodemailer email:', emailError)
+    }
 
     revalidatePath('/hr/orders')
     return { success: true }
@@ -98,6 +138,7 @@ export async function completeTravelOrder(orderId: string, travelNumber: string)
     return { success: false, error: 'Failed to complete travel order' }
   }
 }
+
 
 export async function getNextTravelNumber() {
   const currentYear = new Date().getFullYear()
