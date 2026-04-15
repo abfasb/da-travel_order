@@ -20,6 +20,7 @@ import {
   CheckCircle,
   Printer,
   Archive,
+  Toolbox,
 } from 'lucide-react'
 
 type Route = {
@@ -59,6 +60,7 @@ const routes: Route[] = [
     icon: Settings,
     href: '/hr/settings',
     children: [
+      { label: 'Main Settings', icon: Toolbox, href: '/hr/settings' },
       { label: 'Audit Logs', icon: History, href: '/hr/audit-logs' },
       { label: 'Notifications', icon: Bell, href: '/hr/notifications' },
     ],
