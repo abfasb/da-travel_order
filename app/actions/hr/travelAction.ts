@@ -42,7 +42,6 @@ export async function completeTravelOrder(orderId: string, travelNumber: string)
 
     const { ipAddress, userAgent } = await getRequestMetadata()
 
-    // 2. We assign the transaction result to 'order' so we can use it for the email
     const order = await prisma.$transaction(async (tx) => {
       const updatedOrder = await tx.travelOrderRequest.update({
         where: { id: orderId },
@@ -53,7 +52,6 @@ export async function completeTravelOrder(orderId: string, travelNumber: string)
           hrUserId: hrUserId,
         },
         include: {
-          // ADDED: email: true to fetch the employee's email address
           user: { select: { firstName: true, lastName: true, division: true, email: true } },
         },
       })
@@ -103,11 +101,9 @@ export async function completeTravelOrder(orderId: string, travelNumber: string)
         }
       }
       
-      // Return the updated order so the email function can access it
       return updatedOrder
     })
 
-    // 3. SEND EMAIL NOTIFICATION
     try {
       await transporter.sendMail({
         from: `"HR Department" <${process.env.EMAIL_USER}>`,

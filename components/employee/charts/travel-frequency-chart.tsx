@@ -12,7 +12,12 @@ interface TravelFrequencyChartProps {
   data: ChartData[]
 }
 
-const chartConfig = { travels: { label: 'Total Travels', color: '#2F6B3E' } } satisfies ChartConfig
+const chartConfig = {
+  travels: {
+    label: 'Total Travels',
+    color: 'hsl(var(--primary))', // 👈 use theme primary
+  },
+} satisfies ChartConfig
 
 export function TravelFrequencyChart({ data }: TravelFrequencyChartProps) {
   if (!data || data.length === 0) {
@@ -27,7 +32,7 @@ export function TravelFrequencyChart({ data }: TravelFrequencyChartProps) {
         <YAxis dataKey="province" type="category" tickLine={false} axisLine={false} hide />
         <ChartTooltip cursor={{ fill: 'var(--theme-primary)', opacity: 0.1 }} content={<ChartTooltipContent indicator="line" />} />
         <Bar dataKey="travels" layout="vertical" fill="var(--color-travels)" radius={[0, 6, 6, 0]} barSize={40}>
-          <LabelList dataKey="province" position="insideLeft" offset={16} className="fill-white font-semibold text-sm drop-shadow-sm" />
+          <LabelList dataKey="province" position="insideLeft" offset={16} className="fill-primary-foreground font-semibold text-sm drop-shadow-sm" />
           <LabelList dataKey="travels" position="right" offset={12} className="fill-foreground font-bold text-sm" />
         </Bar>
       </BarChart>

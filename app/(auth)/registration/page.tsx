@@ -51,7 +51,6 @@ const formSchema = z.object({
   mobileNumber: z.string().min(10, "Valid mobile number is required"),
   employmentStatus: z.string().min(1, "Employment status is required"),
   division: z.string().min(1, "Division is required"),
-  // Logic fields
   province: z.string().min(1, "Please select a province"),
   subStation: z.string().optional(),
   officialStation: z.string().min(1, "Official station is required"),

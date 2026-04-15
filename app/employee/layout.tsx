@@ -32,7 +32,7 @@ export default async function EmployeeLayout({
   }
 
   return (
-    <div className="flex h-screen bg-muted/10">
+    <div className="flex h-screen overflow-y-hidden bg-muted/10">
         {/* @ts-ignore */}
       <Sidebar user={currentUser} />
       <div className="flex flex-1 flex-col overflow-hidden">

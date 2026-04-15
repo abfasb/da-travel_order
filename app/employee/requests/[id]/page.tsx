@@ -298,7 +298,7 @@ export default async function TravelOrderPage({ params }: PageProps) {
   const showHRStep = allOfficialsApproved || isHRProcessing || isCompleted
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted print:bg-white print:block">
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted overflow-hidden print:bg-white print:block">
       
       <div className="sticky top-0 z-20 bg-background/90 backdrop-blur-md border-b border-border print:hidden shadow-sm">
         <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">

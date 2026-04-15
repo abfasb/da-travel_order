@@ -14,7 +14,7 @@ export default async function TravelHistoryPage() {
   })
 
   return (
-    <div className="p-6">
+    <div className="p-6 dark:bg-black h-full">
       <TravelHistoryTable data={travelOrders} />
     </div>
   )
