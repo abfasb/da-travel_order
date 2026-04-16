@@ -79,11 +79,9 @@ model TravelOrderRequest {
   requestorStation       String
   employmentStatus       EmploymentStatus
 
-  // Foreign key to the user who created it
   userId                 String
   user                   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Travel details
   purpose                String        @db.Text
   destinationProvince    String
   specificLocation       String

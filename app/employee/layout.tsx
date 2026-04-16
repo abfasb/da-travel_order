@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { Sidebar } from '@/components/employee/sidebar'
 import { Navbar } from '@/components/employee/navbar'
+import { ProfileCompletionCheck } from '@/components/employee/profile-completion-check'
 
 export default async function EmployeeLayout({
   children,
@@ -20,10 +21,14 @@ export default async function EmployeeLayout({
   const currentUser = await prisma.user.findUnique({
     where: { id: userId },
     select: {
+      id: true,
       firstName: true,
       lastName: true,
-      division: true, 
+      division: true,
       avatarUrl: true,
+      mobileNumber: true,
+      officialStation: true,
+      employmentStatus: true,
     }
   })
 
@@ -38,10 +43,12 @@ export default async function EmployeeLayout({
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* @ts-ignore */}
         <Navbar user={currentUser} />
-        <main className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 to-slate-100/50">
+        <main className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-950 dark:to-slate-900">
           {children}
         </main>
       </div>
+      
+      <ProfileCompletionCheck user={currentUser} />
     </div>
   )
 }
