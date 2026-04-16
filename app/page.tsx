@@ -24,8 +24,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-
-// --- 3D Elements ---
+import { useRouter } from "next/navigation";
 
 interface TravelArcProps {
   start: [number, number, number];
@@ -148,7 +147,7 @@ const ProfessionalGlobe: React.FC = () => {
   );
 };
 
-// --- UI Logic ---
+
 
 const transition = { duration: 0.8, ease: [0.16, 1, 0.3, 1] };
 
@@ -185,7 +184,10 @@ const features = [
   },
 ];
 
-const Navbar: React.FC = () => (
+const Navbar: React.FC = () => {
+  
+  const router = useRouter();
+  return (
   <nav className="fixed top-0 w-full z-50 border-b border-white/[0.05] bg-black/50 backdrop-blur-2xl">
     <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
       <div className="flex items-center gap-4 hover:opacity-80 transition-opacity cursor-pointer">
@@ -208,12 +210,13 @@ const Navbar: React.FC = () => (
           </a>
         ))}
       </div>
-      <Button className="hidden md:flex bg-white text-black hover:bg-zinc-200 rounded-lg h-10 px-6 font-semibold transition-all">
+      <Button onClick={() => router.push('/login')} className="hidden md:flex bg-white text-black hover:bg-zinc-200 rounded-lg h-10 px-6 font-semibold transition-all">
         Sign In
       </Button>
     </div>
   </nav>
-);
+  )
+};
 
 const HeroSection: React.FC = () => (
   <section className="relative min-h-screen flex items-center pt-24 pb-12 overflow-hidden bg-[#020202]">

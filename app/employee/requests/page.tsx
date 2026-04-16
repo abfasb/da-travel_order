@@ -26,7 +26,7 @@ export default async function EmployeeDashboardPage() {
 
   return (
     <div className="min-h-screen bg-background p-4">
-      <div className="max-w-6xl mx-auto space-y-8">
+      <div className="max-w-7xl mx-auto space-y-8">
         <div className="bg-emerald-900 dark:bg-emerald-950 text-white p-8 rounded-3xl shadow-lg flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-black mb-2 tracking-tight">My Workspace</h1>

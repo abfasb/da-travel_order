@@ -115,7 +115,6 @@ export function RequestForm({ employmentStatus = 'COS' }: { employmentStatus?: s
       
       <input type="hidden" {...register('employmentStatus')} value={employmentStatus || 'COS'} />
 
-      {/* SECTION 1: Personal Profile */}
       <div className="space-y-4">
         <h3 className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest flex items-center gap-2">
           <Users className="w-4 h-4" /> Employee Profile
