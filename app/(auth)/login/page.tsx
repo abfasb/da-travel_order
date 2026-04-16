@@ -2,6 +2,7 @@ import Image from "next/image"
 import { GalleryVerticalEnd } from "lucide-react"
 import { LoginForm } from "@/components/login-form" 
 import BgLogo from "@/assets/bg-login.png"
+import { signInWithGoogle } from "@/app/actions/auth/google-auth"
 
 export default function LoginPage() {
   return (
