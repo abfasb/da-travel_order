@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -55,6 +55,19 @@ const statusColorMap: Record<string, string> = {
   COMPLETED: 'bg-gray-100 text-gray-800 border-gray-200',
 }
 
+const divisionLabels: Record<string, string> = {
+  regulatory: 'Regulatory Division',
+  laboratory: 'Integrated Laboratory Division',
+  research: 'Research Division',
+  field_ops: 'Field Operations Division',
+  agri_marketing: 'Agribusiness and Marketing Assistance Division',
+  engineering: 'Regional Agricultural Engineering Division',
+  planning: 'Planning, Monitoring and Evaluation Division',
+  info_section: 'Regional Agriculture & Fisheries Information Section',
+  admin_finance: 'Administrative & Finance Division',
+  procurement: 'Procurement of Goods and Infrastructure',
+}
+
 const ITEMS_PER_PAGE = 10
 
 export default function OrdersTable({ initialOrders }: { initialOrders: Order[] }) {
@@ -62,6 +75,7 @@ export default function OrdersTable({ initialOrders }: { initialOrders: Order[] 
   const [currentPage, setCurrentPage] = useState(1)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
+  const [divisionFilter, setDivisionFilter] = useState('ALL')
   const [processingId, setProcessingId] = useState<string | null>(null)
   const [travelNumberInput, setTravelNumberInput] = useState('')
   const [assignModalOpen, setAssignModalOpen] = useState(false)
@@ -69,12 +83,24 @@ export default function OrdersTable({ initialOrders }: { initialOrders: Order[] 
   const [suggestedNumber, setSuggestedNumber] = useState<string>('')
   const [isLoadingNumber, setIsLoadingNumber] = useState(false)
 
+  // Get unique divisions from orders for the filter dropdown
+  const availableDivisions = useMemo(() => {
+    const divisions = new Set<string>()
+    initialOrders.forEach(order => {
+      if (order.user.division) {
+        divisions.add(order.user.division)
+      }
+    })
+    return Array.from(divisions)
+  }, [initialOrders])
+
   const filteredOrders = initialOrders.filter((order) => {
     const fullName = `${order.user.firstName} ${order.user.lastName}`.toLowerCase()
     const matchesSearch = fullName.includes(search.toLowerCase()) ||
       (order.travelOrderNumber && order.travelOrderNumber.includes(search))
     const matchesStatus = statusFilter === 'ALL' || order.status === statusFilter
-    return matchesSearch && matchesStatus
+    const matchesDivision = divisionFilter === 'ALL' || order.user.division === divisionFilter
+    return matchesSearch && matchesStatus && matchesDivision
   })
 
   const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE)
@@ -115,7 +141,6 @@ export default function OrdersTable({ initialOrders }: { initialOrders: Order[] 
   }
 
   const handlePrint = (orderId: string) => {
-    // Open the print-friendly page in a new tab
     window.open(`/hr/orders/${orderId}/print`, '_blank')
   }
 
@@ -160,6 +185,20 @@ export default function OrdersTable({ initialOrders }: { initialOrders: Order[] 
                 <SelectItem value="COMPLETED">Completed</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={divisionFilter} onValueChange={setDivisionFilter}>
+              <SelectTrigger className="w-[220px]">
+                <Filter className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="Filter by division" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Divisions</SelectItem>
+                {availableDivisions.map(div => (
+                  <SelectItem key={div} value={div}>
+                    {divisionLabels[div] || div}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Table */}
@@ -169,6 +208,7 @@ export default function OrdersTable({ initialOrders }: { initialOrders: Order[] 
                 <TableRow>
                   <TableHead>TO Number</TableHead>
                   <TableHead>Employee</TableHead>
+                  <TableHead>Division</TableHead>
                   <TableHead>Destination</TableHead>
                   <TableHead>Travel Dates</TableHead>
                   <TableHead>Status</TableHead>
@@ -185,6 +225,9 @@ export default function OrdersTable({ initialOrders }: { initialOrders: Order[] 
                     </TableCell>
                     <TableCell>
                       {order.user.firstName} {order.user.lastName}
+                    </TableCell>
+                    <TableCell>
+                      {order.user.division ? divisionLabels[order.user.division] || order.user.division : '—'}
                     </TableCell>
                     <TableCell>{order.destinationProvince}</TableCell>
                     <TableCell>
@@ -275,11 +318,11 @@ export default function OrdersTable({ initialOrders }: { initialOrders: Order[] 
       {/* Assign Number Modal */}
       {assignModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 w-full max-w-md">
             <h2 className="text-lg font-bold mb-4">Assign Travel Order Number</h2>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                <label className="text-sm font-medium mb-1 block">
                   Travel Order Number
                 </label>
                 <Input
@@ -289,10 +332,10 @@ export default function OrdersTable({ initialOrders }: { initialOrders: Order[] 
                   disabled={isLoadingNumber}
                 />
                 {isLoadingNumber && (
-                  <p className="text-xs text-gray-500 mt-1">Generating suggested number...</p>
+                  <p className="text-xs text-muted-foreground mt-1">Generating suggested number...</p>
                 )}
                 {!isLoadingNumber && suggestedNumber && (
-                  <p className="text-xs text-green-600 mt-1">
+                  <p className="text-xs text-green-600 dark:text-green-400 mt-1">
                     Suggested: {suggestedNumber}
                   </p>
                 )}

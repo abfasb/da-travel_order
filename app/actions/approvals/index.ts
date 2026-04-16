@@ -191,6 +191,10 @@ export async function submitApproval({
       console.error('Failed to send Nodemailer email:', emailError)
     }
 
+    revalidatePath('/approvers/approvals')
+    revalidatePath(`/approvers/approvals/${approval.travelOrderId}`) 
+    revalidatePath('/employee/requests')
+
     return { success: true }
   } catch (error) {
     console.error('Approval error:', error)

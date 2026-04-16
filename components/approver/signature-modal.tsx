@@ -29,6 +29,7 @@ interface SignatureModalProps {
 }
 
 export function SignatureModal({ orderId, approvalId, userRole }: SignatureModalProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false)
   const [signatureData, setSignatureData] = useState<string | null>(null)
   const [certified, setCertified] = useState(false)
@@ -121,7 +122,8 @@ export function SignatureModal({ orderId, approvalId, userRole }: SignatureModal
     if (result.success) {
       toast.success('Travel order approved successfully.')
       setOpen(false)
-      window.location.reload()
+      router.push('/approvers/approvals')
+      router.refresh();
     } else {
       toast.error(result.error || 'Failed to approve.')
       setIsSubmitting(false)
@@ -146,7 +148,8 @@ export function SignatureModal({ orderId, approvalId, userRole }: SignatureModal
     if (result.success) {
       toast.success('Travel order rejected.')
       setOpen(false)
-      window.location.reload()
+      router.push('/approvers/approvals');
+      router.refresh();
     } else {
       toast.error(result.error || 'Failed to reject.')
       setIsSubmitting(false)
