@@ -59,16 +59,12 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
     redirect('/approvals')
   }
 
-  // --- AUTHORIZATION LOGIC ---
-  // Important: the stored division value is 'field_ops' (from the dropdown)
   const isFieldOps = travelOrder.user?.division === 'field_ops'
 
-  // APCO and Chief Agriculturist are only for Field Ops
   if (userRole === 'APCO' || userRole === 'CHIEF_AGRICULTURIST') {
     if (!isFieldOps) redirect('/approvals')
   }
 
-  // Chief Admin: for Field Ops, requires both APCO and Chief Agriculturist approved
   if (userRole === 'CHIEF_ADMINISTRATIVE') {
     if (isFieldOps) {
       const apco = travelOrder.approvals.find(a => a.approverRole === 'APCO')
@@ -79,16 +75,13 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
     }
   }
 
-  // Regional Executive: always needs Chief Admin approved
   if (userRole === 'REGIONAL_EXECUTIVE') {
     const admin = travelOrder.approvals.find(a => a.approverRole === 'CHIEF_ADMINISTRATIVE')
     if (admin?.status !== 'APPROVED') {
       redirect('/approvals')
     }
   }
-  // --- END AUTHORIZATION LOGIC ---
-
-  // --- DYNAMIC TIMELINE SEQUENCE ---
+  
   const sequence = isFieldOps
     ? ['APCO', 'CHIEF_AGRICULTURIST', 'CHIEF_ADMINISTRATIVE', 'REGIONAL_EXECUTIVE']
     : ['CHIEF_ADMINISTRATIVE', 'REGIONAL_EXECUTIVE']

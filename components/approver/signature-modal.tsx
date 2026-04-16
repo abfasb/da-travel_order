@@ -39,7 +39,6 @@ export function SignatureModal({ orderId, approvalId, userRole }: SignatureModal
 
   const sigCanvas = useRef<SignatureCanvas>(null)
 
-  // Load saved signature when modal opens
   useEffect(() => {
     if (open) {
       const loadSaved = async () => {
