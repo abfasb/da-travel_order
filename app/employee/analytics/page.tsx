@@ -7,10 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { StatsCards } from '@/components/employee/charts/stats-cards'
 import { MonthlyTrendChart } from '@/components/employee/charts/monthly-trend-chart'
 import { DestinationChart } from '@/components/employee/charts/destination-chart'
-import { StatusBreakdownChart } from '@/components/employee/charts/status-breakdown-chart'
 import { RecentTravelsTable } from '@/components/employee/charts/recent-travels-table'
 import { Suspense } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
+import { StatusBreakdownInteractive } from '@/components/employee/charts/custom-chart'
 
 export const metadata: Metadata = {
   title: 'Analytics | TOMS Employee',
@@ -29,6 +29,8 @@ export default async function AnalyticsPage() {
     where: { userId: user.id },
     orderBy: { createdAt: 'desc' },
   })
+
+  const allOrders = travelOrders;
 
   const totalTravels = travelOrders.length
   const pendingCount = travelOrders.filter(o => o.status === 'PENDING' || o.status === 'REVIEWING').length
@@ -121,7 +123,7 @@ export default async function AnalyticsPage() {
             </CardHeader>
             <CardContent className="h-72">
               <Suspense fallback={<ChartSkeleton />}>
-                <StatusBreakdownChart data={statusChartData} />
+                <StatusBreakdownInteractive orders={allOrders} />
               </Suspense>
             </CardContent>
           </Card>

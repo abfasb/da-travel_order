@@ -3,6 +3,18 @@
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { cookies, headers } from 'next/headers'
+import nodemailer from 'nodemailer';
+
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_APP_PASSWORD,
+  },
+})
+
 
 async function getRequestMetadata() {
   const headersList = await headers()
@@ -43,7 +55,8 @@ export async function submitApproval({
               select: { 
                 firstName: true, 
                 lastName: true, 
-                division: true 
+                division: true,
+                email: true,
               } 
             } 
           }
@@ -60,7 +73,6 @@ export async function submitApproval({
     const staffDivision = approval.travelOrder.user.division
 
     await prisma.$transaction(async (tx) => {
-      // Update approval status
       await tx.approval.update({
         where: { id: approvalId },
         data: {
@@ -71,7 +83,6 @@ export async function submitApproval({
         },
       })
 
-      // Handle rejection
       if (action === 'REJECT') {
         await tx.travelOrderRequest.update({
           where: { id: approval.travelOrderId },
@@ -141,7 +152,45 @@ export async function submitApproval({
       }
     })
 
-    revalidatePath('/approvers/approvals')
+    try {
+      const isApproved = action === 'APPROVE';
+      const statusColor = isApproved ? '#059669' : '#dc2626';
+      const statusText = isApproved ? 'Approved' : 'Rejected';
+      const roleName = approval.approverRole.replace('_', ' '); 
+
+      await transporter.sendMail({
+        from: `"Travel Order System" <${process.env.EMAIL_USER}>`,
+        to: approval.travelOrder.user.email,
+        subject: `Travel Order ${statusText} by ${roleName} ✈️`,
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <h2 style="color: ${statusColor}; margin-top: 0;">Travel Order ${statusText}</h2>
+            <p>Hi <strong>${approval.travelOrder.user.firstName}</strong>,</p>
+            <p>Your travel order request has been <strong>${statusText.toLowerCase()}</strong> by the ${roleName}.</p>
+            
+            ${!isApproved && comment ? `
+              <div style="background-color: #fef2f2; padding: 15px; margin: 20px 0;">
+                <p style="margin: 0; color: #991b1b;"><strong>Reason for rejection:</strong><br/>${comment}</p>
+              </div>
+            ` : ''}
+
+            ${isApproved 
+              ? `<p style="color: #475569;">Your request will continue through the approval workflow or proceed to HR for final processing.</p>` 
+              : `<p style="color: #475569;">Please review the comments and submit a new request if necessary.</p>`
+            }
+            
+            <br/>
+            <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/employee/requests/${approval.travelOrderId}" 
+               style="display: inline-block; background-color: ${statusColor}; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+              View Travel Order
+            </a>
+          </div>
+        `
+      })
+    } catch (emailError) {
+      console.error('Failed to send Nodemailer email:', emailError)
+    }
+
     return { success: true }
   } catch (error) {
     console.error('Approval error:', error)
