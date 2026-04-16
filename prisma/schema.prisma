@@ -61,12 +61,24 @@ model User {
   auditLogs        AuditLog[]           
   notifications    Notification[]       
   hrProcessedOrders TravelOrderRequest[] @relation("HRAssignments") 
-  attachments      Attachment[]         
+  attachments      Attachment[]    
+  passwordResetTokens PasswordResetToken[]     
 
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 
   @@map("users")
+}
+
+model PasswordResetToken {
+  id         String   @id @default(uuid())
+  token      String   @unique
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  
+  @@map("password_reset_tokens")
 }
 
 model TravelOrderRequest {
