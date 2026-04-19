@@ -82,22 +82,18 @@ const GlobeScene: React.FC = () => {
     <group ref={groupRef}>
       <OrbitControls enableZoom={false} enablePan={false} enableRotate={false} />
 
-      {/* Wireframe latitude/longitude feel */}
       <Sphere args={[2.03, 24, 12]}>
         <meshBasicMaterial color="#16a34a" transparent opacity={0.06} wireframe />
       </Sphere>
 
-      {/* Core planet — dark navy on light panel */}
       <Sphere args={[2, 64, 64]}>
         <meshStandardMaterial color="#0c1424" roughness={0.85} metalness={0.15} />
       </Sphere>
 
-      {/* Atmospheric rim */}
       <Sphere args={[2.14, 32, 32]}>
         <meshBasicMaterial color="#22c55e" transparent opacity={0.07} side={THREE.BackSide} />
       </Sphere>
 
-      {/* Data nodes */}
       {points.map((p, i) => (
         <group key={i}>
           <mesh position={p}>
@@ -122,7 +118,6 @@ const GlobeScene: React.FC = () => {
   );
 };
 
-// ─── Animation Variants ────────────────────────────────────────────────────
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -140,19 +135,17 @@ const fadeIn = {
   }),
 };
 
-// ─── Announcement Bar ──────────────────────────────────────────────────────
 
 const AnnouncementBar: React.FC = () => (
   <div className="w-full bg-green-50 border-b border-green-200 py-2.5 px-6 flex items-center justify-center gap-3 z-50 relative">
     <span className="flex h-1.5 w-1.5 rounded-full bg-green-600 animate-pulse" />
     <p className="text-[11px] font-bold tracking-widest uppercase text-green-800 text-center">
-      DA-MIMAROPA Digital Transformation Initiative — Travel Order System v2.0 Now Live
+      DA-MIMAROPA Digital Transformation Initiative — Travel Order System Now Live
     </p>
     <ArrowUpRight className="w-3 h-3 text-green-700 shrink-0" />
   </div>
 );
 
-// ─── Navbar ────────────────────────────────────────────────────────────────
 
 const Navbar: React.FC = () => {
   const router = useRouter();
@@ -174,7 +167,6 @@ const Navbar: React.FC = () => {
         : "bg-transparent"
     }`}>
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Brand */}
         <div className="flex items-center gap-3 cursor-pointer group">
           <div className="w-9 h-9 bg-green-700 rounded-lg flex items-center justify-center shadow-md shadow-green-900/20 group-hover:bg-green-600 transition-colors">
             <Leaf className="w-4 h-4 text-white" />
@@ -185,7 +177,6 @@ const Navbar: React.FC = () => {
           </div>
         </div>
 
-        {/* Desktop links */}
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((item) => (
             <a
@@ -198,7 +189,6 @@ const Navbar: React.FC = () => {
           ))}
         </div>
 
-        {/* Desktop CTAs */}
         <div className="hidden md:flex items-center gap-3">
           <Button
             variant="ghost"
@@ -295,9 +285,6 @@ const HeroSection: React.FC = () => {
               <span className="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse mr-2 inline-block" />
               All Systems Operational
             </Badge>
-            <Badge variant="outline" className="border-stone-300 text-stone-400 text-[10px] tracking-[0.15em] uppercase px-3 py-1.5 rounded-md font-semibold bg-white">
-              Version 2.0
-            </Badge>
           </motion.div>
 
           <motion.div variants={fadeUp} custom={0.1} initial="hidden" animate="visible">
@@ -316,7 +303,7 @@ const HeroSection: React.FC = () => {
             variants={fadeUp} custom={0.2} initial="hidden" animate="visible"
             className="text-base md:text-lg text-stone-500 leading-relaxed mb-10 max-w-lg font-light"
           >
-            A centralized digital platform engineered for the Department of Agriculture MIMAROPA — automating travel authorities, approval workflows, and fund disbursement across all provincial offices.
+            A centralized digital platform built for the Department of Agriculture MIMAROPA — automating travel authorities, approval workflows, and fund disbursement across all provincial offices.
           </motion.p>
 
           <motion.div
@@ -350,84 +337,10 @@ const HeroSection: React.FC = () => {
             ))}
           </motion.div>
         </div>
-
-        {/* Right — Globe in dark panel */}
-        <motion.div
-          variants={fadeIn} custom={0.4} initial="hidden" animate="visible"
-          className="lg:col-span-6 xl:col-span-7 flex justify-center lg:justify-end"
-        >
-          <div className="relative w-full max-w-xl lg:max-w-none aspect-square lg:h-[580px] lg:w-auto lg:aspect-auto">
-            {/* Dark globe panel */}
-            <div className="w-full h-full rounded-3xl bg-[#080f1a] border border-stone-200 shadow-2xl shadow-stone-300/40 overflow-hidden relative">
-              {/* Panel chrome header */}
-              <div className="absolute top-0 left-0 right-0 h-10 bg-[#080f1a]/80 border-b border-white/[0.06] flex items-center px-4 gap-2 z-10 backdrop-blur-sm">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-                <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-                <span className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
-                <span className="ml-auto text-[10px] text-white/20 font-mono uppercase tracking-widest">MIMAROPA Regional Network</span>
-              </div>
-
-              <Canvas camera={{ position: [0, 0, 7], fov: 40 }}>
-                <ambientLight intensity={0.2} />
-                <directionalLight position={[5, 5, 5]} intensity={1.5} />
-                <directionalLight position={[-5, -5, -5]} intensity={0.4} color="#16a34a" />
-                <Suspense fallback={null}>
-                  <GlobeScene />
-                </Suspense>
-              </Canvas>
-
-              {/* Globe panel overlay labels */}
-              <div className="absolute bottom-5 left-5 right-5 flex items-center justify-between z-10">
-                {["Mindoro", "Marinduque", "Romblon", "Palawan"].map((loc) => (
-                  <div key={loc} className="flex flex-col items-center gap-1">
-                    <span className="w-1 h-1 rounded-full bg-green-400" />
-                    <span className="text-[9px] text-green-400/60 font-mono uppercase tracking-widest hidden sm:block">{loc}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Inner vignette */}
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_50%,#080f1a_100%)] pointer-events-none" />
-            </div>
-
-            {/* Floating stat chips */}
-            <motion.div
-              initial={{ opacity: 0, x: -16, y: 10 }}
-              animate={{ opacity: 1, x: 0, y: 0 }}
-              transition={{ delay: 0.8, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute -left-6 top-1/4 bg-white rounded-2xl border border-stone-200 shadow-xl shadow-stone-200/60 px-4 py-3 hidden lg:flex items-center gap-3"
-            >
-              <div className="w-8 h-8 bg-green-100 rounded-xl flex items-center justify-center">
-                <FileText className="w-4 h-4 text-green-700" />
-              </div>
-              <div>
-                <div className="text-base font-black text-stone-900">1,240+</div>
-                <div className="text-[10px] text-stone-400 font-semibold uppercase tracking-widest">Orders Processed</div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 16, y: 10 }}
-              animate={{ opacity: 1, x: 0, y: 0 }}
-              transition={{ delay: 1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute -right-6 bottom-1/3 bg-white rounded-2xl border border-stone-200 shadow-xl shadow-stone-200/60 px-4 py-3 hidden lg:flex items-center gap-3"
-            >
-              <div className="w-8 h-8 bg-green-100 rounded-xl flex items-center justify-center">
-                <CheckCircle2 className="w-4 h-4 text-green-700" />
-              </div>
-              <div>
-                <div className="text-base font-black text-stone-900">98.6%</div>
-                <div className="text-[10px] text-stone-400 font-semibold uppercase tracking-widest">Approval Accuracy</div>
-              </div>
-            </motion.div>
-          </div>
-        </motion.div>
       </div>
     </section>
   );
 };
-
-// ─── Metrics Bar ───────────────────────────────────────────────────────────
 
 const stats = [
   { value: "1,240+", label: "Travel Orders Processed", icon: <FileText className="w-4 h-4" /> },
@@ -459,7 +372,6 @@ const MetricsBar: React.FC = () => (
   </section>
 );
 
-// ─── Features Grid ─────────────────────────────────────────────────────────
 
 const features = [
   {
@@ -561,7 +473,6 @@ const FeaturesGrid: React.FC = () => (
   </section>
 );
 
-// ─── Workflow Section ──────────────────────────────────────────────────────
 
 const workflowSteps = [
   {
@@ -713,14 +624,11 @@ const ComplianceSection: React.FC = () => (
   </section>
 );
 
-// ─── CTA Section ───────────────────────────────────────────────────────────
-
 const CTASection: React.FC = () => {
   const router = useRouter();
   return (
     <section className="bg-white py-32 border-t border-stone-100">
       <div className="max-w-7xl mx-auto px-6">
-        {/* Full-width dark CTA card */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -771,7 +679,6 @@ const CTASection: React.FC = () => {
   );
 };
 
-// ─── Footer ────────────────────────────────────────────────────────────────
 
 const Footer: React.FC = () => (
   <footer className="bg-[#FAFAF8] border-t border-stone-200">
