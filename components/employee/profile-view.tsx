@@ -22,6 +22,19 @@ import {
 import { toast } from 'sonner'
 import { uploadAvatar, removeAvatar } from '@/app/actions/user/avatar'
 
+const DIVISION_CHOICES = [
+  { value: "regulatory", label: "Regulatory Division" },
+  { value: "laboratory", label: "Integrated Laboratory Division" },
+  { value: "research", label: "Research Division" },
+  { value: "field_ops", label: "Field Operations Division" },
+  { value: "agri_marketing", label: "Agribusiness and Marketing Assistance Division" },
+  { value: "engineering", label: "Regional Agricultural Engineering Division" },
+  { value: "planning", label: "Planning, Monitoring and Evaluation Division" },
+  { value: "info_section", label: "Regional Agriculture & Fisheries Information Section" },
+  { value: "admin_finance", label: "Administrative & Finance Division" },
+  { value: "procurement", label: "Procurement of Goods and Infrastructure" },
+] as const;
+
 interface ProfileViewProps {
   user: {
     id: string
@@ -48,6 +61,9 @@ export function ProfileView({ user: initialUser }: ProfileViewProps) {
   
   const initials = `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`.toUpperCase()
   const fullName = `${user.firstName} ${user.middleInitial ? user.middleInitial + '. ' : ''}${user.lastName}`.trim()
+
+  // 2. Find the matching label for the user's division, fallback to raw value if not found
+  const divisionLabel = DIVISION_CHOICES.find(d => d.value === user.division)?.label || user.division;
 
   const formatStatus = (status: string) => {
     if (!status) return ''
@@ -155,7 +171,8 @@ export function ProfileView({ user: initialUser }: ProfileViewProps) {
             
             <div className="space-y-1 w-full">
               <h2 className="text-2xl font-bold tracking-tight text-foreground">{fullName}</h2>
-              <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400/90 capitalize">{user.division}</p>
+              {/* 3. Replaced user.division with divisionLabel and removed capitalize */}
+              <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400/90">{divisionLabel}</p>
             </div>
 
             {/* Sleeker Status Badges */}
@@ -297,8 +314,9 @@ export function ProfileView({ user: initialUser }: ProfileViewProps) {
                 <Label className="text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider flex items-center gap-1.5 mb-2">
                   <Building className="w-4 h-4" /> Assigned Division
                 </Label>
-                <div className="text-foreground font-medium text-lg capitalize px-1">
-                  {user.division}
+                {/* 4. Replaced user.division with divisionLabel and removed capitalize */}
+                <div className="text-foreground font-medium text-lg px-1">
+                  {divisionLabel}
                 </div>
               </div>
 

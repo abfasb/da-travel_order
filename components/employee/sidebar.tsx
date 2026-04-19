@@ -29,6 +29,19 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 
+const DIVISION_CHOICES = [
+  { value: "regulatory", label: "Regulatory Division" },
+  { value: "laboratory", label: "Integrated Laboratory Division" },
+  { value: "research", label: "Research Division" },
+  { value: "field_ops", label: "Field Operations Division" },
+  { value: "agri_marketing", label: "Agribusiness and Marketing Assistance Division" },
+  { value: "engineering", label: "Regional Agricultural Engineering Division" },
+  { value: "planning", label: "Planning, Monitoring and Evaluation Division" },
+  { value: "info_section", label: "Regional Agriculture & Fisheries Information Section" },
+  { value: "admin_finance", label: "Administrative & Finance Division" },
+  { value: "procurement", label: "Procurement of Goods and Infrastructure" },
+] as const;
+
 const routes = [
   {
     label: 'Dashboard',
@@ -83,11 +96,11 @@ export function Sidebar({ defaultCollapsed = false, user }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed)
   const [mounted, setMounted] = useState(false)
 
-  // 2. ADDED: Dynamically generate initials and full name
   const initials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
   const fullName = `${user.firstName} ${user.lastName}`;
 
-  // Prevent hydration mismatch
+  const divisionLabel = DIVISION_CHOICES.find(d => d.value === user.division)?.label || user.division;
+
   useEffect(() => {
     setMounted(true)
     const saved = localStorage.getItem('sidebar-collapsed')
@@ -174,28 +187,26 @@ export function Sidebar({ defaultCollapsed = false, user }: SidebarProps) {
               <TooltipTrigger asChild>
                 <Button variant="ghost" size="icon" className="w-full h-10">
                   <Avatar className="h-8 w-8">
-                    {/* 3. Dynamic Initials */}
                     <AvatarFallback>{initials}</AvatarFallback>
                   </Avatar>
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="right">
-                {/* 4. Dynamic Name and Division */}
                 <p>{fullName}</p>
-                <p className="text-xs text-muted-foreground">{user.division}</p>
+                {/* 3. Render divisionLabel here */}
+                <p className="text-xs text-muted-foreground">{divisionLabel}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         ) : (
           <div className="flex items-center gap-3 px-2 py-2">
             <Avatar className="h-8 w-8">
-              {/* 3. Dynamic Initials */}
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              {/* 4. Dynamic Name and Division */}
               <p className="text-sm font-medium truncate">{fullName}</p>
-              <p className="text-xs text-muted-foreground truncate">{user.division}</p>
+              {/* 4. Render divisionLabel here */}
+              <p className="text-xs text-muted-foreground truncate">{divisionLabel}</p>
             </div>
           </div>
         )}

@@ -1,35 +1,53 @@
-"use client";
+'use client'
 
-import React, { useEffect } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, Controller } from "react-hook-form";
-import * as z from "zod";
-import { toast } from "sonner";
-import { registerUser } from "@/app/actions/register";
-
-import { 
-  User, Mail, Briefcase, Lock, ChevronRight,
-  ShieldCheck, MapPin, Building2 
-} from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
+import { useTheme } from 'next-themes'
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+  Bell,
+  Search,
+  Menu,
+  PlusCircle,
+  LogOut,
+  Settings,
+  User,
+  HelpCircle,
+  LayoutDashboard,
+  History,
+  ClipboardList,
+  BarChart3,
+  Leaf,
+  Moon,
+  Sun,
+} from 'lucide-react'
+import { formatDistanceToNow } from 'date-fns'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Separator } from '@/components/ui/separator'
+import { cn } from '@/lib/utils'
+import { getUnreadCount, getRecentNotifications } from '@/app/actions/notifications'
+import { toast } from 'sonner'
 
-const EMPLOYMENT_STATUSES = ["Permanent", "Contract of Service (COS)", "Job Order (JO)"] as const;
-
-const PROVINCES = [
-  "Oriental Mindoro",
-  "Occidental Mindoro",
-  "Marinduque",
-  "Palawan",
-  "Romblon"
-];
-
-const ORIENTAL_MINDORO_STATIONS = ["DA Victoria", "DA Barcenaga", "DA Calapan"];
-
+// 1. Add your DIVISION_CHOICES array here (or import it if it lives in a separate constants file)
 const DIVISION_CHOICES = [
   { value: "regulatory", label: "Regulatory Division" },
   { value: "laboratory", label: "Integrated Laboratory Division" },
@@ -43,254 +61,296 @@ const DIVISION_CHOICES = [
   { value: "procurement", label: "Procurement of Goods and Infrastructure" },
 ] as const;
 
-const formSchema = z.object({
-  firstName: z.string().min(2, "First name is required"),
-  middleInitial: z.string().max(2, "Initial only").optional(),
-  lastName: z.string().min(2, "Last name is required"),
-  email: z.string().email("Invalid email address"),
-  mobileNumber: z.string().min(10, "Valid mobile number is required"),
-  employmentStatus: z.string().min(1, "Employment status is required"),
-  division: z.string().min(1, "Division is required"),
-  province: z.string().min(1, "Please select a province"),
-  subStation: z.string().optional(),
-  officialStation: z.string().min(1, "Official station is required"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-});
+interface NavbarProps {
+  user: {
+    firstName: string;
+    lastName: string;
+    division: string;
+    avatarUrl?: string | null;
+  }
+}
 
-type FormValues = z.infer<typeof formSchema>;
+interface Notification {
+  id: string
+  title: string
+  message: string
+  type: string
+  isRead: boolean
+  link: string | null
+  createdAt: Date
+}
 
-export default function RegisterPage() {
-  const {
-    register,
-    handleSubmit,
-    control,
-    reset,
-    watch,
-    setValue,
-    formState: { errors, isSubmitting },
-  } = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      firstName: "", middleInitial: "", lastName: "",
-      email: "", mobileNumber: "", division: "", employmentStatus: "",
-      province: "", subStation: "", officialStation: "", password: "",
-    },
-  });
+export function Navbar({ user }: NavbarProps) {
+  const pathname = usePathname()
+  const router = useRouter()
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+  const [searchFocused, setSearchFocused] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [recentNotifications, setRecentNotifications] = useState<Notification[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const selectedProvince = watch("province");
-  const selectedSubStation = watch("subStation");
+  const initials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
+  const fullName = `${user.firstName} ${user.lastName}`
+  
+  // 2. Find the matching label for the user's division, fallback to the raw value if not found
+  const divisionLabel = DIVISION_CHOICES.find(d => d.value === user.division)?.label || user.division
 
   useEffect(() => {
-    if (selectedProvince === "Oriental Mindoro") {
-      setValue("officialStation", selectedSubStation || "");
-    } else {
-      setValue("officialStation", selectedProvince);
-      setValue("subStation", ""); 
-    }
-  }, [selectedProvince, selectedSubStation, setValue]);
+    setMounted(true)
+  }, [])
 
-  async function onSubmit(values: FormValues) {
-    const toastId = toast.loading("Creating your account...");
-    const result = await registerUser(values);
-
-    if (result.success) {
-      toast.success("Account created successfully!", { id: toastId });
-      reset();
-    } else {
-      toast.error(result.error || "Failed to create account.", { id: toastId });
+  const fetchNotifications = async () => {
+    try {
+      const [count, recent] = await Promise.all([
+        getUnreadCount(),
+        getRecentNotifications(5)
+      ])
+      setUnreadCount(count)
+      setRecentNotifications(recent)
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
-  const fieldHeight = "h-14 md:h-16";
+  useEffect(() => {
+    fetchNotifications()
+    const interval = setInterval(fetchNotifications, 30000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const handleNotificationClick = async (notification: Notification) => {
+    if (!notification.isRead) {
+      const { markAsRead } = await import('@/app/actions/notifications')
+      await markAsRead(notification.id)
+      setUnreadCount(prev => Math.max(0, prev - 1))
+      setRecentNotifications(prev =>
+        prev.map(n => n.id === notification.id ? { ...n, isRead: true } : n)
+      )
+    }
+    if (notification.link) {
+      router.push(notification.link)
+    }
+  }
+
+  const mobileRoutes = [
+    { label: 'Dashboard', href: '/employee/dashboard', icon: LayoutDashboard },
+    { label: 'Travel Requests', href: '/employee/requests', icon: ClipboardList },
+    { label: 'Travel History', href: '/employee/history', icon: History },
+    { label: 'Analytics', href: '/employee/analytics', icon: BarChart3 },
+    { label: 'Notifications', href: '/employee/notifications', icon: Bell },
+    { label: 'Profile', href: '/employee/profile', icon: User },
+  ]
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch('/api/auth/logout', { method: 'POST' })
+      if (res.ok) {
+        toast.success('Logged out successfully')
+        router.push('/login')
+      } else {
+        toast.error('Logout failed')
+      }
+    } catch (error) {
+      toast.error('Something went wrong')
+    }
+  }
 
   return (
-    <div className="flex min-h-screen w-full bg-white overflow-hidden">
-      
-      <div className="relative hidden lg:flex lg:w-1/2 bg-emerald-950 p-16 flex-col justify-between text-white">
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-16">
-            <img src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMVJJK1z4PWdaWJG9ArC6U45RvjxMJsEZVKQ&s' alt="Logo" className="h-12 w-12 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-             
-            </img>
-            <span className="text-2xl font-black tracking-tighter uppercase italic">DA - Travel Order</span>
-          </div>
-          <h1 className="text-7xl font-black leading-[1] mb-8 tracking-tighter">
-            Personnel <br />
-            <span className="text-emerald-400 underline decoration-emerald-500/30">Onboarding.</span>
-          </h1>
-          <p className="text-emerald-100/60 text-xl max-w-md font-light leading-relaxed">
-            Register your credentials to access the Official Travel Order Management System.
-          </p>
+    <header className="sticky top-0 z-30 flex h-16 items-center border-b bg-card px-4 md:px-6">
+      {/* Mobile menu */}
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="ghost" size="icon" className="md:hidden mr-2">
+            <Menu className="h-5 w-5" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="w-64 p-0">
+          <SheetHeader className="border-b p-4">
+            <SheetTitle className="flex items-center gap-2">
+              <Leaf className="h-5 w-5 text-primary" />
+              <span>TOMS · Employee</span>
+            </SheetTitle>
+          </SheetHeader>
+          <ScrollArea className="h-[calc(100vh-5rem)]">
+            <nav className="flex flex-col p-2">
+              {mobileRoutes.map((route) => {
+                const isActive = pathname === route.href
+                return (
+                  <Link
+                    key={route.href}
+                    href={route.href}
+                    className={cn(
+                      'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                      isActive
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                    )}
+                  >
+                    <route.icon className="h-4 w-4" />
+                    {route.label}
+                  </Link>
+                )
+              })}
+              <Separator className="my-4" />
+              <div className="px-3 py-2">
+                <p className="text-xs text-muted-foreground mb-2">Signed in as</p>
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user.avatarUrl || undefined} />
+                    <AvatarFallback>{initials}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-sm font-medium">{fullName}</p>
+                    {/* 3. Updated this line to use divisionLabel */}
+                    <p className="text-xs text-muted-foreground">{divisionLabel}</p>
+                  </div>
+                </div>
+              </div>
+            </nav>
+          </ScrollArea>
+        </SheetContent>
+      </Sheet>
+
+      {/* Search bar */}
+      <div className="flex flex-1 items-center gap-4">
+        <div className="relative w-full max-w-md">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search travel orders..."
+            className="pl-9 pr-16"
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setSearchFocused(false)}
+          />
+          {!searchFocused && (
+            <kbd className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none hidden h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:flex">
+              <span className="text-xs">⌘</span>K
+            </kbd>
+          )}
         </div>
       </div>
 
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-20 bg-slate-50/30 overflow-y-auto">
-        <div className="w-full max-w-2xl py-10">
-          <div className="mb-14">
-            <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">Register</h2>
-            <p className="text-slate-500 text-lg font-medium">Join the professional network of DA personnel.</p>
-          </div>
+      <div className="flex items-center gap-2 md:gap-4">
+        <Button asChild variant="default" size="sm" className="hidden md:flex">
+          <Link href="/employee/requests/">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            New Request
+          </Link>
+        </Button>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            
-            <div className="space-y-4">
-              <h3 className="text-xs font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
-                <User className="w-4 h-4" /> Personal Details
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                <div className="md:col-span-5">
-                  <Input {...register("firstName")} placeholder="First Name" className={`${fieldHeight} px-6 border-slate-200 bg-white shadow-sm focus:ring-2 focus:ring-emerald-500/20 text-lg rounded-xl`} />
-                  {errors.firstName && <p className="text-red-500 text-xs mt-1 ml-2">{errors.firstName.message}</p>}
-                </div>
-                <div className="md:col-span-2">
-                  <Input {...register("middleInitial")} placeholder="M.I." className={`${fieldHeight} text-center border-slate-200 bg-white shadow-sm rounded-xl text-lg`} />
-                </div>
-                <div className="md:col-span-5">
-                  <Input {...register("lastName")} placeholder="Last Name" className={`${fieldHeight} px-6 border-slate-200 bg-white shadow-sm rounded-xl text-lg`} />
-                  {errors.lastName && <p className="text-red-500 text-xs mt-1 ml-2">{errors.lastName.message}</p>}
-                </div>
-              </div>
-            </div>
+        {mounted && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            title="Toggle theme"
+          >
+            <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Toggle theme</span>
+          </Button>
+        )}
 
-            <div className="space-y-4">
-              <h3 className="text-xs font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
-                <Mail className="w-4 h-4" /> Reachability
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Input {...register("email")} placeholder="Official Email" className={`${fieldHeight} px-6 border-slate-200 bg-white shadow-sm rounded-xl text-lg`} />
-                  {errors.email && <p className="text-red-500 text-xs mt-1 ml-2">{errors.email.message}</p>}
-                </div>
-                <div>
-                  <Input {...register("mobileNumber")} placeholder="Mobile Number" className={`${fieldHeight} px-6 border-slate-200 bg-white shadow-sm rounded-xl text-lg`} />
-                  {errors.mobileNumber && <p className="text-red-500 text-xs mt-1 ml-2">{errors.mobileNumber.message}</p>}
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-xs font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
-                <Briefcase className="w-4 h-4" /> Assignment
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Controller
-                    control={control}
-                    name="employmentStatus"
-                    render={({ field }) => (
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger className={`${fieldHeight} px-6 border-slate-200 bg-white shadow-sm rounded-xl text-lg font-medium`}>
-                          <SelectValue placeholder="Employment Status" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl border-slate-200">
-                          {EMPLOYMENT_STATUSES.map(s => <SelectItem key={s} value={s} className="py-3">{s}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                  {errors.employmentStatus && <p className="text-red-500 text-xs mt-1 ml-2">{errors.employmentStatus.message}</p>}
-                </div>
-
-                <div>
-                  <Controller
-                    control={control}
-                    name="province"
-                    render={({ field }) => (
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger className={`${fieldHeight} px-6 border-slate-200 bg-white shadow-sm rounded-xl text-lg font-medium`}>
-                          <div className="flex items-center gap-2">
-                            <MapPin className="w-5 h-5 text-slate-400" />
-                            <SelectValue placeholder="Official Station" />
-                          </div>
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl border-slate-200">
-                          {PROVINCES.map(p => <SelectItem key={p} value={p} className="py-3">{p}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                  {errors.province && <p className="text-red-500 text-xs mt-1 ml-2">{errors.province.message}</p>}
-                </div>
-              </div>
-
-              {selectedProvince === "Oriental Mindoro" && (
-                <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                  <Controller
-                    control={control}
-                    name="subStation"
-                    render={({ field }) => (
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger className={`${fieldHeight} px-6 border-emerald-200 bg-emerald-50/30 shadow-sm rounded-xl text-lg font-medium`}>
-                          <SelectValue placeholder="Select Specific Station" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl border-slate-200">
-                          {ORIENTAL_MINDORO_STATIONS.map(s => <SelectItem key={s} value={s} className="py-3">{s}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                  {errors.officialStation && <p className="text-red-500 text-xs mt-1 ml-2">Please select a specific station</p>}
-                </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="h-5 w-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground text-white">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
               )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-80">
+            <DropdownMenuLabel className="flex items-center justify-between">
+              <span>Notifications</span>
+              <Badge variant="outline" className="ml-auto">
+                {unreadCount} unread
+              </Badge>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <ScrollArea className="h-72">
+              {loading ? (
+                <div className="p-4 text-center text-muted-foreground">Loading...</div>
+              ) : recentNotifications.length === 0 ? (
+                <div className="p-4 text-center text-muted-foreground">No notifications</div>
+              ) : (
+                recentNotifications.map((notification) => (
+                  <DropdownMenuItem
+                    key={notification.id}
+                    className={cn(
+                      'flex flex-col items-start gap-1 p-3 cursor-pointer',
+                      !notification.isRead && 'bg-muted/50'
+                    )}
+                    onClick={() => handleNotificationClick(notification)}
+                  >
+                    <div className="flex w-full items-center justify-between">
+                      <span className="font-medium text-sm">{notification.title}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground line-clamp-2">{notification.message}</p>
+                  </DropdownMenuItem>
+                ))
+              )}
+            </ScrollArea>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/employee/notifications" className="justify-center text-primary">
+                View all notifications
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-              {/* DIVISION SELECTOR */}
-              <div>
-                <Controller
-                  control={control}
-                  name="division"
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger className={`${fieldHeight} px-6 border-slate-200 bg-white shadow-sm rounded-xl text-lg font-medium`}>
-                        <div className="flex items-center gap-2">
-                          <Building2 className="w-5 h-5 text-slate-400" />
-                          <SelectValue placeholder="Select Assigned Division" />
-                        </div>
-                      </SelectTrigger>
-                      <SelectContent className="max-h-[300px] rounded-xl border-slate-200">
-                        {DIVISION_CHOICES.map(choice => (
-                          <SelectItem key={choice.value} value={choice.value} className="py-3">
-                            {choice.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                {errors.division && <p className="text-red-500 text-xs mt-1 ml-2">{errors.division.message}</p>}
+        {/* User dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="flex items-center gap-2 px-2">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={user.avatarUrl || undefined} />
+                <AvatarFallback>{initials}</AvatarFallback>
+              </Avatar>
+              <div className="hidden text-left lg:block">
+                <p className="text-sm font-medium">{fullName}</p>
+                {/* 4. Updated this line to use divisionLabel */}
+                <p className="text-xs text-muted-foreground">{divisionLabel}</p>
               </div>
-            </div>
-
-            {/* SECURITY SECTION */}
-            <div className="pt-8 border-t border-slate-200 space-y-4">
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Security</h3>
-              <div>
-                <div className="relative group">
-                  <Lock className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
-                  <Input {...register("password")} type="password" placeholder="Set Account Password" className={`${fieldHeight} pl-14 border-slate-200 bg-white shadow-sm rounded-xl text-lg`} />
-                </div>
-                {errors.password && <p className="text-red-500 text-xs mt-1 ml-2">{errors.password.message}</p>}
-              </div>
-            </div>
-
-            {/* SUBMIT */}
-            <div className="flex flex-col gap-6 pt-6">
-              <Button 
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full h-16 bg-emerald-600 hover:bg-emerald-700 text-white text-xl font-black rounded-2xl shadow-2xl shadow-emerald-600/30 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3"
-              >
-                {isSubmitting ? "Generating Account..." : "Create Account"}
-                {!isSubmitting && <ChevronRight className="w-6 h-6" />}
-              </Button>
-              
-              <p className="text-center text-slate-500 font-semibold">
-                Already registered? <a href="/login" className="text-emerald-600 hover:text-emerald-700 underline underline-offset-8">Sign In</a>
-              </p>
-            </div>
-          </form>
-        </div>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/employee/profile">
+                <User className="mr-2 h-4 w-4" />
+                Profile
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/employee/settings">
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/help">
+                <HelpCircle className="mr-2 h-4 w-4" />
+                Help
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Log out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-    </div>
-  );
+    </header>
+  )
 }

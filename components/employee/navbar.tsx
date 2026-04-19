@@ -47,6 +47,19 @@ import { cn } from '@/lib/utils'
 import { getUnreadCount, getRecentNotifications } from '@/app/actions/notifications'
 import { toast } from 'sonner'
 
+const DIVISION_CHOICES = [
+  { value: "regulatory", label: "Regulatory Division" },
+  { value: "laboratory", label: "Integrated Laboratory Division" },
+  { value: "research", label: "Research Division" },
+  { value: "field_ops", label: "Field Operations Division" },
+  { value: "agri_marketing", label: "Agribusiness and Marketing Assistance Division" },
+  { value: "engineering", label: "Regional Agricultural Engineering Division" },
+  { value: "planning", label: "Planning, Monitoring and Evaluation Division" },
+  { value: "info_section", label: "Regional Agriculture & Fisheries Information Section" },
+  { value: "admin_finance", label: "Administrative & Finance Division" },
+  { value: "procurement", label: "Procurement of Goods and Infrastructure" },
+] as const;
+
 interface NavbarProps {
   user: {
     firstName: string;
@@ -78,6 +91,9 @@ export function Navbar({ user }: NavbarProps) {
 
   const initials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
   const fullName = `${user.firstName} ${user.lastName}`
+  
+  // 2. Find the matching label for the user's division, fallback to the raw value if not found
+  const divisionLabel = DIVISION_CHOICES.find(d => d.value === user.division)?.label || user.division
 
   useEffect(() => {
     setMounted(true)
@@ -187,7 +203,8 @@ export function Navbar({ user }: NavbarProps) {
                   </Avatar>
                   <div>
                     <p className="text-sm font-medium">{fullName}</p>
-                    <p className="text-xs text-muted-foreground">{user.division}</p>
+                    {/* 3. Updated this line to use divisionLabel */}
+                    <p className="text-xs text-muted-foreground">{divisionLabel}</p>
                   </div>
                 </div>
               </div>
@@ -299,7 +316,8 @@ export function Navbar({ user }: NavbarProps) {
               </Avatar>
               <div className="hidden text-left lg:block">
                 <p className="text-sm font-medium">{fullName}</p>
-                <p className="text-xs text-muted-foreground">{user.division}</p>
+                {/* 4. Updated this line to use divisionLabel */}
+                <p className="text-xs text-muted-foreground">{divisionLabel}</p>
               </div>
             </Button>
           </DropdownMenuTrigger>
