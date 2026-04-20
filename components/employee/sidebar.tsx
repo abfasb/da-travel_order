@@ -52,7 +52,7 @@ const routes = [
     label: 'Travel Requests',
     icon: ClipboardList,
     href: '/employee/requests',
-    badge: 3, 
+    badge: 1, 
   },
   {
     label: 'Travel History',
@@ -193,7 +193,6 @@ export function Sidebar({ defaultCollapsed = false, user }: SidebarProps) {
               </TooltipTrigger>
               <TooltipContent side="right">
                 <p>{fullName}</p>
-                {/* 3. Render divisionLabel here */}
                 <p className="text-xs text-muted-foreground">{divisionLabel}</p>
               </TooltipContent>
             </Tooltip>

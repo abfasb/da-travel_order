@@ -14,6 +14,30 @@ export async function getUnreadCount() {
   })
 }
 
+export async function getNotifications(page: number = 1, limit: number = 20) {
+  const cookieStore = await cookies()
+  const userId = cookieStore.get('auth_session')?.value
+  if (!userId) return { notifications: [], total: 0 }
+
+  const skip = (page - 1) * limit
+
+  const [notifications, total] = await Promise.all([
+    prisma.notification.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: limit,
+    }),
+    prisma.notification.count({ where: { userId } }),
+  ])
+
+  return { notifications, total }
+}
+
+export async function markAllAsRead() {
+  return markAllNotificationsAsRead()
+}
+
 export async function getRecentNotifications(limit: number = 5) {
   const cookieStore = await cookies()
   const userId = cookieStore.get('auth_session')?.value

@@ -198,13 +198,10 @@ const HeroSection: React.FC = () => {
           backgroundSize: "28px 28px",
         }}
       />
-      {/* Soft green gradient bloom — top right */}
       <div className="absolute top-0 right-0 w-[700px] h-[700px] bg-gradient-radial from-green-100/60 via-green-50/30 to-transparent rounded-full translate-x-1/3 -translate-y-1/4 z-0 pointer-events-none" />
-      {/* Bottom fade */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#FAFAF8] to-transparent z-0" />
 
       <div className="max-w-7xl mx-auto px-6 relative z-10 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-        {/* Left Column – Text Content */}
         <div className="lg:col-span-6 xl:col-span-5">
           <motion.div
  /* @ts-ignore */
