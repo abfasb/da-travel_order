@@ -204,11 +204,14 @@ const HeroSection: React.FC = () => {
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#FAFAF8] to-transparent z-0" />
 
       <div className="max-w-7xl mx-auto px-6 relative z-10 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-        {/* @ts-ignore */}
+        {/* Left Column – Text Content */}
         <div className="lg:col-span-6 xl:col-span-5">
           <motion.div
-        /* @ts-ignore */
-            variants={fadeUp} custom={0} initial="hidden" animate="visible"
+ /* @ts-ignore */
+            variants={fadeUp}
+            custom={0}
+            initial="hidden"
+            animate="visible"
             className="flex items-center gap-2 mb-8"
           >
             <Badge className="bg-green-100 border-green-300 text-green-800 text-[10px] font-bold tracking-[0.2em] uppercase px-3 py-1.5 rounded-md hover:bg-green-100">
@@ -220,7 +223,7 @@ const HeroSection: React.FC = () => {
             </Badge>
           </motion.div>
 
-        {/* @ts-ignore */}
+{ /* @ts-ignore */}
           <motion.div variants={fadeUp} custom={0.1} initial="hidden" animate="visible">
             <h1 className="text-5xl md:text-6xl xl:text-7xl font-black leading-[0.9] tracking-tight mb-6 text-stone-900">
               Government
@@ -234,16 +237,22 @@ const HeroSection: React.FC = () => {
           </motion.div>
 
           <motion.p
-                /* @ts-ignore */
-            variants={fadeUp} custom={0.2} initial="hidden" animate="visible"
+ /* @ts-ignore */
+            variants={fadeUp}
+            custom={0.2}
+            initial="hidden"
+            animate="visible"
             className="text-base md:text-lg text-stone-500 leading-relaxed mb-10 max-w-lg font-light"
           >
             A centralized digital platform engineered for the Department of Agriculture MIMAROPA — automating travel authorities, approval workflows, and fund disbursement across all provincial offices.
           </motion.p>
 
           <motion.div
-            /* @ts-ignore */
-            variants={fadeUp} custom={0.3} initial="hidden" animate="visible"
+ /* @ts-ignore */
+            variants={fadeUp}
+            custom={0.3}
+            initial="hidden"
+            animate="visible"
             className="flex flex-wrap items-center gap-3 mb-10"
           >
             <Button
@@ -274,6 +283,90 @@ const HeroSection: React.FC = () => {
           </motion.div>
         </div>
 
+        <motion.div
+ /* @ts-ignore */
+          variants={fadeUp}
+          custom={0.2}
+          initial="hidden"
+          animate="visible"
+          className="lg:col-span-6 xl:col-span-7 relative"
+        >
+          <div className="relative rounded-3xl bg-white border border-stone-200 shadow-xl shadow-green-900/5 overflow-hidden p-1">
+            {/* Subtle inner gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-green-50/50 via-white to-white pointer-events-none" />
+            
+            {/* Mockup content */}
+            <div className="relative z-10 p-6">
+              {/* MIMAROPA Map Silhouette */}
+              <div className="mb-6 flex justify-center">
+                <svg width="280" height="180" viewBox="0 0 400 260" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-80">
+                  <path d="M120 40 L160 30 L200 35 L240 45 L260 70 L250 100 L220 120 L190 130 L160 140 L130 130 L100 110 L90 80 Z" fill="#dcfce7" stroke="#86efac" strokeWidth="2" />
+                  <path d="M280 60 L320 50 L350 65 L360 90 L340 110 L310 115 L290 100 L280 80 Z" fill="#dcfce7" stroke="#86efac" strokeWidth="2" />
+                  <path d="M140 150 L170 145 L190 155 L180 175 L150 180 L130 170 Z" fill="#dcfce7" stroke="#86efac" strokeWidth="2" />
+                  <path d="M60 120 L90 110 L100 130 L80 150 L55 145 Z" fill="#dcfce7" stroke="#86efac" strokeWidth="2" />
+                  <path d="M200 30 L230 20 L250 35 L240 55 L210 50 Z" fill="#dcfce7" stroke="#86efac" strokeWidth="2" />
+                  <circle cx="160" cy="80" r="4" fill="#059669" />
+                  <circle cx="300" cy="80" r="4" fill="#059669" />
+                  <circle cx="160" cy="160" r="4" fill="#059669" />
+                  <circle cx="80" cy="130" r="4" fill="#059669" />
+                  <circle cx="220" cy="40" r="4" fill="#059669" />
+                </svg>
+              </div>
+
+              {/* Approval badges row */}
+              <div className="flex justify-center gap-3 mb-6">
+                {["APCO", "Chief Agriculturist", "Admin Officer", "Regional Director"].map((role, idx) => (
+                  <Badge
+                    key={role}
+                    className={`bg-green-50 border-green-200 text-green-700 text-[10px] font-bold px-3 py-1.5 rounded-full ${
+                      idx === 2 ? "ring-2 ring-green-300 ring-offset-1" : ""
+                    }`}
+                  >
+                    {role === "Admin Officer" ? "✓ Admin Officer" : role}
+                  </Badge>
+                ))}
+              </div>
+
+              {/* Travel Order Card Mockup */}
+              <div className="bg-stone-50 border border-stone-200 rounded-2xl p-5 shadow-inner">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-green-700" />
+                    <span className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                      Travel Order #TO-2026-042
+                    </span>
+                  </div>
+                  <Badge className="bg-amber-100 text-amber-700 border-amber-200 text-[9px]">
+                    Pending Approval
+                  </Badge>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-2.5 bg-stone-200 rounded-full w-3/4" />
+                  <div className="h-2.5 bg-stone-200 rounded-full w-1/2" />
+                  <div className="h-2.5 bg-stone-200 rounded-full w-2/3" />
+                </div>
+                <div className="flex justify-end mt-4">
+                  <div className="h-8 w-24 bg-green-100 rounded-lg flex items-center justify-center">
+                    <span className="text-[10px] font-bold text-green-700">APPROVE</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Floating stat pills */}
+              <div className="absolute -top-3 -right-3 bg-white border border-stone-200 rounded-full px-4 py-1.5 shadow-md">
+                <span className="text-[10px] font-bold text-stone-600">98.6% Approval Rate</span>
+              </div>
+              <div className="absolute -bottom-2 -left-2 bg-white border border-stone-200 rounded-full px-3 py-1 shadow-md flex items-center gap-1.5">
+                <Clock className="w-3 h-3 text-green-600" />
+                <span className="text-[9px] font-bold text-stone-500">Avg 72h processing</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Decorative dots */}
+          <div className="absolute -z-10 top-1/2 -translate-y-1/2 -right-6 w-32 h-32 bg-green-100/40 rounded-full blur-2xl" />
+          <div className="absolute -z-10 bottom-0 left-0 w-40 h-40 bg-amber-50/40 rounded-full blur-2xl" />
+        </motion.div>
       </div>
     </section>
   );
