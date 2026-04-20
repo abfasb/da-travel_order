@@ -1,214 +1,234 @@
-'use client'
-
-import { useState, useEffect } from 'react'
+import { getCurrentUser } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import { prisma } from '@/lib/prisma'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  RadarChart,
-  Radar,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-} from 'recharts'
+import { MonthlyTrendChart } from '@/components/hr/charts/monthly-trend-chart'
+import { DivisionPieChart } from '@/components/hr/charts/division-pie-chart'
+import { ProvinceBarChart } from '@/components/hr/charts/province-bar-chart'
 
-interface AnalyticsData {
-  total: number
-  approved: number
-  rejected: number
-  pending: number
-  totalEmployees: number
-  avgApprovalDays: number
-  monthlyData: { month: string; count: number }[]
-  provinceData: { name: string; value: number }[]
-  divisionData: { name: string; value: number }[]
-  radarData: { division: string; approvalRate: number }[]
+export const dynamic = 'force-dynamic'
+
+const divisionLabels: Record<string, string> = {
+  regulatory: 'Regulatory',
+  laboratory: 'Laboratory',
+  research: 'Research',
+  field_ops: 'Field Ops',
+  agri_marketing: 'Agri-Marketing',
+  engineering: 'Engineering',
+  planning: 'Planning',
+  info_section: 'Info Section',
+  admin_finance: 'Admin & Finance',
+  procurement: 'Procurement',
 }
 
-export default function HRAnalyticsPage() {
-  const [data, setData] = useState<AnalyticsData | null>(null)
-  const [loading, setLoading] = useState(true)
+export default async function HRAnalyticsPage() {
+  const user = await getCurrentUser()
+  if (!user || user.role !== 'HR') redirect('/login')
 
-  useEffect(() => {
-    fetch('/api/hr/analytics')
-      .then(res => res.json())
-      .then(setData)
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }, [])
+  // Fetch all necessary data
+  const [
+    totalOrders,
+    approved,           // fully approved, waiting for HR number
+    hrProcessing,       // HR has assigned number but not yet finalized? (optional)
+    completed,          // finalized by HR
+    rejected,
+    pendingReview,      // still in approvers' queues (PENDING/REVIEWING)
+    totalEmployees,
+    monthlyRaw,
+    provinceRaw,
+  ] = await Promise.all([
+    prisma.travelOrderRequest.count(),
+    prisma.travelOrderRequest.count({ where: { status: 'APPROVED' } }),
+    prisma.travelOrderRequest.count({ where: { status: 'HR_PROCESSING' } }),
+    prisma.travelOrderRequest.count({ where: { status: 'COMPLETED' } }),
+    prisma.travelOrderRequest.count({ where: { status: 'REJECTED' } }),
+    prisma.travelOrderRequest.count({
+      where: { status: { in: ['PENDING', 'REVIEWING'] } },
+    }),
+    prisma.user.count({ where: { role: 'STAFF' } }),
+    prisma.$queryRaw<{ month: string; pending: number; completed: number }[]>`
+      SELECT 
+        TO_CHAR(DATE_TRUNC('month', "createdAt"), 'Mon') as month,
+        COUNT(*) FILTER (WHERE status IN ('APPROVED', 'HR_PROCESSING'))::int as pending,
+        COUNT(*) FILTER (WHERE status = 'COMPLETED')::int as completed
+      FROM travel_orders
+      GROUP BY DATE_TRUNC('month', "createdAt")
+      ORDER BY DATE_TRUNC('month', "createdAt")
+    `,
+    prisma.travelOrderRequest.groupBy({
+      by: ['destinationProvince'],
+      _count: { destinationProvince: true },
+      orderBy: { _count: { destinationProvince: 'desc' } },
+      take: 10,
+    }),
+  ])
 
-  if (loading) {
-    return <div className="p-8 text-center">Loading analytics...</div>
-  }
+  // Combine APPROVED + HR_PROCESSING for "Pending HR Action" stat
+  const pendingHRAction = approved + hrProcessing
 
-  if (!data) {
-    return <div className="p-8 text-center">Failed to load data.</div>
-  }
+  const divisionData = await prisma.user.groupBy({
+    by: ['division'],
+    where: { division: { not: null } },
+    _count: { id: true },
+  })
+
+  const divisionChartData = divisionData
+    .filter(d => d.division)
+    .map(d => ({
+      name: divisionLabels[d.division!] || d.division,
+      value: d._count.id,
+    }))
+
+  const provinceChartData = provinceRaw.map(p => ({
+    name: p.destinationProvince,
+    value: p._count.destinationProvince,
+  }))
+
+  const monthlyChartData = monthlyRaw.map(d => ({
+    month: d.month,
+    pending: d.pending,
+    completed: d.completed,
+  }))
 
   return (
-    <div className="space-y-8 p-6">
-      {/* Header */}
+    <div className="p-6 lg:p-8 space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">HR Analytics</h1>
-        <p className="text-muted-foreground">Overall travel statistics and insights.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          HR Analytics
+        </h1>
+        <p className="text-muted-foreground">
+          Comprehensive overview of travel order metrics and processing pipeline.
+        </p>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Travel Orders</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Total Orders
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.total}</div>
-            <p className="text-xs text-muted-foreground">All time requests</p>
+            <div className="text-2xl font-bold">{totalOrders}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Approved</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Pending Review
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{data.approved}</div>
-            <p className="text-xs text-muted-foreground">{((data.approved / data.total) * 100).toFixed(1)}% of total</p>
+            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+              {pendingReview}
+            </div>
+            <p className="text-xs text-muted-foreground">With approvers</p>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Rejected</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Pending HR
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{data.rejected}</div>
-            <p className="text-xs text-muted-foreground">{((data.rejected / data.total) * 100).toFixed(1)}% of total</p>
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+              {pendingHRAction}
+            </div>
+            <p className="text-xs text-muted-foreground">Awaiting number/print</p>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Completed
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{data.pending}</div>
-            <p className="text-xs text-muted-foreground">Awaiting approval</p>
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              {completed}
+            </div>
+            <p className="text-xs text-muted-foreground">Finalized</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Rejected
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+              {rejected}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Employees
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalEmployees}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Completion Rate
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {totalOrders > 0
+                ? ((completed / totalOrders) * 100).toFixed(1)
+                : '0'}%
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Additional Metrics */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Total Employees</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{data.totalEmployees}</div>
-            <p className="text-xs text-muted-foreground">Registered personnel</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Average Approval Time</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{data.avgApprovalDays.toFixed(1)} days</div>
-            <p className="text-xs text-muted-foreground">From submission to final approval</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Charts */}
+      {/* Charts Tabs */}
       <Tabs defaultValue="monthly" className="space-y-4">
         <TabsList>
           <TabsTrigger value="monthly">Monthly Trend</TabsTrigger>
           <TabsTrigger value="province">By Province</TabsTrigger>
           <TabsTrigger value="division">By Division</TabsTrigger>
-          <TabsTrigger value="radar">Approval Rates</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="monthly" className="space-y-4">
+        <TabsContent value="monthly">
           <Card>
             <CardHeader>
-              <CardTitle>Travel Requests Over Time</CardTitle>
+              <CardTitle>Pending (HR) vs Completed Orders</CardTitle>
             </CardHeader>
-            <CardContent className="pt-2">
-              <ResponsiveContainer width="100%" height={400}>
-                <LineChart data={data.monthlyData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" angle={-45} textAnchor="end" height={60} interval={0} />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="count" stroke="#8884d8" strokeWidth={2} name="Requests" />
-                </LineChart>
-              </ResponsiveContainer>
+            <CardContent className="h-96">
+              <MonthlyTrendChart data={monthlyChartData} />
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="province" className="space-y-4">
+        <TabsContent value="province">
           <Card>
             <CardHeader>
-              <CardTitle>Top Destinations (by Province)</CardTitle>
+              <CardTitle>Top Destinations</CardTitle>
             </CardHeader>
-            <CardContent className="pt-2">
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={data.provinceData} layout="vertical" margin={{ top: 20, right: 30, left: 100, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" />
-                  <YAxis type="category" dataKey="name" width={100} />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="value" fill="#82ca9d" name="Travel Orders" />
-                </BarChart>
-              </ResponsiveContainer>
+            <CardContent className="h-96">
+              <ProvinceBarChart data={provinceChartData} />
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="division" className="space-y-4">
+        <TabsContent value="division">
           <Card>
             <CardHeader>
-              <CardTitle>Requests by Division</CardTitle>
+              <CardTitle>Staff Distribution</CardTitle>
             </CardHeader>
-            <CardContent className="pt-2">
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={data.divisionData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} interval={0} />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="value" fill="#8884d8" name="Travel Orders" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="radar" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Approval Rate by Division</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-2">
-              <ResponsiveContainer width="100%" height={400}>
-                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data.radarData}>
-                  <PolarGrid />
-                  <PolarAngleAxis dataKey="division" />
-                  <PolarRadiusAxis angle={30} domain={[0, 100]} />
-                  <Radar name="Approval Rate (%)" dataKey="approvalRate" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-                  <Tooltip />
-                  <Legend />
-                </RadarChart>
-              </ResponsiveContainer>
+            <CardContent className="h-96">
+              { /* @ts-ignore */ }
+              <DivisionPieChart data={divisionChartData} />
             </CardContent>
           </Card>
         </TabsContent>
