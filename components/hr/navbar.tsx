@@ -2,7 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Bell, Search, Menu, Maximize, Minimize, LogOut, User, Settings } from 'lucide-react'
+import { useTheme } from 'next-themes'
+import {
+  Bell, Search, Menu, Maximize, Minimize, LogOut, User, Settings,
+  Moon, Sun
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -13,10 +17,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { logout } from '@/app/actions/logout'
 import { toast } from 'sonner'
 import Link from 'next/link'
+import { NotificationsDropdown } from './notifications-dropdown'
 
 interface NavbarProps {
   user: {
@@ -25,12 +30,14 @@ interface NavbarProps {
     lastName: string
     email: string
     role: string
+    avatarUrl?: string | null
   } | null
   notificationCount: number
 }
 
 export function Navbar({ user, notificationCount }: NavbarProps) {
   const router = useRouter()
+  const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -38,7 +45,6 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
 
   useEffect(() => {
     setMounted(true)
-    // Check initial fullscreen state
     setIsFullscreen(!!document.fullscreenElement)
     
     const handleFullscreenChange = () => {
@@ -78,7 +84,7 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
 
   return (
     <>
-      <style>{`
+      <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@500&display=swap');
 
         .navbar-root {
@@ -87,8 +93,8 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
           align-items: center;
           height: 64px;
           padding: 0 20px;
-          background: #ffffff;
-          border-bottom: 1px solid #e8ecf0;
+          background: hsl(var(--background));
+          border-bottom: 1px solid hsl(var(--border));
           gap: 16px;
           position: relative;
           z-index: 40;
@@ -101,7 +107,7 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
           left: 0;
           right: 0;
           height: 1px;
-          background: linear-gradient(90deg, transparent, #4ade80 20%, #16a34a 50%, #4ade80 80%, transparent);
+          background: linear-gradient(90deg, transparent, hsl(var(--primary)) 20%, hsl(var(--primary)/0.8) 50%, hsl(var(--primary)) 80%, transparent);
           opacity: 0.4;
         }
 
@@ -112,18 +118,18 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
           width: 36px;
           height: 36px;
           border-radius: 8px;
-          border: 1px solid #e8ecf0;
+          border: 1px solid hsl(var(--border));
           background: transparent;
-          color: #64748b;
+          color: hsl(var(--muted-foreground));
           cursor: pointer;
           transition: all 0.15s ease;
           flex-shrink: 0;
         }
 
         .navbar-mobile-btn:hover {
-          background: #f8fafc;
-          color: #0f172a;
-          border-color: #cbd5e1;
+          background: hsl(var(--muted));
+          color: hsl(var(--foreground));
+          border-color: hsl(var(--border));
         }
 
         @media (min-width: 768px) {
@@ -141,7 +147,7 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
           left: 11px;
           top: 50%;
           transform: translateY(-50%);
-          color: #94a3b8;
+          color: hsl(var(--muted-foreground));
           pointer-events: none;
           display: flex;
         }
@@ -152,23 +158,23 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
           padding: 0 12px 0 34px;
           font-family: 'DM Sans', sans-serif;
           font-size: 13px;
-          color: #0f172a;
-          background: #f8fafc;
-          border: 1px solid #e2e8f0;
+          color: hsl(var(--foreground));
+          background: hsl(var(--muted));
+          border: 1px solid hsl(var(--border));
           border-radius: 8px;
           outline: none;
           transition: all 0.15s ease;
-          caret-color: #16a34a;
+          caret-color: hsl(var(--primary));
         }
 
         .navbar-search-input::placeholder {
-          color: #94a3b8;
+          color: hsl(var(--muted-foreground));
         }
 
         .navbar-search-input:focus {
-          background: #ffffff;
-          border-color: #86efac;
-          box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.12);
+          background: hsl(var(--background));
+          border-color: hsl(var(--primary));
+          box-shadow: 0 0 0 3px hsl(var(--primary)/0.12);
         }
 
         .navbar-search-kbd {
@@ -178,9 +184,9 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
           transform: translateY(-50%);
           font-family: 'DM Mono', monospace;
           font-size: 10px;
-          color: #94a3b8;
-          background: #f1f5f9;
-          border: 1px solid #e2e8f0;
+          color: hsl(var(--muted-foreground));
+          background: hsl(var(--muted));
+          border: 1px solid hsl(var(--border));
           border-radius: 4px;
           padding: 1px 5px;
           letter-spacing: 0.03em;
@@ -197,7 +203,7 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
         .navbar-divider {
           width: 1px;
           height: 24px;
-          background: #e2e8f0;
+          background: hsl(var(--border));
           margin: 0 4px;
         }
 
@@ -206,9 +212,9 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
           width: 36px;
           height: 36px;
           border-radius: 8px;
-          border: 1px solid #e8ecf0;
+          border: 1px solid hsl(var(--border));
           background: transparent;
-          color: #64748b;
+          color: hsl(var(--muted-foreground));
           cursor: pointer;
           display: flex;
           align-items: center;
@@ -217,9 +223,9 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
         }
 
         .navbar-icon-btn:hover {
-          background: #f8fafc;
-          color: #0f172a;
-          border-color: #cbd5e1;
+          background: hsl(var(--muted));
+          color: hsl(var(--foreground));
+          border-color: hsl(var(--border));
         }
 
         .navbar-bell-badge {
@@ -229,8 +235,8 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
           min-width: 18px;
           height: 18px;
           border-radius: 9px;
-          background: #ef4444;
-          color: #fff;
+          background: hsl(var(--destructive));
+          color: hsl(var(--destructive-foreground));
           font-family: 'DM Mono', monospace;
           font-size: 10px;
           font-weight: 500;
@@ -238,7 +244,7 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
           align-items: center;
           justify-content: center;
           padding: 0 4px;
-          border: 2px solid #ffffff;
+          border: 2px solid hsl(var(--background));
           line-height: 1;
         }
 
@@ -247,7 +253,7 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
           position: absolute;
           inset: -2px;
           border-radius: 50%;
-          background: #ef4444;
+          background: hsl(var(--destructive));
           opacity: 0.4;
           animation: navbar-pulse 2s ease-out infinite;
         }
@@ -264,7 +270,7 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
           gap: 10px;
           padding: 4px 10px 4px 4px;
           border-radius: 10px;
-          border: 1px solid #e8ecf0;
+          border: 1px solid hsl(var(--border));
           background: transparent;
           cursor: pointer;
           transition: all 0.15s ease;
@@ -272,22 +278,22 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
         }
 
         .navbar-profile-btn:hover {
-          background: #f8fafc;
-          border-color: #cbd5e1;
+          background: hsl(var(--muted));
+          border-color: hsl(var(--border));
         }
 
         .navbar-avatar {
           width: 32px;
           height: 32px;
           border-radius: 8px;
-          background: linear-gradient(135deg, #16a34a 0%, #4ade80 100%);
+          background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary)/0.8) 100%);
           display: flex;
           align-items: center;
           justify-content: center;
           font-family: 'DM Mono', monospace;
           font-size: 11px;
           font-weight: 500;
-          color: #fff;
+          color: hsl(var(--primary-foreground));
           letter-spacing: 0.05em;
           flex-shrink: 0;
         }
@@ -303,21 +309,21 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
         .navbar-profile-name {
           font-size: 13px;
           font-weight: 600;
-          color: #0f172a;
+          color: hsl(var(--foreground));
           line-height: 1.2;
           white-space: nowrap;
         }
 
         .navbar-profile-role {
           font-size: 11px;
-          color: #94a3b8;
+          color: hsl(var(--muted-foreground));
           line-height: 1.2;
           white-space: nowrap;
         }
       `}</style>
 
       <header className="navbar-root">
-        {/* Mobile menu button (can be connected to sidebar toggle) */}
+        {/* Mobile menu button */}
         <button className="navbar-mobile-btn">
           <Menu size={16} strokeWidth={2} />
         </button>
@@ -337,7 +343,19 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
         </form>
 
         <div className="navbar-actions">
-          {/* Fullscreen Toggle */}
+          {/* Dark Mode Toggle */}
+          {mounted && (
+            <button
+              className="navbar-icon-btn"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              title="Toggle theme"
+            >
+              <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+              <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              <span className="sr-only">Toggle theme</span>
+            </button>
+          )}
+
           <button
             className="navbar-icon-btn"
             onClick={toggleFullscreen}
@@ -346,41 +364,17 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
             {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
           </button>
 
-          {/* Notifications */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="navbar-icon-btn">
-                <Bell size={16} strokeWidth={2} />
-                {notifCount > 0 && (
-                  <span className="navbar-bell-badge">{notifCount}</span>
-                )}
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <div className="max-h-64 overflow-y-auto">
-                {/* Notifications would be fetched and displayed here */}
-                <div className="p-4 text-center text-sm text-slate-500">
-                  View all notifications in the dedicated panel.
-                </div>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/hr/notifications" className="cursor-pointer">
-                  View all notifications
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <NotificationsDropdown userId={user.id} initialCount={notificationCount} />
 
           <div className="navbar-divider" />
 
-          {/* Profile Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="navbar-profile-btn">
-                <div className="navbar-avatar">{initials}</div>
+                <Avatar className="navbar-avatar">
+                  <AvatarImage src={user.avatarUrl || undefined} />
+                  <AvatarFallback className="bg-transparent">{initials}</AvatarFallback>
+                </Avatar>
                 <div className="navbar-profile-info">
                   <div className="navbar-profile-name">{displayName}</div>
                   <div className="navbar-profile-role">{roleDisplay}</div>
@@ -401,7 +395,7 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+              <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                 <LogOut className="mr-2 h-4 w-4" /> Log out
               </DropdownMenuItem>
             </DropdownMenuContent>

@@ -16,10 +16,6 @@ import {
   List,
   History,
   Bell,
-  Clock,
-  CheckCircle,
-  Printer,
-  Archive,
   Toolbox,
 } from 'lucide-react'
 
@@ -31,16 +27,8 @@ type Route = {
 }
 
 const routes: Route[] = [
-  {
-    label: 'Dashboard',
-    icon: LayoutDashboard,
-    href: '/hr/dashboard',
-  },
-  {
-    label: 'Travel Orders',
-    icon: FileText,
-    href: '/hr/orders',
-  },
+  { label: 'Dashboard', icon: LayoutDashboard, href: '/hr/dashboard' },
+  { label: 'Travel Orders', icon: FileText, href: '/hr/orders' },
   {
     label: 'User Management',
     icon: Users,
@@ -50,11 +38,7 @@ const routes: Route[] = [
       { label: 'Add User', icon: UserPlus, href: '/hr/users/new' },
     ],
   },
-  {
-    label: 'Analytics',
-    icon: BarChart3,
-    href: '/hr/analytics',
-  },
+  { label: 'Analytics', icon: BarChart3, href: '/hr/analytics' },
   {
     label: 'Settings',
     icon: Settings,
@@ -72,7 +56,7 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
     '/hr/users': false,
-    '/hr/orders': true, // default open for quick access
+    '/hr/orders': true,
   })
 
   const toggleMenu = (href: string) => {
@@ -84,6 +68,24 @@ export function Sidebar() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
+        /* Light mode fallback variables */
+        :root {
+          --sidebar-bg: 0 0% 100%;
+          --sidebar-border: 214 32% 91%;
+          --sidebar-muted: 210 40% 96%;
+          --sidebar-foreground: 222 47% 11%;
+          --sidebar-muted-foreground: 215 16% 47%;
+          --sidebar-primary: 142 76% 36%;
+        }
+        .dark {
+          --sidebar-bg: 222 47% 11%;
+          --sidebar-border: 217 33% 17%;
+          --sidebar-muted: 217 33% 17%;
+          --sidebar-foreground: 210 40% 98%;
+          --sidebar-muted-foreground: 215 20% 65%;
+          --sidebar-primary: 142 71% 45%;
+        }
+
         .hr-sidebar {
           font-family: 'Inter', sans-serif;
           position: relative;
@@ -91,8 +93,8 @@ export function Sidebar() {
           flex-direction: column;
           width: 260px;
           height: 100vh;
-          background: #0a0c10;
-          border-right: 1px solid rgba(255,255,255,0.05);
+          background: linear-gradient(180deg, hsl(var(--sidebar-bg)) 0%, hsl(var(--sidebar-muted)) 100%);
+          border-right: 1px solid hsl(var(--sidebar-border));
           transition: width 0.25s ease;
           overflow: hidden;
           flex-shrink: 0;
@@ -100,40 +102,69 @@ export function Sidebar() {
         @media (min-width: 768px) { .hr-sidebar { display: flex; } }
         .hr-sidebar.collapsed { width: 72px; }
 
+        /* Decorative agricultural accent */
+        .hr-sidebar::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 200px;
+          background: radial-gradient(ellipse at 20% 0%, hsl(var(--sidebar-primary) / 0.08) 0%, transparent 70%);
+          pointer-events: none;
+          z-index: 0;
+        }
+
+        /* Header */
         .sidebar-header {
           display: flex;
           align-items: center;
-          justify-content: space-between;
           height: 60px;
-          padding: 0 14px;
-          border-bottom: 1px solid rgba(255,255,255,0.05);
+          padding: 0 12px;
+          border-bottom: 1px solid hsl(var(--sidebar-border));
           flex-shrink: 0;
+          position: relative;
+          z-index: 2;
+          transition: padding 0.25s;
         }
+        .hr-sidebar.collapsed .sidebar-header {
+          justify-content: center;
+          padding: 0;
+        }
+
         .sidebar-brand {
           display: flex;
           align-items: center;
           gap: 10px;
           overflow: hidden;
         }
+        .hr-sidebar.collapsed .sidebar-brand {
+          justify-content: center;
+        }
+
         .sidebar-logo {
           width: 32px;
           height: 32px;
           border-radius: 7px;
-          background: rgba(34,197,94,0.15);
+          background: linear-gradient(135deg, hsl(var(--sidebar-primary) / 0.2), hsl(var(--sidebar-primary) / 0.1));
+          border: 1px solid hsl(var(--sidebar-primary) / 0.2);
           display: flex;
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
+          box-shadow: 0 2px 8px hsl(var(--sidebar-primary) / 0.1);
         }
         .sidebar-logo img {
           width: 20px;
           height: 20px;
           object-fit: contain;
+          filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
         }
+
         .sidebar-title {
           font-weight: 600;
           font-size: 15px;
-          color: #f1f5f9;
+          color: hsl(var(--sidebar-foreground));
           white-space: nowrap;
           transition: opacity 0.15s;
         }
@@ -141,25 +172,30 @@ export function Sidebar() {
           opacity: 0;
           width: 0;
         }
+
         .sidebar-badge {
           font-size: 9px;
           font-weight: 600;
-          color: #4ade80;
-          background: rgba(74,222,128,0.12);
+          color: hsl(var(--sidebar-primary));
+          background: hsl(var(--sidebar-primary) / 0.12);
           padding: 2px 5px;
           border-radius: 4px;
           letter-spacing: 0.5px;
           margin-left: 5px;
+          border: 1px solid hsl(var(--sidebar-primary) / 0.2);
         }
         .collapsed .sidebar-badge { display: none; }
 
+        /* Toggle button */
         .sidebar-toggle {
+          position: absolute;
+          right: 12px;
           width: 26px;
           height: 26px;
           border-radius: 6px;
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.08);
-          color: rgba(255,255,255,0.5);
+          background: hsl(var(--sidebar-muted) / 0.5);
+          border: 1px solid hsl(var(--sidebar-border));
+          color: hsl(var(--sidebar-muted-foreground));
           display: flex;
           align-items: center;
           justify-content: center;
@@ -167,24 +203,30 @@ export function Sidebar() {
           transition: all 0.15s;
           flex-shrink: 0;
         }
+        .hr-sidebar.collapsed .sidebar-toggle {
+          right: 50%;
+          transform: translateX(50%);
+        }
         .sidebar-toggle:hover {
-          background: rgba(255,255,255,0.08);
-          color: #fff;
-          border-color: rgba(255,255,255,0.15);
+          background: hsl(var(--sidebar-muted));
+          color: hsl(var(--sidebar-foreground));
         }
 
+        /* Navigation */
         .sidebar-nav {
           flex: 1;
           padding: 14px 6px;
           overflow-y: auto;
           overflow-x: hidden;
+          position: relative;
+          z-index: 1;
         }
         .nav-section-title {
           font-size: 10px;
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.05em;
-          color: rgba(255,255,255,0.25);
+          color: hsl(var(--sidebar-muted-foreground) / 0.6);
           padding: 8px 10px 4px;
           white-space: nowrap;
           transition: opacity 0.15s;
@@ -198,7 +240,7 @@ export function Sidebar() {
           gap: 10px;
           padding: 8px 10px;
           border-radius: 7px;
-          color: rgba(255,255,255,0.55);
+          color: hsl(var(--sidebar-muted-foreground));
           font-size: 13px;
           font-weight: 500;
           text-decoration: none;
@@ -208,13 +250,13 @@ export function Sidebar() {
           border: 1px solid transparent;
         }
         .nav-link:hover {
-          background: rgba(255,255,255,0.04);
-          color: rgba(255,255,255,0.85);
+          background: hsl(var(--sidebar-muted) / 0.5);
+          color: hsl(var(--sidebar-foreground));
         }
         .nav-link.active {
-          background: rgba(34,197,94,0.12);
-          color: #4ade80;
-          border-color: rgba(34,197,94,0.25);
+          background: linear-gradient(90deg, hsl(var(--sidebar-primary) / 0.15) 0%, hsl(var(--sidebar-primary) / 0.05) 100%);
+          color: hsl(var(--sidebar-primary));
+          border-color: hsl(var(--sidebar-primary) / 0.3);
         }
         .nav-icon {
           width: 22px;
@@ -232,7 +274,7 @@ export function Sidebar() {
 
         .nav-chevron {
           margin-left: auto;
-          color: rgba(255,255,255,0.3);
+          color: hsl(var(--sidebar-muted-foreground) / 0.6);
           transition: transform 0.2s;
           flex-shrink: 0;
         }
@@ -259,22 +301,22 @@ export function Sidebar() {
           gap: 8px;
           padding: 6px 10px 6px 14px;
           border-radius: 5px;
-          color: rgba(255,255,255,0.4);
+          color: hsl(var(--sidebar-muted-foreground) / 0.8);
           font-size: 12px;
           text-decoration: none;
           transition: all 0.15s;
           white-space: nowrap;
-          border-left: 1px solid rgba(255,255,255,0.1);
+          border-left: 1px solid hsl(var(--sidebar-border));
           margin-left: 6px;
         }
         .sub-link:hover {
-          color: rgba(255,255,255,0.8);
-          background: rgba(255,255,255,0.03);
+          color: hsl(var(--sidebar-foreground));
+          background: hsl(var(--sidebar-muted) / 0.3);
         }
         .sub-link.active {
-          color: #4ade80;
-          background: rgba(34,197,94,0.08);
-          border-left-color: #4ade80;
+          color: hsl(var(--sidebar-primary));
+          background: hsl(var(--sidebar-primary) / 0.08);
+          border-left-color: hsl(var(--sidebar-primary));
         }
 
         /* Tooltip for collapsed */
@@ -283,19 +325,19 @@ export function Sidebar() {
           left: 75px;
           top: 50%;
           transform: translateY(-50%);
-          background: #1a1e2a;
-          border: 1px solid rgba(255,255,255,0.1);
+          background: hsl(var(--sidebar-popover, 0 0% 100%));
+          border: 1px solid hsl(var(--sidebar-border));
           border-radius: 6px;
           padding: 5px 10px;
           font-size: 12px;
           font-weight: 500;
-          color: #fff;
+          color: hsl(var(--sidebar-popover-foreground, 222 47% 11%));
           white-space: nowrap;
           opacity: 0;
           pointer-events: none;
           transition: opacity 0.15s;
           z-index: 100;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         .collapsed .nav-item:hover .nav-tooltip {
           opacity: 1;
@@ -305,16 +347,32 @@ export function Sidebar() {
         /* Footer */
         .sidebar-footer {
           padding: 10px 14px;
-          border-top: 1px solid rgba(255,255,255,0.05);
+          border-top: 1px solid hsl(var(--sidebar-border));
           flex-shrink: 0;
+          position: relative;
+          z-index: 2;
+          background: hsl(var(--sidebar-muted) / 0.3);
+          backdrop-filter: blur(4px);
         }
         .version-text {
           font-size: 10px;
-          color: rgba(255,255,255,0.2);
+          color: hsl(var(--sidebar-muted-foreground) / 0.5);
           text-align: center;
           white-space: nowrap;
         }
         .collapsed .version-text { opacity: 0; }
+
+        /* Sprout accent in footer */
+        .sidebar-footer::before {
+          content: '🌱';
+          position: absolute;
+          right: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          opacity: 0.15;
+          font-size: 20px;
+          pointer-events: none;
+        }
       `}</style>
 
       <div className={cn('hr-sidebar', collapsed && 'collapsed')}>
@@ -349,7 +407,6 @@ export function Sidebar() {
                       onClick={() => !collapsed && toggleMenu(route.href)}
                     >
                       <span className="nav-icon">
-                        { /*@ts-ignore */}
                         <route.icon size={16} strokeWidth={1.8} />
                       </span>
                       <span className="nav-label">{route.label}</span>
@@ -362,7 +419,6 @@ export function Sidebar() {
                           href={child.href}
                           className={cn('sub-link', pathname === child.href && 'active')}
                         >
-                        { /*@ts-ignore */}
                           <child.icon size={13} strokeWidth={1.5} />
                           {child.label}
                         </Link>
@@ -372,7 +428,6 @@ export function Sidebar() {
                 ) : (
                   <Link href={route.href} className={cn('nav-link', pathname === route.href && 'active')}>
                     <span className="nav-icon">
-                        { /*@ts-ignore */}
                       <route.icon size={16} strokeWidth={1.8} />
                     </span>
                     <span className="nav-label">{route.label}</span>

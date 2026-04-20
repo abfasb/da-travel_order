@@ -49,7 +49,6 @@ export function PasswordForm({ isDefaultPassword }: { isDefaultPassword?: boolea
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-6 pt-6">
           
-          {/* Action Required Banner */}
           {isDefaultPassword && !message && (
             <Alert className="bg-amber-500/10 text-amber-800 dark:text-amber-400 border-amber-500/20 mb-6">
               <AlertTriangle className="h-4 w-4 stroke-amber-600 dark:stroke-amber-400" />
@@ -60,7 +59,6 @@ export function PasswordForm({ isDefaultPassword }: { isDefaultPassword?: boolea
             </Alert>
           )}
 
-          {/* Success/Error Messages */}
           {message && (
             <Alert 
               className={`mb-6 ${
