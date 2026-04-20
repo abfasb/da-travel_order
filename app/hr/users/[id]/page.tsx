@@ -3,27 +3,50 @@ import { notFound } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Mail, Phone, MapPin, Briefcase, Shield } from 'lucide-react'
+import { ArrowLeft, Mail, Phone, MapPin, Eye } from 'lucide-react'
 import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { format } from 'date-fns'
 
 const roleColorMap: Record<string, string> = {
-  STAFF: 'bg-gray-100 text-gray-800 border-gray-200',
-  DIVISION_HEAD: 'bg-teal-100 text-teal-800 border-teal-200',
-  APCO: 'bg-purple-100 text-purple-800 border-purple-200',
-  CHIEF_AGRICULTURIST: 'bg-blue-100 text-blue-800 border-blue-200',
-  CHIEF_ADMINISTRATIVE: 'bg-indigo-100 text-indigo-800 border-indigo-200',
-  REGIONAL_EXECUTIVE: 'bg-amber-100 text-amber-800 border-amber-200',
-  HR: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-  ADMIN: 'bg-rose-100 text-rose-800 border-rose-200',
+  STAFF: 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700',
+  DIVISION_HEAD: 'bg-teal-100 text-teal-800 border-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-800',
+  APCO: 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800',
+  CHIEF_AGRICULTURIST: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800',
+  CHIEF_ADMINISTRATIVE: 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800',
+  REGIONAL_EXECUTIVE: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800',
+  HR: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800',
+  ADMIN: 'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-800',
+}
+
+const statusVariants: Record<string, any> = {
+  PENDING: 'secondary',
+  REVIEWING: 'outline',
+  APPROVED: 'default',
+  REJECTED: 'destructive',
+  COMPLETED: 'success',
+  HR_PROCESSING: 'secondary',
 }
 
 export default async function UserDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  
   const user = await prisma.user.findUnique({
     where: { id },
     include: {
       _count: { select: { travelOrders: true } },
+      travelOrders: {
+        orderBy: { createdAt: 'desc' },
+        take: 10, // Limit to recent 10, can add pagination later
+      },
     },
   })
 
@@ -108,6 +131,68 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
           </CardContent>
         </Card>
       </div>
+
+      {/* Travel Orders Section */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Travel Orders</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              All travel requests submitted by this user.
+            </p>
+          </div>
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/hr/orders?employee=${user.firstName}%20${user.lastName}`}>
+              View All
+            </Link>
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {user.travelOrders.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No travel orders found for this user.
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>TO Number</TableHead>
+                  <TableHead>Destination</TableHead>
+                  <TableHead>Travel Dates</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {user.travelOrders.map((order) => (
+                  <TableRow key={order.id}>
+                    <TableCell className="font-mono text-sm">
+                      {order.travelOrderNumber || '—'}
+                    </TableCell>
+                    <TableCell>{order.destinationProvince}</TableCell>
+                    <TableCell>
+                      {format(new Date(order.departureDate), 'MMM d, yyyy')} –{' '}
+                      {format(new Date(order.returnDate), 'MMM d, yyyy')}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={statusVariants[order.status] || 'secondary'}>
+                        {order.status.replace(/_/g, ' ')}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="sm" asChild>
+                        <Link href={`/hr/orders/${order.id}`}>
+                          <Eye className="h-4 w-4 mr-1" /> View
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }
