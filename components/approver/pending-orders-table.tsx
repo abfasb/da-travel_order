@@ -251,14 +251,14 @@ export default function PendingOrdersTable({ orders, userRole }: PendingOrdersTa
                       </Badge>
                     </TableCell>
                     <TableCell className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                      <div className="flex justify-end gap-2">
                         <Button variant="ghost" size="sm" asChild className="h-8 w-8 p-0 hover:bg-muted hover:text-foreground">
                           <Link href={`/employee/requests/${order.id}`} target="_blank" title="View Details">
                             <Eye className="h-4 w-4" />
                             <span className="sr-only">View</span>
                           </Link>
                         </Button>
-                        <Button variant="default" size="sm" asChild className="h-8 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm">
+                        <Button variant="default" size="sm" asChild className="h-8 bg-black text-primary-foreground shadow-sm">
                           <Link href={`/approvers/approvals/${order.id}`}>
                             <PenSquare className="h-3.5 w-3.5 mr-1.5" />
                             <span>Review</span>

@@ -159,7 +159,7 @@ export function SignatureModal({ orderId, approvalId, userRole }: SignatureModal
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3">
+        <Button className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 dark:text-white dark:bg-black">
           Open Signature Panel
         </Button>
       </DialogTrigger>

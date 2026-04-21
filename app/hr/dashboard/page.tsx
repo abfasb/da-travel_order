@@ -34,7 +34,6 @@ export default async function HRDashboardPage() {
   const user = await getCurrentUser()
   if (!user || user.role !== 'HR') redirect('/login')
 
-  // Fetch counts
   const [
     totalOrders,
     pendingAssignment,
@@ -46,7 +45,7 @@ export default async function HRDashboardPage() {
   ] = await Promise.all([
     prisma.travelOrderRequest.count(),
     prisma.travelOrderRequest.count({
-      where: { status: 'APPROVED', travelOrderNumber: null },
+      where: { status: 'HR_PROCESSING', travelOrderNumber: null },
     }),
     prisma.travelOrderRequest.count({
       where: { status: 'HR_PROCESSING' },
@@ -166,7 +165,7 @@ export default async function HRDashboardPage() {
               <CardTitle>Orders Awaiting Number Assignment</CardTitle>
             </CardHeader>
             <CardContent>
-              {recentOrders.filter(o => o.status === 'APPROVED').length === 0 ? (
+              {recentOrders.filter(o => o.status === 'HR_PROCESSING').length === 0 ? (
                 <p className="text-center py-8 text-muted-foreground">
                   No orders pending assignment.
                 </p>
@@ -183,7 +182,7 @@ export default async function HRDashboardPage() {
                   </TableHeader>
                   <TableBody>
                     {recentOrders
-                      .filter(o => o.status === 'APPROVED')
+                      .filter(o => o.status === 'HR_PROCESSING')
                       .map((order) => (
                         <TableRow key={order.id}>
                           <TableCell className="font-medium">

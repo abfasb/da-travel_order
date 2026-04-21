@@ -183,8 +183,8 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
         <div className="mb-10">
           <Card className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm overflow-hidden">
             <div className="bg-slate-50/50 border-b p-3 px-6 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-muted-foreground" />
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Approval Workflow</span>
+              <Clock className="w-4 h-4 text-muted-foreground dark:text-white" />
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider dark:text-white">Approval Workflow</span>
             </div>
             <CardContent className="p-6">
               <div className="relative">
@@ -295,8 +295,8 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
             <Card className="border-0 shadow-lg overflow-hidden">
               <div className="bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 p-5 border-b">
                 <div className="flex items-center gap-2">
-                  <Briefcase className="h-5 w-5 text-slate-600" />
-                  <h2 className="text-lg font-bold text-slate-800">Travel Order Summary</h2>
+                  <Briefcase className="h-5 w-5 text-slate-600 dark:text-white" />
+                  <h2 className="text-lg font-bold text-slate-800 dark:text-white">Travel Order Summary</h2>
                 </div>
               </div>
               <CardContent className="p-0">
@@ -312,7 +312,7 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5">Travel Period</p>
-                    <p className="text-sm font-medium text-slate-900">
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">
                       {new Date(travelOrder.departureDate).toLocaleDateString()} -{' '}
                       {new Date(travelOrder.returnDate).toLocaleDateString()}
                     </p>
@@ -324,7 +324,7 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5">Destination</p>
-                    <p className="text-sm font-medium text-slate-900">
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">
                       {travelOrder.specificLocation}, {travelOrder.destinationProvince}
                     </p>
                   </div>
@@ -335,7 +335,7 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5">Requested By</p>
-                    <p className="text-sm font-medium text-slate-900">
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">
                       {travelOrder.requestorName || travelOrder.user?.email}
                     </p>
                   </div>
