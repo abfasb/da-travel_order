@@ -1,30 +1,57 @@
-'use client';
+'use client'
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { useQuery } from '@tanstack/react-query';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts'
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart'
 
-async function fetchMonthlyData(division: string) {
-  const res = await fetch(`/api/division-head/analytics/monthly?division=${division}`);
-  return res.json();
+interface TravelTrendChartProps {
+  data: { month: string; count: number }[]
 }
 
-export function TravelTrendChart({ division }: { division: string }) {
-  const { data, isLoading } = useQuery({
-    queryKey: ['monthly-travel', division],
-    queryFn: () => fetchMonthlyData(division),
-  });
+const chartConfig = {
+  count: {
+    label: 'Travel Orders',
+    color: 'hsl(var(--primary))',
+  },
+} satisfies ChartConfig
 
-  if (isLoading) return <div className="h-full flex items-center justify-center">Loading...</div>;
+export function TravelTrendChart({ data }: TravelTrendChartProps) {
+  if (!data || data.length === 0) {
+    return (
+      <div className="h-full flex items-center justify-center text-muted-foreground">
+        No travel data for this year yet.
+      </div>
+    )
+  }
 
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <BarChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="month" />
-        <YAxis />
-        <Tooltip />
-        <Bar dataKey="count" fill="#10b981" radius={[4, 4, 0, 0]} />
+    <ChartContainer config={chartConfig} className="h-full w-full">
+      <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+        <XAxis
+          dataKey="month"
+          tick={{ fontSize: 12 }}
+          className="fill-muted-foreground"
+          axisLine={false}
+          tickLine={false}
+        />
+        <YAxis
+          tick={{ fontSize: 12 }}
+          className="fill-muted-foreground"
+          axisLine={false}
+          tickLine={false}
+          allowDecimals={false}
+        />
+        <ChartTooltip
+          cursor={{ fill: 'hsl(var(--muted))' }}
+          content={<ChartTooltipContent indicator="line" />}
+        />
+        <Bar dataKey="count" fill="var(--color-count)" radius={[4, 4, 0, 0]} barSize={40} />
       </BarChart>
-    </ResponsiveContainer>
-  );
+    </ChartContainer>
+  )
 }

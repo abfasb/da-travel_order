@@ -110,9 +110,13 @@ export default function RegisterPage() {
       <div className="relative hidden lg:flex lg:w-1/2 bg-emerald-950 p-16 flex-col justify-between text-white">
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-16">
-            <Image src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMVJJK1z4PWdaWJG9ArC6U45RvjxMJsEZVKQ&s' alt="Logo" className="h-12 w-12 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-             
-            </Image>
+             <Image 
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMVJJK1z4PWdaWJG9ArC6U45RvjxMJsEZVKQ&s"
+              alt="Logo"
+              width={48}
+              height={48}
+              className="h-12 w-12 bg-emerald-500 rounded-xl shadow-lg shadow-emerald-500/20"
+            />
             <span className="text-2xl font-black tracking-tighter uppercase italic">DA - Travel Order</span>
           </div>
           <h1 className="text-7xl font-black leading-[1] mb-8 tracking-tighter">

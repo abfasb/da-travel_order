@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
       ],
     },
   },
+    images: {
+    domains: ["encrypted-tbn0.gstatic.com", "images.unsplash.com"],
+  },
 };
 
 export default nextConfig;
