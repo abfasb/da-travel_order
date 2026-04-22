@@ -25,6 +25,7 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { logout } from '@/app/actions/logout';
+import Image from 'next/image';
 
 interface SidebarProps {
   user: {
@@ -63,7 +64,7 @@ export function DivisionHeadSidebar({ user }: SidebarProps) {
     <Sidebar className="border-r border-border bg-background">
       <SidebarHeader className="border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
-          <Building2 className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+          <img src='https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Department_of_Agriculture_of_the_Philippines.svg/1280px-Department_of_Agriculture_of_the_Philippines.svg.png' alt='DA Logo' className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
           <div>
             <h2 className="text-sm font-bold text-foreground">DA MIMAROPA</h2>
             <p className="text-xs text-muted-foreground">{divisionName}</p>

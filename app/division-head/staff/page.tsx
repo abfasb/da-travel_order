@@ -52,7 +52,7 @@ export default async function StaffPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Staff Members</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Staff Members</h1>
         <p className="text-slate-500">Manage and view staff travel history.</p>
       </div>
 
