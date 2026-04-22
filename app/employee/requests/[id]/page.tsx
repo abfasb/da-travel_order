@@ -14,6 +14,7 @@ import {
 import Link from 'next/link'
 import PrintButton from '@/components/employee/PrintButton'
 import { FloatingPrintButton } from '@/components/employee/floatingprintbutton'
+import { PDFDownloadButton } from '@/components/division-head/pdf-download-button'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -328,6 +329,7 @@ export default async function TravelOrderPage({ params }: PageProps) {
             </div>
             <div className="flex items-center gap-2">
               <PrintButton status={travelOrder.status} />
+              <PDFDownloadButton order={travelOrder} />
             </div>
           </div>
         </div>

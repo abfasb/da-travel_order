@@ -15,10 +15,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Download, Printer } from 'lucide-react';
+import { Download, Printer, ArrowLeft } from 'lucide-react';
 import TravelOrderDocument from '@/app/sample/page';
 import ProposedItineraryDocument from '@/app/sample/itinerary/page';
 import CertificationDocument from '@/app/sample/certification/page';
+import Link from 'next/link';
+import { PDFDownloadButton } from '@/components/division-head/pdf-download-button';
 
 export default async function TravelOrderDetailPage({
   params,
@@ -69,10 +71,20 @@ export default async function TravelOrderDetailPage({
 
   return (
     <div className="space-y-6">
+      {/* Back Button */}
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/division-head/travel-orders">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Travel Orders
+          </Link>
+        </Button>
+      </div>
+
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Travel Order Details</h1>
-          <p className="text-slate-500">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Travel Order Details</h1>
+          <p className="text-muted-foreground">
             {order.travelOrderNumber || 'Draft'} • Created{' '}
             {format(new Date(order.createdAt), 'PPP')}
           </p>
@@ -83,14 +95,13 @@ export default async function TravelOrderDetailPage({
           </Badge>
           {order.status === 'COMPLETED' && (
             <>
-              <Button variant="outline" size="sm">
+             <Button variant="outline" size="sm" asChild>
+              <Link href={`/division-head/travel-orders/${order.id}/print`} target="_blank">
                 <Printer className="mr-2 h-4 w-4" />
                 Print All
-              </Button>
-              <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">
-                <Download className="mr-2 h-4 w-4" />
-                Download PDF
-              </Button>
+              </Link>
+             </Button>
+             <PDFDownloadButton order={order} />
             </>
           )}
         </div>
@@ -113,46 +124,46 @@ export default async function TravelOrderDetailPage({
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm font-medium text-slate-500">Employee</p>
-                      <p className="text-base">
+                      <p className="text-sm font-medium text-muted-foreground">Employee</p>
+                      <p className="text-base text-foreground">
                         {order.user.firstName} {order.user.lastName}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-slate-500">Employment Status</p>
+                      <p className="text-sm font-medium text-muted-foreground">Employment Status</p>
                       <Badge variant="outline">{order.employmentStatus}</Badge>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-slate-500">Purpose</p>
-                      <p className="text-base">{order.purpose}</p>
+                      <p className="text-sm font-medium text-muted-foreground">Purpose</p>
+                      <p className="text-base text-foreground">{order.purpose}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-slate-500">Destination</p>
-                      <p className="text-base">
+                      <p className="text-sm font-medium text-muted-foreground">Destination</p>
+                      <p className="text-base text-foreground">
                         {order.destinationProvince} - {order.specificLocation}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-slate-500">Departure</p>
-                      <p className="text-base">{format(new Date(order.departureDate), 'PPP')}</p>
+                      <p className="text-sm font-medium text-muted-foreground">Departure</p>
+                      <p className="text-base text-foreground">{format(new Date(order.departureDate), 'PPP')}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-slate-500">Return</p>
-                      <p className="text-base">{format(new Date(order.returnDate), 'PPP')}</p>
+                      <p className="text-sm font-medium text-muted-foreground">Return</p>
+                      <p className="text-base text-foreground">{format(new Date(order.returnDate), 'PPP')}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-slate-500">Transportation</p>
-                      <p className="text-base">{order.meansOfTransport}</p>
+                      <p className="text-sm font-medium text-muted-foreground">Transportation</p>
+                      <p className="text-base text-foreground">{order.meansOfTransport}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-slate-500">Estimated Expenses</p>
-                      <p className="text-base">{order.estimatedExpenses}</p>
+                      <p className="text-sm font-medium text-muted-foreground">Estimated Expenses</p>
+                      <p className="text-base text-foreground">{order.estimatedExpenses}</p>
                     </div>
                   </div>
                   <Separator />
                   <div>
-                    <p className="text-sm font-medium text-slate-500 mb-2">Objectives</p>
-                    <p className="text-sm text-slate-700 whitespace-pre-wrap">{order.objectives}</p>
+                    <p className="text-sm font-medium text-muted-foreground mb-2">Objectives</p>
+                    <p className="text-sm text-foreground whitespace-pre-wrap">{order.objectives}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -174,9 +185,9 @@ export default async function TravelOrderDetailPage({
                       <TableBody>
                         {order.itineraryItems.map((item) => (
                           <TableRow key={item.id}>
-                            <TableCell>{format(new Date(item.date), 'MMM dd, yyyy')}</TableCell>
-                            <TableCell>{item.location}</TableCell>
-                            <TableCell>{item.activity}</TableCell>
+                            <TableCell className="text-foreground">{format(new Date(item.date), 'MMM dd, yyyy')}</TableCell>
+                            <TableCell className="text-foreground">{item.location}</TableCell>
+                            <TableCell className="text-foreground">{item.activity}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -201,13 +212,13 @@ export default async function TravelOrderDetailPage({
                               ? 'bg-emerald-500'
                               : approval.status === 'REJECTED'
                               ? 'bg-red-500'
-                              : 'bg-slate-300'
+                              : 'bg-muted-foreground'
                           }`}
                         />
                         <div className="flex-1">
-                          <p className="text-sm font-medium">{approval.approverRole}</p>
+                          <p className="text-sm font-medium text-foreground">{approval.approverRole}</p>
                           {approval.approver && (
-                            <p className="text-xs text-slate-500">
+                            <p className="text-xs text-muted-foreground">
                               {approval.approver.firstName} {approval.approver.lastName}
                             </p>
                           )}
@@ -215,7 +226,7 @@ export default async function TravelOrderDetailPage({
                             {approval.status}
                           </Badge>
                           {approval.comment && (
-                            <p className="text-xs text-slate-600 mt-1">{approval.comment}</p>
+                            <p className="text-xs text-muted-foreground mt-1">{approval.comment}</p>
                           )}
                         </div>
                       </div>
@@ -225,12 +236,12 @@ export default async function TravelOrderDetailPage({
               </Card>
 
               {order.rejectionReason && (
-                <Card className="border-red-200 bg-red-50">
+                <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/20">
                   <CardHeader>
-                    <CardTitle className="text-red-800">Rejection Reason</CardTitle>
+                    <CardTitle className="text-red-800 dark:text-red-300">Rejection Reason</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-red-700">{order.rejectionReason}</p>
+                    <p className="text-sm text-red-700 dark:text-red-400">{order.rejectionReason}</p>
                   </CardContent>
                 </Card>
               )}
@@ -245,34 +256,34 @@ export default async function TravelOrderDetailPage({
             </CardHeader>
             <CardContent>
               {order.status !== 'COMPLETED' ? (
-                <div className="text-center py-8 text-slate-500">
+                <div className="text-center py-8 text-muted-foreground">
                   Documents will be available after HR completes processing.
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <p className="text-sm text-slate-600">
+                  <p className="text-sm text-muted-foreground">
                     Employment Status: <Badge>{order.employmentStatus}</Badge> — 
                     {isPermanent ? ' For Permanent you only need Travel Order Document' : ' For JO and COS you will have 3 documents: Travel Order, Itinerary, and Certification'}.
                   </p>
                   
-                  <div className="border rounded-lg p-4 bg-slate-50">
-                    <h3 className="font-semibold mb-2">Travel Order {isPermanent && '(4 copies)'}</h3>
-                    <div className="max-h-[1300px] overflow-hidden border bg-white p-2">
+                  <div className="border rounded-lg p-4 bg-muted/30">
+                    <h3 className="font-semibold mb-2 text-foreground">Travel Order {isPermanent && '(4 copies)'}</h3>
+                    <div className="max-h-[1300px] overflow-hidden border bg-background p-2">
                       <TravelOrderDocument data={order} />
                     </div>
                   </div>
 
                   {isCOSorJO && (
                     <>
-                      <div className="border rounded-lg p-4 bg-slate-50">
-                        <h3 className="font-semibold mb-2">Proposed Itinerary</h3>
-                        <div className="max-h-[1300px] overflow-hidden border bg-white p-2">
+                      <div className="border rounded-lg p-4 bg-muted/30">
+                        <h3 className="font-semibold mb-2 text-foreground">Proposed Itinerary</h3>
+                        <div className="max-h-[1300px] overflow-hidden border bg-background p-2">
                           <ProposedItineraryDocument data={order} />
                         </div>
                       </div>
-                      <div className="border rounded-lg p-4 bg-slate-50">
-                        <h3 className="font-semibold mb-2">Certification</h3>
-                        <div className="max-h-[1300px] overflow-hidden border bg-white p-2">
+                      <div className="border rounded-lg p-4 bg-muted/30">
+                        <h3 className="font-semibold mb-2 text-foreground">Certification</h3>
+                        <div className="max-h-[1300px] overflow-hidden border bg-background p-2">
                           <CertificationDocument data={order} />
                         </div>
                       </div>
@@ -302,16 +313,16 @@ export default async function TravelOrderDetailPage({
                 <TableBody>
                   {order.approvals.map((approval) => (
                     <TableRow key={approval.id}>
-                      <TableCell>{approval.approverRole}</TableCell>
+                      <TableCell className="text-foreground">{approval.approverRole}</TableCell>
                       <TableCell>
                         <Badge variant={approval.status === 'APPROVED' ? 'default' : 'secondary'}>
                           {approval.status}
                         </Badge>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-foreground">
                         {approval.updatedAt ? format(new Date(approval.updatedAt), 'PPp') : '—'}
                       </TableCell>
-                      <TableCell>{approval.comment || '—'}</TableCell>
+                      <TableCell className="text-foreground">{approval.comment || '—'}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
