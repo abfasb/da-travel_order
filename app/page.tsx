@@ -215,9 +215,6 @@ const HeroSection: React.FC = () => {
               <span className="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse mr-2 inline-block" />
               All Systems Operational
             </Badge>
-            <Badge variant="outline" className="border-stone-300 text-stone-400 text-[10px] tracking-[0.15em] uppercase px-3 py-1.5 rounded-md font-semibold bg-white">
-              Version 2.0
-            </Badge>
           </motion.div>
 
 { /* @ts-ignore */}
