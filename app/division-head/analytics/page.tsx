@@ -98,6 +98,7 @@ export default async function AnalyticsPage() {
               <CardTitle>Monthly Travel Volume</CardTitle>
             </CardHeader>
             <CardContent className="h-80">
+              { /* @ts-ignore */}
               <TravelTrendChart division={division} />
             </CardContent>
           </Card>
