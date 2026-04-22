@@ -29,7 +29,7 @@ export default async function DashboardPage() {
   const approvedThisMonth = await prisma.travelOrderRequest.count({
     where: {
       userId,
-      status: 'APPROVED',
+      status: 'COMPLETED',
       createdAt: { gte: firstDayOfMonth, lte: lastDayOfMonth },
     },
   })
@@ -47,7 +47,6 @@ export default async function DashboardPage() {
     { title: 'Total Travels (2026)', value: totalTravelsThisYear, icon: <Plane className="h-4 w-4" /> },
   ]
 
-  // Calendar events (upcoming travels only)
   const today = new Date()
   const travelOrdersForCalendar = await prisma.travelOrderRequest.findMany({
     where: {
@@ -77,7 +76,7 @@ export default async function DashboardPage() {
 
   const frequencyData = await prisma.travelOrderRequest.groupBy({
     by: ['destinationProvince'],
-    where: { userId, status: 'APPROVED' },
+    where: { userId, status: 'COMPLETED' },
     _count: { destinationProvince: true },
   })
 
@@ -91,7 +90,7 @@ export default async function DashboardPage() {
       TO_CHAR(DATE_TRUNC('month', "createdAt"), 'Mon YYYY') as month,
       COUNT(*)::int as count
     FROM travel_orders
-    WHERE "userId" = ${userId} AND status = 'APPROVED'
+    WHERE "userId" = ${userId} AND status = 'COMPLETED'
     GROUP BY DATE_TRUNC('month', "createdAt")
     ORDER BY DATE_TRUNC('month', "createdAt") DESC
     LIMIT 12

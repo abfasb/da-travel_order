@@ -1,6 +1,5 @@
 'use client'
 
-import { useTheme } from 'next-themes'
 import { Line, LineChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import {
   ChartConfig,
@@ -21,9 +20,6 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function MonthlyTrendChart({ data }: MonthlyTrendChartProps) {
-  const { theme } = useTheme()
-  const isDark = theme === 'dark'
-
   const chartData = data.map(item => ({
     month: item.month,
     trips: item.count,
@@ -37,29 +33,28 @@ export function MonthlyTrendChart({ data }: MonthlyTrendChartProps) {
     )
   }
 
-  const axisColor = isDark ? '#94a3b8' : '#64748b'
-  const gridColor = isDark ? '#334155' : '#e2e8f0'
-
   return (
     <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
       <LineChart data={chartData} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" className="stroke-border" vertical={false} />
         <XAxis
           dataKey="month"
           tickLine={false}
           axisLine={false}
           tickMargin={10}
-          tick={{ fill: axisColor, fontSize: 12 }}
+          tick={{ fontSize: 12 }}
+          className="fill-foreground"
         />
         <YAxis
           tickLine={false}
           axisLine={false}
           tickMargin={10}
-          tick={{ fill: axisColor, fontSize: 12 }}
+          tick={{ fontSize: 12 }}
+          className="fill-foreground"
           allowDecimals={false}
         />
         <ChartTooltip
-          cursor={{ stroke: isDark ? '#475569' : '#cbd5e1', strokeWidth: 1 }}
+          cursor={{ stroke: 'hsl(var(--border))', strokeWidth: 1 }}
           content={<ChartTooltipContent indicator="line" />}
         />
         <Line
