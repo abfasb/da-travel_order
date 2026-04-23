@@ -2,7 +2,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Activity, Clock, CheckCircle, XCircle } from 'lucide-react'
 import PendingOrdersTable from '@/components/approver/pending-orders-table'
 import HistoryOrdersTable from '@/components/approver/history-orders-table'
@@ -49,7 +49,6 @@ export default async function ApprovalsPage() {
     ]
   }
 
-
   const pendingOrders = await prisma.travelOrderRequest.findMany({
     where: pendingWhere,
     include: {
@@ -57,11 +56,6 @@ export default async function ApprovalsPage() {
       approvals: true,
     },
     orderBy: { createdAt: 'desc' },
-  })
-
-  console.log(`[ApprovalsPage] Found ${pendingOrders.length} pending orders`)
-  pendingOrders.forEach(order => {
-    console.log(`  - ${order.user.firstName} ${order.user.lastName}, division: "${order.user.division}"`)
   })
 
   const historyOrders = await prisma.travelOrderRequest.findMany({
@@ -95,8 +89,14 @@ export default async function ApprovalsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
-      <div className="container mx-auto py-8 px-4 md:px-6 max-w-7xl">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 relative">
+      {/* Green ambient glow – dark mode only */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-emerald-500/10 dark:bg-emerald-400/8 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 -left-20 w-[500px] h-[500px] bg-green-600/5 dark:bg-green-500/6 rounded-full blur-3xl" />
+      </div>
+
+      <div className="container mx-auto py-8 px-4 md:px-6 max-w-7xl relative z-10">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
             Approval Dashboard
@@ -107,7 +107,7 @@ export default async function ApprovalsPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          <Card className="border-0 shadow-md bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800">
+          <Card className="border-0 shadow-md bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 dark:shadow-emerald-900/5">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -118,7 +118,7 @@ export default async function ApprovalsPage() {
               </div>
             </CardContent>
           </Card>
-          <Card className="border-0 shadow-md bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800">
+          <Card className="border-0 shadow-md bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 dark:shadow-emerald-900/5">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -129,7 +129,7 @@ export default async function ApprovalsPage() {
               </div>
             </CardContent>
           </Card>
-          <Card className="border-0 shadow-md bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800">
+          <Card className="border-0 shadow-md bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 dark:shadow-emerald-900/5">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -140,7 +140,7 @@ export default async function ApprovalsPage() {
               </div>
             </CardContent>
           </Card>
-          <Card className="border-0 shadow-md bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800">
+          <Card className="border-0 shadow-md bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 dark:shadow-emerald-900/5">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>

@@ -27,7 +27,7 @@ export default async function ApproverLayout({
   return (
     <div className="min-h-screen bg-muted/10">
       <Navbar user={user} />
-      <main className="container mx-auto p-6">{children}</main>
+      <main className="container mx-auto">{children}</main>
     </div>
   )
 }

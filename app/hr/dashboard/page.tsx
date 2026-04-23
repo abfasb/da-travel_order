@@ -23,10 +23,10 @@ import {
   TrendingUp,
   Users,
   Calendar,
-  ArrowRight,
 } from 'lucide-react'
 import Link from 'next/link'
-import { formatDistanceToNow, format } from 'date-fns'
+import { format } from 'date-fns'
+import { OrdersCreatedChart } from '@/components/hr/charts/orders-created-chart'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,18 +34,25 @@ export default async function HRDashboardPage() {
   const user = await getCurrentUser()
   if (!user || user.role !== 'HR') redirect('/login')
 
+  const now = new Date()
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+
   const [
     totalOrders,
     pendingAssignment,
     readyToPrint,
     completedThisMonth,
     totalEmployees,
-    recentOrders,
-    upcomingTravels,
+    pendingOrdersList,
+    upcomingTravelsList,
+    dailyOrdersRaw,
   ] = await Promise.all([
     prisma.travelOrderRequest.count(),
     prisma.travelOrderRequest.count({
-      where: { status: 'HR_PROCESSING', travelOrderNumber: null },
+      where: {
+        status: 'HR_PROCESSING',
+        travelOrderNumber: null,
+      },
     }),
     prisma.travelOrderRequest.count({
       where: { status: 'HR_PROCESSING' },
@@ -53,31 +60,41 @@ export default async function HRDashboardPage() {
     prisma.travelOrderRequest.count({
       where: {
         status: 'COMPLETED',
-        updatedAt: {
-          gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-        },
+        hrProcessedAt: { gte: startOfMonth },
       },
     }),
     prisma.user.count({ where: { role: 'STAFF' } }),
     prisma.travelOrderRequest.findMany({
-      where: { status: { in: ['APPROVED', 'HR_PROCESSING'] } },
+      where: {
+        status: 'HR_PROCESSING',
+        travelOrderNumber: null,
+      },
       include: {
         user: { select: { firstName: true, lastName: true, division: true } },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: 'asc' },
       take: 10,
     }),
     prisma.travelOrderRequest.findMany({
       where: {
-        status: 'APPROVED',
-        departureDate: { gte: new Date() },
+        status: { in: ['APPROVED', 'HR_PROCESSING', 'COMPLETED'] },
+        departureDate: { gte: now },
       },
       include: {
         user: { select: { firstName: true, lastName: true } },
       },
       orderBy: { departureDate: 'asc' },
-      take: 5,
+      take: 10,
     }),
+    prisma.$queryRaw<{ date: string; count: number }[]>`
+      SELECT 
+        TO_CHAR(DATE_TRUNC('day', "createdAt"), 'YYYY-MM-DD') as date,
+        CAST(COUNT(*) AS INTEGER) as count
+      FROM "travel_orders"
+      WHERE "createdAt" >= NOW() - INTERVAL '30 days'
+      GROUP BY DATE_TRUNC('day', "createdAt")
+      ORDER BY date ASC
+    `,
   ])
 
   const statCards = [
@@ -118,7 +135,7 @@ export default async function HRDashboardPage() {
             Here's what's happening with travel orders today.
           </p>
         </div>
-        <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
+        <Button asChild className="bg-emerald-600 dark:text-white hover:bg-emerald-700">
           <Link href="/hr/orders">
             <FileText className="mr-2 h-4 w-4" /> View All Orders
           </Link>
@@ -143,15 +160,17 @@ export default async function HRDashboardPage() {
         ))}
       </div>
 
+      <OrdersCreatedChart data={dailyOrdersRaw} />
+
       <Tabs defaultValue="pending" className="space-y-4">
         <TabsList>
           <TabsTrigger value="pending">
             <Clock className="mr-2 h-4 w-4" />
-            Pending Assignment
+            Awaiting Number ({pendingAssignment})
           </TabsTrigger>
           <TabsTrigger value="upcoming">
             <Calendar className="mr-2 h-4 w-4" />
-            Upcoming Travels
+            Upcoming Travels ({upcomingTravelsList.length})
           </TabsTrigger>
           <TabsTrigger value="quick">
             <TrendingUp className="mr-2 h-4 w-4" />
@@ -162,13 +181,13 @@ export default async function HRDashboardPage() {
         <TabsContent value="pending" className="space-y-4">
           <Card className="border-0 shadow-sm">
             <CardHeader>
-              <CardTitle>Orders Awaiting Number Assignment</CardTitle>
+              <CardTitle>Orders Awaiting Travel Order Number</CardTitle>
             </CardHeader>
             <CardContent>
-              {recentOrders.filter(o => o.status === 'HR_PROCESSING').length === 0 ? (
-                <p className="text-center py-8 text-muted-foreground">
+              {pendingOrdersList.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
                   No orders pending assignment.
-                </p>
+                </div>
               ) : (
                 <Table>
                   <TableHeader>
@@ -181,33 +200,31 @@ export default async function HRDashboardPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {recentOrders
-                      .filter(o => o.status === 'HR_PROCESSING')
-                      .map((order) => (
-                        <TableRow key={order.id}>
-                          <TableCell className="font-medium">
-                            {order.user.firstName} {order.user.lastName}
-                          </TableCell>
-                          <TableCell>{order.user.division || '—'}</TableCell>
-                          <TableCell>{order.destinationProvince}</TableCell>
-                          <TableCell>
-                            {format(new Date(order.departureDate), 'MMM d')} –{' '}
-                            {format(new Date(order.returnDate), 'MMM d, yyyy')}
-                          </TableCell>
-                          <TableCell className="text-right space-x-1">
-                            <Button variant="ghost" size="sm" asChild>
-                              <Link href={`/hr/orders/${order.id}`}>
-                                <Eye className="h-4 w-4" />
-                              </Link>
-                            </Button>
-                            <Button variant="ghost" size="sm" asChild>
-                              <Link href={`/hr/orders/${order.id}?action=assign`}>
-                                <Hash className="h-4 w-4" />
-                              </Link>
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                    {pendingOrdersList.map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell className="font-medium">
+                          {order.user.firstName} {order.user.lastName}
+                        </TableCell>
+                        <TableCell>{order.user.division || '—'}</TableCell>
+                        <TableCell>{order.destinationProvince}</TableCell>
+                        <TableCell>
+                          {format(new Date(order.departureDate), 'MMM d')} –{' '}
+                          {format(new Date(order.returnDate), 'MMM d, yyyy')}
+                        </TableCell>
+                        <TableCell className="text-right space-x-1">
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link href={`/hr/orders/${order.id}`}>
+                              <Eye className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link href={`/hr/orders/${order.id}?action=assign`}>
+                              <Hash className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               )}
@@ -218,13 +235,13 @@ export default async function HRDashboardPage() {
         <TabsContent value="upcoming" className="space-y-4">
           <Card className="border-0 shadow-sm">
             <CardHeader>
-              <CardTitle>Upcoming Approved Travels</CardTitle>
+              <CardTitle>Finalized Travels (Future Departures)</CardTitle>
             </CardHeader>
             <CardContent>
-              {upcomingTravels.length === 0 ? (
-                <p className="text-center py-8 text-muted-foreground">
-                  No upcoming travels.
-                </p>
+              {upcomingTravelsList.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No upcoming finalized travels.
+                </div>
               ) : (
                 <Table>
                   <TableHeader>
@@ -233,10 +250,11 @@ export default async function HRDashboardPage() {
                       <TableHead>Destination</TableHead>
                       <TableHead>Departure</TableHead>
                       <TableHead>Return</TableHead>
+                      <TableHead>TO Number</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {upcomingTravels.map((order) => (
+                    {upcomingTravelsList.map((order) => (
                       <TableRow key={order.id}>
                         <TableCell>
                           {order.user.firstName} {order.user.lastName}
@@ -247,6 +265,9 @@ export default async function HRDashboardPage() {
                         </TableCell>
                         <TableCell>
                           {format(new Date(order.returnDate), 'MMM d, yyyy')}
+                        </TableCell>
+                        <TableCell className="font-mono">
+                          {order.travelOrderNumber || '—'}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -272,8 +293,8 @@ export default async function HRDashboardPage() {
                 <CardTitle className="text-sm font-medium">Avg. Processing Time</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">2.4 days</div>
-                <p className="text-xs text-muted-foreground">From approval to number</p>
+                <div className="text-2xl font-bold">—</div>
+                <p className="text-xs text-muted-foreground">Coming soon</p>
               </CardContent>
             </Card>
             <Card className="border-0 shadow-sm">
