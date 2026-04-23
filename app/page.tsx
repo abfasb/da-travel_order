@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useMemo, Suspense, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
@@ -18,43 +18,24 @@ import {
   Menu,
   X,
   Building2,
+  TrendingUp,
+  Calendar,
+  User,
+  MapPin,
+  Briefcase,
+  MoreHorizontal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 
-
-interface TravelArcProps {
-  start: [number, number, number];
-  end: [number, number, number];
-  color: string;
-  opacity?: number;
-}
-
-
-const TravelArc: React.FC<TravelArcProps> = ({ start, end, color, opacity = 0.5 }) => (
-// @ts-ignore
-  <QuadraticBezierLine
-    start={start}
-    end={end}
-    mid={[
-      ((start[0] + end[0]) / 2) * 1.3,
-      ((start[1] + end[1]) / 2) * 1.3,
-      ((start[2] + end[2]) / 2) * 1.3,
-    ]}
-    color={color}
-    lineWidth={1.2}
-    transparent
-    opacity={opacity}
-  />
-);
-
-
+// Animation variants
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
   visible: (delay = 0) => ({
-    opacity: 1, y: 0,
+    opacity: 1,
+    y: 0,
     transition: { duration: 0.65, delay, ease: [0.16, 1, 0.3, 1] },
   }),
 };
@@ -91,19 +72,27 @@ const Navbar: React.FC = () => {
   const navLinks = ["Features", "Workflow", "Compliance", "Support"];
 
   return (
-    <nav className={`fixed top-8 w-full z-40 transition-all duration-500 ${
-      scrolled
-        ? "bg-white/90 border-b border-stone-200 backdrop-blur-xl shadow-sm shadow-black/5"
-        : "bg-transparent"
-    }`}>
+    <nav
+      className={`fixed top-8 w-full z-40 transition-all duration-500 ${
+        scrolled
+          ? "bg-white/90 border-b border-stone-200 backdrop-blur-xl shadow-sm shadow-black/5"
+          : "bg-transparent"
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3 cursor-pointer group">
-          <div className="w-9 h-9 bg-green-700 rounded-lg flex items-center justify-center shadow-md shadow-green-900/20 group-hover:bg-green-600 transition-colors">
-            <Leaf className="w-4 h-4 text-white" />
-          </div>
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Department_of_Agriculture_of_the_Philippines.svg/1280px-Department_of_Agriculture_of_the_Philippines.svg.png"
+            alt="TravelOrder Logo"
+            className="w-9 h-9 rounded-lg"
+          />
           <div>
-            <div className="text-[13px] font-black text-stone-900 tracking-tight leading-none">TravelOrder</div>
-            <div className="text-[9px] text-green-700 font-bold uppercase tracking-[0.25em] leading-tight">DA · MIMAROPA</div>
+            <div className="text-[13px] font-black text-stone-900 tracking-tight leading-none">
+              TravelOrder
+            </div>
+            <div className="text-[9px] text-green-700 font-bold uppercase tracking-[0.25em] leading-tight">
+              DA · MIMAROPA
+            </div>
           </div>
         </div>
 
@@ -128,14 +117,13 @@ const Navbar: React.FC = () => {
             Sign In
           </Button>
           <Button
-            onClick={() => router.push("/login")}
+            onClick={() => router.push("/registration")}
             className="h-9 px-5 bg-green-700 hover:bg-green-600 text-white text-[13px] font-semibold rounded-lg shadow-md shadow-green-800/20 border-0 transition-all"
           >
-            Request Access
+            Register
           </Button>
         </div>
 
-        {/* Mobile toggle */}
         <button
           className="md:hidden text-stone-500 hover:text-stone-900"
           onClick={() => setMobileOpen(!mobileOpen)}
@@ -144,7 +132,6 @@ const Navbar: React.FC = () => {
         </button>
       </div>
 
-      {/* Mobile menu */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -178,9 +165,9 @@ const Navbar: React.FC = () => {
   );
 };
 
-
 const HeroSection: React.FC = () => {
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState<"overview" | "recent">("overview");
 
   const trustBadges = [
     { icon: <ShieldCheck className="w-3.5 h-3.5" />, label: "COA Compliant" },
@@ -188,9 +175,16 @@ const HeroSection: React.FC = () => {
     { icon: <Globe2 className="w-3.5 h-3.5" />, label: "MIMAROPA-Wide" },
   ];
 
+  const provinces = [
+    { name: "Oriental Mindoro", count: 342, color: "bg-emerald-100 text-emerald-700" },
+    { name: "Occidental Mindoro", count: 218, color: "bg-green-100 text-green-700" },
+    { name: "Marinduque", count: 156, color: "bg-teal-100 text-teal-700" },
+    { name: "Romblon", count: 189, color: "bg-cyan-100 text-cyan-700" },
+    { name: "Palawan", count: 421, color: "bg-sky-100 text-sky-700" },
+  ];
+
   return (
     <section className="relative min-h-screen flex items-center pt-32 pb-20 overflow-hidden bg-[#FAFAF8]">
-      {/* Dot grid texture */}
       <div
         className="absolute inset-0 z-0 opacity-[0.4]"
         style={{
@@ -198,13 +192,14 @@ const HeroSection: React.FC = () => {
           backgroundSize: "28px 28px",
         }}
       />
-      <div className="absolute top-0 right-0 w-[700px] h-[700px] bg-gradient-radial from-green-100/60 via-green-50/30 to-transparent rounded-full translate-x-1/3 -translate-y-1/4 z-0 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gradient-radial from-green-100/60 via-green-50/30 to-transparent rounded-full translate-x-1/3 -translate-y-1/4 z-0 pointer-events-none" />
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#FAFAF8] to-transparent z-0" />
 
       <div className="max-w-7xl mx-auto px-6 relative z-10 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        {/* LEFT COLUMN */}
         <div className="lg:col-span-6 xl:col-span-5">
           <motion.div
- /* @ts-ignore */
+          /* @ts-ignore */
             variants={fadeUp}
             custom={0}
             initial="hidden"
@@ -231,18 +226,18 @@ const HeroSection: React.FC = () => {
           </motion.div>
 
           <motion.p
- /* @ts-ignore */
+          /* @ts-ignore */
             variants={fadeUp}
             custom={0.2}
             initial="hidden"
             animate="visible"
             className="text-base md:text-lg text-stone-500 leading-relaxed mb-10 max-w-lg font-light"
           >
-            A centralized digital platform engineered for the Department of Agriculture MIMAROPA — automating travel authorities, approval workflows, and fund disbursement across all provincial offices.
+            A centralized digital platform engineered for the Department of Agriculture MIMAROPA  automating travel authorities, approval workflows, and fund disbursement across all provincial offices.
           </motion.p>
 
           <motion.div
- /* @ts-ignore */
+          /* @ts-ignore */
             variants={fadeUp}
             custom={0.3}
             initial="hidden"
@@ -250,14 +245,16 @@ const HeroSection: React.FC = () => {
             className="flex flex-wrap items-center gap-3 mb-10"
           >
             <Button
-              onClick={() => router.push("/login")} size="lg"
+              onClick={() => router.push("/login")}
+              size="lg"
               className="h-12 px-7 bg-green-700 hover:bg-green-600 text-white font-bold text-sm rounded-xl shadow-lg shadow-green-800/25 border-0 transition-all group"
             >
               Access Portal
               <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Button>
             <Button
-              size="lg" variant="outline"
+              size="lg"
+              variant="outline"
               className="h-12 px-7 border-stone-300 bg-white hover:bg-stone-50 text-stone-600 hover:text-stone-900 font-semibold text-sm rounded-xl transition-all shadow-sm"
             >
               View Documentation
@@ -265,7 +262,10 @@ const HeroSection: React.FC = () => {
           </motion.div>
 
           <motion.div
-            variants={fadeIn} custom={0.5} initial="hidden" animate="visible"
+            variants={fadeIn}
+            custom={0.5}
+            initial="hidden"
+            animate="visible"
             className="flex items-center gap-6 flex-wrap"
           >
             {trustBadges.map((b) => (
@@ -285,81 +285,234 @@ const HeroSection: React.FC = () => {
           animate="visible"
           className="lg:col-span-6 xl:col-span-7 relative"
         >
-          <div className="relative rounded-3xl bg-white border border-stone-200 shadow-xl shadow-green-900/5 overflow-hidden p-1">
-            {/* Subtle inner gradient */}
-            <div className="absolute inset-0 bg-gradient-to-br from-green-50/50 via-white to-white pointer-events-none" />
-            
-            {/* Mockup content */}
-            <div className="relative z-10 p-6">
-              {/* MIMAROPA Map Silhouette */}
-              <div className="mb-6 flex justify-center">
-                <svg width="280" height="180" viewBox="0 0 400 260" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-80">
-                  <path d="M120 40 L160 30 L200 35 L240 45 L260 70 L250 100 L220 120 L190 130 L160 140 L130 130 L100 110 L90 80 Z" fill="#dcfce7" stroke="#86efac" strokeWidth="2" />
-                  <path d="M280 60 L320 50 L350 65 L360 90 L340 110 L310 115 L290 100 L280 80 Z" fill="#dcfce7" stroke="#86efac" strokeWidth="2" />
-                  <path d="M140 150 L170 145 L190 155 L180 175 L150 180 L130 170 Z" fill="#dcfce7" stroke="#86efac" strokeWidth="2" />
-                  <path d="M60 120 L90 110 L100 130 L80 150 L55 145 Z" fill="#dcfce7" stroke="#86efac" strokeWidth="2" />
-                  <path d="M200 30 L230 20 L250 35 L240 55 L210 50 Z" fill="#dcfce7" stroke="#86efac" strokeWidth="2" />
-                  <circle cx="160" cy="80" r="4" fill="#059669" />
-                  <circle cx="300" cy="80" r="4" fill="#059669" />
-                  <circle cx="160" cy="160" r="4" fill="#059669" />
-                  <circle cx="80" cy="130" r="4" fill="#059669" />
-                  <circle cx="220" cy="40" r="4" fill="#059669" />
-                </svg>
-              </div>
-
-              {/* Approval badges row */}
-              <div className="flex justify-center gap-3 mb-6">
-                {["APCO", "Chief Agriculturist", "Admin Officer", "Regional Director"].map((role, idx) => (
-                  <Badge
-                    key={role}
-                    className={`bg-green-50 border-green-200 text-green-700 text-[10px] font-bold px-3 py-1.5 rounded-full ${
-                      idx === 2 ? "ring-2 ring-green-300 ring-offset-1" : ""
-                    }`}
-                  >
-                    {role === "Admin Officer" ? "✓ Admin Officer" : role}
-                  </Badge>
-                ))}
-              </div>
-
-              {/* Travel Order Card Mockup */}
-              <div className="bg-stone-50 border border-stone-200 rounded-2xl p-5 shadow-inner">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-green-700" />
-                    <span className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                      Travel Order #TO-2026-042
-                    </span>
-                  </div>
-                  <Badge className="bg-amber-100 text-amber-700 border-amber-200 text-[9px]">
-                    Pending Approval
-                  </Badge>
+          <div className="relative rounded-2xl bg-white border border-stone-200/80 shadow-2xl shadow-black/5 overflow-hidden backdrop-blur-sm">
+            {/* Header with tabs */}
+            <div className="border-b border-stone-100 px-5 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-green-50 border border-green-200 flex items-center justify-center">
+                  <Building2 className="w-4 h-4 text-green-700" />
                 </div>
-                <div className="space-y-2">
-                  <div className="h-2.5 bg-stone-200 rounded-full w-3/4" />
-                  <div className="h-2.5 bg-stone-200 rounded-full w-1/2" />
-                  <div className="h-2.5 bg-stone-200 rounded-full w-2/3" />
-                </div>
-                <div className="flex justify-end mt-4">
-                  <div className="h-8 w-24 bg-green-100 rounded-lg flex items-center justify-center">
-                    <span className="text-[10px] font-bold text-green-700">APPROVE</span>
-                  </div>
+                <div>
+                  <h3 className="text-sm font-black text-stone-900 tracking-tight">
+                    Regional Command Center
+                  </h3>
+                  <p className="text-[9px] text-stone-400 font-medium uppercase tracking-wider">
+                    MIMAROPA Travel Operations
+                  </p>
                 </div>
               </div>
-
-              {/* Floating stat pills */}
-              <div className="absolute -top-3 -right-3 bg-white border border-stone-200 rounded-full px-4 py-1.5 shadow-md">
-                <span className="text-[10px] font-bold text-stone-600">98.6% Approval Rate</span>
-              </div>
-              <div className="absolute -bottom-2 -left-2 bg-white border border-stone-200 rounded-full px-3 py-1 shadow-md flex items-center gap-1.5">
-                <Clock className="w-3 h-3 text-green-600" />
-                <span className="text-[9px] font-bold text-stone-500">Avg 72h processing</span>
+              <div className="flex gap-1 bg-stone-100 p-0.5 rounded-lg">
+                <button
+                  onClick={() => setActiveTab("overview")}
+                  className={`px-3 py-1 text-[10px] font-bold rounded-md transition-all ${
+                    activeTab === "overview"
+                      ? "bg-white text-stone-800 shadow-sm"
+                      : "text-stone-500 hover:text-stone-700"
+                  }`}
+                >
+                  Overview
+                </button>
+                <button
+                  onClick={() => setActiveTab("recent")}
+                  className={`px-3 py-1 text-[10px] font-bold rounded-md transition-all ${
+                    activeTab === "recent"
+                      ? "bg-white text-stone-800 shadow-sm"
+                      : "text-stone-500 hover:text-stone-700"
+                  }`}
+                >
+                  Recent Orders
+                </button>
               </div>
             </div>
+
+            {/* Content based on active tab */}
+            <div className="p-5">
+              {activeTab === "overview" ? (
+                <div className="space-y-4">
+                  {/* Mini stats row */}
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { label: "Total Orders", value: "1,426", change: "+12%", icon: FileText },
+                      { label: "Pending", value: "38", change: "-5%", icon: Clock },
+                      { label: "Approved", value: "1,388", change: "+18%", icon: CheckCircle2 },
+                    ].map((stat, i) => (
+                      <div key={i} className="bg-stone-50 rounded-lg p-3 border border-stone-100">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <stat.icon className="w-3 h-3 text-green-600" />
+                          <span className="text-[9px] font-medium text-stone-500">{stat.label}</span>
+                        </div>
+                        <div className="text-lg font-black text-stone-900">{stat.value}</div>
+                        <span className="text-[9px] font-bold text-green-600">{stat.change}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="bg-stone-50 rounded-lg p-4 border border-stone-100">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-[10px] font-bold text-stone-600 uppercase tracking-wider">
+                        Approval Pipeline
+                      </span>
+                      <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                        98% Complete
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {[
+                        { step: "APCO", status: "approved", date: "Apr 22" },
+                        { step: "Chief Agriculturist", status: "approved", date: "Apr 22" },
+                        { step: "Chief Administrative", status: "approved", date: "Apr 23" },
+                        { step: "Regional Director", status: "pending", date: "Pending" },
+                      ].map((item, idx) => (
+                        <div key={idx} className="flex items-center gap-3">
+                          <div
+                            className={`w-5 h-5 rounded-full flex items-center justify-center ${
+                              item.status === "approved"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-amber-100 text-amber-700"
+                            }`}
+                          >
+                            {item.status === "approved" ? (
+                              <CheckCircle2 className="w-3 h-3" />
+                            ) : (
+                              <Clock className="w-3 h-3" />
+                            )}
+                          </div>
+                          <span className="text-xs font-medium text-stone-700 flex-1">{item.step}</span>
+                          <span className="text-[9px] text-stone-400">{item.date}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-3 h-1.5 bg-stone-200 rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: "75%" }}
+                        transition={{ duration: 1, delay: 0.3 }}
+                        className="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Province distribution */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {provinces.map((p) => (
+                      <Badge
+                        key={p.name}
+                        className={`${p.color} border-0 text-[9px] font-bold px-2.5 py-1`}
+                      >
+                        {p.name} ({p.count})
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {/* Recent travel orders list */}
+                  {[
+                    {
+                      employee: "Cloyd R. Sapico",
+                      destination: "Puerto Princesa, Palawan",
+                      purpose: "Field Monitoring",
+                      date: "Apr 24-28, 2026",
+                      status: "Pending Director",
+                      avatar: "MS",
+                    },
+                    {
+                      employee: "Kate M. Manay",
+                      destination: "Boac, Marinduque",
+                      purpose: "Training Workshop",
+                      date: "Apr 20-22, 2026",
+                      status: "Approved",
+                      avatar: "JR",
+                    },
+                    {
+                      employee: "Rae Mae L. Fababaer",
+                      destination: "Calapan, Oriental Mindoro",
+                      purpose: "Stakeholder Meeting",
+                      date: "Apr 18-19, 2026",
+                      status: "Completed",
+                      avatar: "AC",
+                    },
+                  ].map((order, i) => (
+                    <div
+                      key={i}
+                      className="bg-white rounded-lg border border-stone-200 p-3 hover:border-green-300 hover:shadow-sm transition-all"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-green-100 text-green-700 flex items-center justify-center text-[10px] font-black">
+                          {order.avatar}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs font-bold text-stone-800">{order.employee}</span>
+                            <Badge
+                              className={`text-[8px] font-bold ${
+                                order.status === "Approved"
+                                  ? "bg-green-50 text-green-700 border-green-200"
+                                  : order.status === "Completed"
+                                  ? "bg-blue-50 text-blue-700 border-blue-200"
+                                  : "bg-amber-50 text-amber-700 border-amber-200"
+                              }`}
+                            >
+                              {order.status}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-1 text-[9px] text-stone-500 mb-1">
+                            <MapPin className="w-2.5 h-2.5" />
+                            <span>{order.destination}</span>
+                          </div>
+                          <div className="flex items-center gap-3 text-[9px] text-stone-400">
+                            <span className="flex items-center gap-0.5">
+                              <Briefcase className="w-2.5 h-2.5" /> {order.purpose}
+                            </span>
+                            <span className="flex items-center gap-0.5">
+                              <Calendar className="w-2.5 h-2.5" /> {order.date}
+                            </span>
+                          </div>
+                        </div>
+                        <button className="text-stone-400 hover:text-stone-600">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full text-[10px] font-bold text-green-700 hover:text-green-800 hover:bg-green-50"
+                  >
+                    View All Orders
+                    <ChevronRight className="w-3 h-3 ml-1" />
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* Bottom status bar */}
+            <div className="border-t border-stone-100 px-5 py-2.5 flex items-center justify-between bg-stone-50/50">
+              <div className="flex items-center gap-2">
+                <div className="flex -space-x-1">
+                  {[1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className="w-5 h-5 rounded-full bg-white border border-stone-200 flex items-center justify-center text-[8px] font-bold text-stone-500"
+                    >
+                      {String.fromCharCode(64 + i)}
+                    </div>
+                  ))}
+                </div>
+                <span className="text-[9px] text-stone-400">5 active users</span>
+              </div>
+              <div className="flex items-center gap-1 text-green-600">
+                <TrendingUp className="w-3 h-3" />
+                <span className="text-[9px] font-bold">+23% this month</span>
+              </div>
+            </div>
+
           </div>
 
-          {/* Decorative dots */}
-          <div className="absolute -z-10 top-1/2 -translate-y-1/2 -right-6 w-32 h-32 bg-green-100/40 rounded-full blur-2xl" />
-          <div className="absolute -z-10 bottom-0 left-0 w-40 h-40 bg-amber-50/40 rounded-full blur-2xl" />
+          {/* Background decorative blobs */}
+          <div className="absolute -z-10 top-1/2 -translate-y-1/2 -right-6 w-40 h-40 bg-green-100/40 rounded-full blur-3xl" />
+          <div className="absolute -z-10 bottom-0 left-0 w-48 h-48 bg-amber-50/40 rounded-full blur-3xl" />
         </motion.div>
       </div>
     </section>
@@ -367,10 +520,10 @@ const HeroSection: React.FC = () => {
 };
 
 const stats = [
-  { value: "1,240+", label: "Travel Orders Processed", icon: <FileText className="w-4 h-4" /> },
+  { value: "5+", label: "Travel Orders Processed", icon: <FileText className="w-4 h-4" /> },
   { value: "5", label: "Provinces Connected", icon: <Globe2 className="w-4 h-4" /> },
   { value: "98.6%", label: "Approval Accuracy", icon: <CheckCircle2 className="w-4 h-4" /> },
-  { value: "72 hrs", label: "Average Processing Time", icon: <Clock className="w-4 h-4" /> },
+  { value: "72 hrs  ", label: "Average Processing Time", icon: <Clock className="w-4 h-4" /> },
 ];
 
 const MetricsBar: React.FC = () => (
@@ -388,7 +541,9 @@ const MetricsBar: React.FC = () => (
           >
             <div className="text-green-700 mb-1">{s.icon}</div>
             <div className="text-3xl font-black text-stone-900 tracking-tight">{s.value}</div>
-            <div className="text-[11px] text-stone-400 font-bold uppercase tracking-widest text-center">{s.label}</div>
+            <div className="text-[11px] text-stone-400 font-bold uppercase tracking-widest text-center">
+              {s.label}
+            </div>
           </motion.div>
         ))}
       </div>
@@ -402,7 +557,8 @@ const features = [
     number: "01",
     icon: <ShieldCheck className="w-5 h-5 text-green-700" />,
     title: "COA Compliance Engine",
-    description: "Built-in automated validation against Commission on Audit travel guidelines. Pre-travel authority computation, per diem schedule adherence, and fund availability checks are enforced at every submission stage — before a single peso is committed.",
+    description:
+      "Built-in automated validation against Commission on Audit travel guidelines. Pre-travel authority computation, per diem schedule adherence, and fund availability checks are enforced at every submission stage — before a single peso is committed.",
     tags: ["COA RA 9184", "Auto-validation", "Per Diem Calculator"],
   },
   {
@@ -410,7 +566,8 @@ const features = [
     number: "02",
     icon: <FileText className="w-5 h-5 text-green-700" />,
     title: "Paperless Travel Orders",
-    description: "Digital form generation, structured routing, and cryptographic e-signatures replace manual paper trails entirely.",
+    description:
+      "Digital form generation, structured routing, and cryptographic e-signatures replace manual paper trails entirely.",
     tags: ["E-signature", "Auto-routing"],
   },
   {
@@ -418,7 +575,8 @@ const features = [
     number: "03",
     icon: <Clock className="w-5 h-5 text-green-700" />,
     title: "Real-Time Status Tracking",
-    description: "Live approval telemetry visible to both the requestor and all approving officers — no more chasing signatures.",
+    description:
+      "Live approval telemetry visible to both the requestor and all approving officers — no more chasing signatures.",
     tags: ["Live Updates", "Notifications"],
   },
   {
@@ -426,7 +584,8 @@ const features = [
     number: "04",
     icon: <Users className="w-5 h-5 text-green-700" />,
     title: "Unified Command Center",
-    description: "Operations, Admin, Finance, and all Field Offices operate within a single governed ecosystem with role-based access.",
+    description:
+      "Operations, Admin, Finance, and all Field Offices operate within a single governed ecosystem with role-based access.",
     tags: ["RBAC", "Multi-office"],
   },
   {
@@ -434,7 +593,8 @@ const features = [
     number: "05",
     icon: <BarChart3 className="w-5 h-5 text-green-700" />,
     title: "Fund Utilization Analytics",
-    description: "Granular dashboards tracking expenditure per office, deployment frequency, and budget absorption rates at fiscal year end.",
+    description:
+      "Granular dashboards tracking expenditure per office, deployment frequency, and budget absorption rates at fiscal year end.",
     tags: ["Dashboards", "Export to PDF"],
   },
 ];
@@ -444,7 +604,9 @@ const FeaturesGrid: React.FC = () => (
     <div className="max-w-7xl mx-auto px-6">
       <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-16 gap-6">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-green-700 mb-4">Platform Capabilities</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-green-700 mb-4">
+            Platform Capabilities
+          </p>
           <h2 className="text-3xl md:text-4xl font-black text-stone-900 tracking-tight leading-tight max-w-sm">
             Everything your office needs. Nothing it doesn't.
           </h2>
@@ -465,7 +627,6 @@ const FeaturesGrid: React.FC = () => (
             className={f.span}
           >
             <div className="h-full rounded-2xl border border-stone-200 bg-white hover:border-green-300 hover:shadow-md hover:shadow-green-100/80 transition-all duration-300 group p-8 relative overflow-hidden shadow-sm">
-              {/* Number watermark */}
               <div className="absolute top-6 right-8 text-7xl font-black text-stone-100 select-none leading-none">
                 {f.number}
               </div>
@@ -500,19 +661,22 @@ const workflowSteps = [
   {
     step: "01",
     title: "Submit Travel Request",
-    description: "Personnel file a travel request with destination, purpose, itinerary, and projected expenses. The system auto-computes per diem entitlements based on CSC and DBM rates.",
+    description:
+      "Personnel file a travel request with destination, purpose, itinerary, and projected expenses. The system auto-computes per diem entitlements based on CSC and DBM rates.",
     role: "Field Personnel",
   },
   {
     step: "02",
     title: "Multi-Level Approval",
-    description: "Requests route automatically — Division Chief, Admin Officer, Budget Officer, and Regional Director are notified in sequence. Approvals are timestamped and audit-logged.",
+    description:
+      "Requests route automatically  Division Chief, Admin Officer, Budget Officer, and Regional Director are notified in sequence. Approvals are timestamped and audit-logged.",
     role: "Approving Officers",
   },
   {
     step: "03",
     title: "Travel Order Issuance",
-    description: "Upon full approval, a COA-compliant Travel Order is generated, digitally signed, and stored. Liquidation deadlines are tracked automatically post-travel.",
+    description:
+      "Upon full approval, a COA-compliant Travel Order is generated, digitally signed, and stored. Liquidation deadlines are tracked automatically post-travel.",
     role: "Admin & Finance",
   },
 ];
@@ -542,7 +706,6 @@ const WorkflowSection: React.FC = () => (
             transition={{ delay: i * 0.12, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className="rounded-2xl border border-stone-200 bg-white p-8 h-full relative group hover:border-green-300 hover:shadow-md hover:shadow-green-50 transition-all duration-300 shadow-sm">
-              {/* Step circle */}
               <div className="w-10 h-10 rounded-full border-2 border-green-200 bg-green-50 flex items-center justify-center mb-8 text-[11px] font-black text-green-700 tracking-widest group-hover:bg-green-100 group-hover:border-green-300 transition-colors">
                 {s.step}
               </div>
@@ -576,15 +739,20 @@ const ComplianceSection: React.FC = () => (
     <div className="max-w-7xl mx-auto px-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
         <motion.div
-          initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }} transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          initial={{ opacity: 0, x: -20 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
-          <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-green-700 mb-4">Regulatory Compliance</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-green-700 mb-4">
+            Regulatory Compliance
+          </p>
           <h2 className="text-3xl md:text-4xl font-black text-stone-900 tracking-tight leading-tight mb-6">
             Built on government standards. Not bolted on.
           </h2>
           <p className="text-stone-400 text-sm leading-relaxed mb-10">
-            Every feature was designed with Philippine government regulatory frameworks at its core — not retrofitted. Your travel orders will always meet audit requirements.
+            Every feature was designed with Philippine government regulatory frameworks at its core — not retrofitted.
+            Your travel orders will always meet audit requirements.
           </p>
           <div className="space-y-3.5">
             {complianceItems.map((item) => (
@@ -597,8 +765,10 @@ const ComplianceSection: React.FC = () => (
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }} transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          initial={{ opacity: 0, x: 20 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
         >
           <div className="rounded-2xl border border-stone-200 bg-white p-8 space-y-6 shadow-sm">
             <div className="flex items-center justify-between mb-2">
@@ -655,7 +825,6 @@ const CTASection: React.FC = () => {
           transition={{ duration: 0.7 }}
           className="relative rounded-3xl bg-[#080f1a] overflow-hidden px-10 py-20 text-center"
         >
-          {/* Background glow */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_50%_100%,rgba(22,163,74,0.25),transparent)] pointer-events-none" />
           <div
             className="absolute inset-0 opacity-[0.04]"
@@ -669,24 +838,28 @@ const CTASection: React.FC = () => {
             Ready to Deploy
           </Badge>
           <h2 className="relative z-10 text-4xl md:text-5xl font-black text-white tracking-tight leading-tight mb-6">
-            Modernize your region's<br />
+            Modernize your region's
+            <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500">
               travel management today.
             </span>
           </h2>
           <p className="relative z-10 text-stone-400 text-base leading-relaxed mb-10 max-w-xl mx-auto">
-            Join all DA-MIMAROPA offices now on the platform. Contact the Regional ICT Officer for onboarding and system access provisioning.
+            Join all DA-MIMAROPA offices now on the platform. Contact the Regional ICT Officer for onboarding and
+            system access provisioning.
           </p>
           <div className="relative z-10 flex flex-wrap gap-4 justify-center">
             <Button
-              onClick={() => router.push("/login")} size="lg"
+              onClick={() => router.push("/login")}
+              size="lg"
               className="h-12 px-8 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl shadow-xl shadow-green-900/40 border-0 group"
             >
               Access the Portal
               <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Button>
             <Button
-              size="lg" variant="outline"
+              size="lg"
+              variant="outline"
               className="h-12 px-8 border-white/20 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white rounded-xl font-semibold backdrop-blur-sm"
             >
               Contact ICT Support
@@ -713,11 +886,14 @@ const Footer: React.FC = () => (
             </div>
           </div>
           <p className="text-stone-400 text-xs leading-relaxed max-w-xs">
-            Department of Agriculture — MIMAROPA Region IV-B. Official digital platform for travel order processing and approval management.
+            Department of Agriculture — MIMAROPA Region IV-B. Official digital platform for travel order processing and
+            approval management.
           </p>
           <div className="mt-6 flex items-center gap-2">
             <Building2 className="w-3.5 h-3.5 text-stone-300" />
-            <span className="text-[10px] text-stone-300 font-bold uppercase tracking-widest">Official Government System</span>
+            <span className="text-[10px] text-stone-300 font-bold uppercase tracking-widest">
+              Official Government System
+            </span>
           </div>
         </div>
 
@@ -725,7 +901,9 @@ const Footer: React.FC = () => (
           <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-5">Platform</p>
           <div className="space-y-3">
             {["Dashboard", "Travel Orders", "Approval Workflow", "Reports & Analytics", "System Logs"].map((l) => (
-              <a key={l} href="#" className="block text-xs text-stone-400 hover:text-stone-700 transition-colors">{l}</a>
+              <a key={l} href="#" className="block text-xs text-stone-400 hover:text-stone-700 transition-colors">
+                {l}
+              </a>
             ))}
           </div>
         </div>
@@ -734,7 +912,9 @@ const Footer: React.FC = () => (
           <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-5">Resources</p>
           <div className="space-y-3">
             {["COA Guidelines", "DBM Travel Rates", "User Manual", "ICT Support", "Privacy Policy"].map((l) => (
-              <a key={l} href="#" className="block text-xs text-stone-400 hover:text-stone-700 transition-colors">{l}</a>
+              <a key={l} href="#" className="block text-xs text-stone-400 hover:text-stone-700 transition-colors">
+                {l}
+              </a>
             ))}
           </div>
         </div>
@@ -748,7 +928,13 @@ const Footer: React.FC = () => (
         </p>
         <div className="flex items-center gap-6">
           {["Privacy", "Accessibility", "Terms of Use"].map((l) => (
-            <a key={l} href="#" className="text-[10px] text-stone-300 hover:text-stone-600 font-semibold uppercase tracking-widest transition-colors">{l}</a>
+            <a
+              key={l}
+              href="#"
+              className="text-[10px] text-stone-300 hover:text-stone-600 font-semibold uppercase tracking-widest transition-colors"
+            >
+              {l}
+            </a>
           ))}
         </div>
       </div>

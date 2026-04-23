@@ -105,8 +105,7 @@ model TravelOrderRequest {
   accompanyingPersonnel  String?
   requestorSignature     String?  
 
-  // Additional detailed fields
-  destinationSummary     String        @db.Text
+  destinationSummary     String?        @db.Text
   objectives             String        @db.Text
   travelDetails          String        @db.Text
 

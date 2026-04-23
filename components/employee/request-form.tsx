@@ -18,7 +18,7 @@ const formSchema = z.object({
   destinationProvince: z.string().min(1, 'Destination province is required'),
   specificLocation: z.string().min(1, 'Specific location is required'),
 
-  destinationSummary: z.string().min(1, 'Destination summary is required'),
+  destinationSummary: z.string().optional(),
   specificPurpose: z.string().min(1, 'Specific purpose is required'),
   objectives: z.string().min(1, 'Objectives are required'),
   travelDetails: z.string().min(1, 'Travel details are required'),
@@ -105,7 +105,6 @@ export function RequestForm({ employmentStatus = 'COS' }: { employmentStatus?: s
       toast.error(result.error || 'Failed to submit the request.', { id: toastId })
     }
   }
-
   const ErrorMessage = ({ error }: { error?: { message?: string } }) => (
     error?.message ? <p className="text-destructive text-xs mt-1">{error.message}</p> : null
   )
@@ -305,7 +304,7 @@ export function RequestForm({ employmentStatus = 'COS' }: { employmentStatus?: s
         </h3>
         <div className="grid grid-cols-1 gap-4">
           <div className="space-y-1">
-            <label className="text-sm font-semibold text-foreground">Destination Summary</label>
+            <label className="text-sm font-semibold text-foreground">Destination Summary (Optional)</label>
             <input
               type="text"
               placeholder="Brief summary of where you are going"
