@@ -6,20 +6,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { MonthlyTrendChart } from '@/components/hr/charts/monthly-trend-chart'
 import { DivisionPieChart } from '@/components/hr/charts/division-pie-chart'
 import { ProvinceBarChart } from '@/components/hr/charts/province-bar-chart'
+import { StatusBreakdownInteractive } from '@/components/hr/charts/status-breakdown-interactive'
 
 export const dynamic = 'force-dynamic'
 
+// Full professional division labels matching registration form
 const divisionLabels: Record<string, string> = {
-  regulatory: 'Regulatory',
-  laboratory: 'Laboratory',
-  research: 'Research',
-  field_ops: 'Field Ops',
-  agri_marketing: 'Agri-Marketing',
-  engineering: 'Engineering',
-  planning: 'Planning',
-  info_section: 'Info Section',
-  admin_finance: 'Admin & Finance',
-  procurement: 'Procurement',
+  regulatory: 'Regulatory Division',
+  laboratory: 'Integrated Laboratory Division',
+  research: 'Research Division',
+  field_ops: 'Field Operations Division',
+  agri_marketing: 'Agribusiness and Marketing Assistance Division',
+  engineering: 'Regional Agricultural Engineering Division',
+  planning: 'Planning, Monitoring and Evaluation Division',
+  info_section: 'Regional Agriculture & Fisheries Information Section',
+  admin_finance: 'Administrative & Finance Division',
+  procurement: 'Procurement of Goods and Infrastructure',
 }
 
 export default async function HRAnalyticsPage() {
@@ -29,14 +31,15 @@ export default async function HRAnalyticsPage() {
   // Fetch all necessary data
   const [
     totalOrders,
-    approved,           // fully approved, waiting for HR number
-    hrProcessing,       // HR has assigned number but not yet finalized? (optional)
-    completed,          // finalized by HR
+    approved,
+    hrProcessing,
+    completed,
     rejected,
-    pendingReview,      // still in approvers' queues (PENDING/REVIEWING)
+    pendingReview,
     totalEmployees,
     monthlyRaw,
     provinceRaw,
+    allOrdersForTimeline,
   ] = await Promise.all([
     prisma.travelOrderRequest.count(),
     prisma.travelOrderRequest.count({ where: { status: 'APPROVED' } }),
@@ -62,9 +65,16 @@ export default async function HRAnalyticsPage() {
       orderBy: { _count: { destinationProvince: 'desc' } },
       take: 10,
     }),
+    prisma.travelOrderRequest.findMany({
+      select: {
+        id: true,
+        status: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    }),
   ])
 
-  // Combine APPROVED + HR_PROCESSING for "Pending HR Action" stat
   const pendingHRAction = approved + hrProcessing
 
   const divisionData = await prisma.user.groupBy({
@@ -76,7 +86,7 @@ export default async function HRAnalyticsPage() {
   const divisionChartData = divisionData
     .filter(d => d.division)
     .map(d => ({
-      name: divisionLabels[d.division!] || d.division,
+      name: divisionLabels[d.division!] || d.division!,
       value: d._count.id,
     }))
 
@@ -197,6 +207,7 @@ export default async function HRAnalyticsPage() {
           <TabsTrigger value="monthly">Monthly Trend</TabsTrigger>
           <TabsTrigger value="province">By Province</TabsTrigger>
           <TabsTrigger value="division">By Division</TabsTrigger>
+          <TabsTrigger value="timeline">Status Timeline</TabsTrigger>
         </TabsList>
 
         <TabsContent value="monthly">
@@ -224,13 +235,16 @@ export default async function HRAnalyticsPage() {
         <TabsContent value="division">
           <Card>
             <CardHeader>
-              <CardTitle>Staff Distribution</CardTitle>
+              <CardTitle>Staff Distribution by Division</CardTitle>
             </CardHeader>
             <CardContent className="h-96">
-              { /* @ts-ignore */ }
               <DivisionPieChart data={divisionChartData} />
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="timeline">
+          <StatusBreakdownInteractive orders={allOrdersForTimeline} />
         </TabsContent>
       </Tabs>
     </div>

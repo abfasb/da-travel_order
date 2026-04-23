@@ -43,10 +43,6 @@ const routeSections = [
         label: 'User Management',
         icon: Users,
         href: '/hr/users',
-        children: [
-          { label: 'All Users', icon: List, href: '/hr/users' },
-          { label: 'Add User', icon: UserPlus, href: '/hr/users/new' },
-        ],
       },
     ] as Route[],
   },

@@ -161,7 +161,7 @@ export function UsersTable({ users }: { users: any[] }) {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {user.division ? divisionLabels[user.division] || user.division : '—'}
+                      {user.division ? divisionLabels[user.division] || user.division : ''}
                     </TableCell>
                     <TableCell>{user.officialStation || '—'}</TableCell>
                     <TableCell>
