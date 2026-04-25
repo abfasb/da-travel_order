@@ -15,7 +15,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Download, Printer, ArrowLeft } from 'lucide-react';
+import {
+  Download,
+  Printer,
+  ArrowLeft,
+  Paperclip,
+  FileText,
+  Image as ImageIcon,
+  Eye,
+} from 'lucide-react';
 import TravelOrderDocument from '@/app/sample/page';
 import ProposedItineraryDocument from '@/app/sample/itinerary/page';
 import CertificationDocument from '@/app/sample/certification/page';
@@ -50,7 +58,7 @@ export default async function TravelOrderDetailPage({
         },
       },
       itineraryItems: true,
-      attachments: true,
+      attachments: true,   // already fetched
     },
   });
 
@@ -68,6 +76,8 @@ export default async function TravelOrderDetailPage({
     REJECTED: 'destructive',
     COMPLETED: 'success',
   };
+
+  const hasAttachments = order.attachments?.length > 0;
 
   return (
     <div className="space-y-6">
@@ -95,13 +105,13 @@ export default async function TravelOrderDetailPage({
           </Badge>
           {order.status === 'COMPLETED' && (
             <>
-             <Button variant="outline" size="sm" asChild>
-              <Link href={`/division-head/travel-orders/${order.id}/print`} target="_blank">
-                <Printer className="mr-2 h-4 w-4" />
-                Print All
-              </Link>
-             </Button>
-             <PDFDownloadButton order={order} />
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/division-head/travel-orders/${order.id}/print`} target="_blank">
+                  <Printer className="mr-2 h-4 w-4" />
+                  Print All
+                </Link>
+              </Button>
+              <PDFDownloadButton order={order} />
             </>
           )}
         </div>
@@ -192,6 +202,55 @@ export default async function TravelOrderDetailPage({
                         ))}
                       </TableBody>
                     </Table>
+                  </CardContent>
+                </Card>
+              )}
+
+              {hasAttachments && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Paperclip className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                      Supporting Documents
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {order.attachments.map((att) => (
+                        <div
+                          key={att.id}
+                          className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border hover:shadow-sm transition-shadow group"
+                        >
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                            att.mimeType.startsWith('image/')
+                              ? 'bg-blue-100 dark:bg-blue-900/30'
+                              : 'bg-amber-100 dark:bg-amber-900/30'
+                          }`}>
+                            {att.mimeType.startsWith('image/') ? (
+                              <ImageIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            ) : (
+                              <FileText className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate text-foreground">{att.fileName}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {(att.fileSize / 1024).toFixed(1)} KB
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                            asChild
+                          >
+                            <a href={att.fileUrl} target="_blank" rel="noopener noreferrer" download>
+                              <Eye className="h-4 w-4" />
+                            </a>
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
                   </CardContent>
                 </Card>
               )}
