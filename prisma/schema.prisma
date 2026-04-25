@@ -81,6 +81,18 @@ model PasswordResetToken {
   @@map("password_reset_tokens")
 }
 
+model FundSource {
+  id             String   @id @default(uuid())
+  name           String
+  allocatedBudget Float
+  travelOrders   TravelOrderRequest[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("fund_sources")
+}
+
 model TravelOrderRequest {
   id                     String        @id @default(uuid())
   travelOrderNumber      String?       @unique
@@ -118,7 +130,8 @@ model TravelOrderRequest {
   hrUserId               String?
   hrUser                 User?         @relation("HRAssignments", fields: [hrUserId], references: [id])
 
-  // Relations to other models
+  fundSourceId    String?     
+  fundSource      FundSource? @relation(fields: [fundSourceId], references: [id])
   approvals              Approval[]
   attachments            Attachment[]
   auditLogs              AuditLog[]    @relation("TravelOrderAuditLogs")
