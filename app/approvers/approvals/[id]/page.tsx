@@ -31,6 +31,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { PDFDownloadButton } from '@/components/division-head/pdf-download-button'
 
 export default async function SignaturePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -223,10 +224,7 @@ export default async function SignaturePage({ params }: { params: Promise<{ id: 
                       <Printer className="h-4 w-4" />
                       <span className="hidden sm:inline">Print</span>
                     </Button>
-                    <Button variant="secondary" size="sm" className="gap-2 bg-white/10 hover:bg-white/20 text-white border-0">
-                      <Download className="h-4 w-4" />
-                      <span className="hidden sm:inline">Download PDF</span>
-                    </Button>
+                    <PDFDownloadButton order={travelOrder} />
                   </div>
                 </div>
               </div>

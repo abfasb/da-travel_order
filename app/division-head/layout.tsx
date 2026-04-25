@@ -16,6 +16,18 @@ export default async function DivisionHeadLayout({
     redirect('/login');
   }
 
+  const fullUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: {
+      firstName: true,
+      lastName: true,
+      division: true,
+      avatarUrl: true,
+    },
+  });
+
+  if (!fullUser) redirect('/login');
+
   const notifications = await prisma.notification.findMany({
     where: { userId: user.id },
     include: {
@@ -30,7 +42,7 @@ export default async function DivisionHeadLayout({
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-slate-50 dark:bg-slate-950">
-        <DivisionHeadSidebar user={user} />
+        <DivisionHeadSidebar user={fullUser} />
         <div className="flex-1 flex flex-col">
           <DivisionHeadNavbar
             user={user}
