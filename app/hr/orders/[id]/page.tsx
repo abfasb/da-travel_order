@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import {
   ArrowLeft, CheckCircle, XCircle, Clock, UserCheck,
   MapPin, CalendarDays, Award, FileText, ChevronRight,
+  Paperclip, Download, Image as ImageIcon,
 } from 'lucide-react'
 import TravelOrderDocument from '@/app/sample/page'
 import ProposedItineraryDocument from '@/app/sample/itinerary/page'
@@ -207,7 +208,7 @@ const ApprovalStep = ({
   )
 }
 
-/* ─── Page (Light Theme) ───────────────────────────────── */
+/* ─── Page ───────────────────────────────── */
 export default async function HROrderDetailPage({ params }: PageProps) {
   const { id } = await params
 
@@ -221,6 +222,7 @@ export default async function HROrderDetailPage({ params }: PageProps) {
       user: true,
       itineraryItems: true,
       approvals: { include: { approver: true }, orderBy: { createdAt: 'asc' } },
+      attachments: true,  // 🆕 fetch uploaded files
     },
   })
   if (!travelOrder) notFound()
@@ -230,6 +232,8 @@ export default async function HROrderDetailPage({ params }: PageProps) {
   const totalSteps     = travelOrder.approvals.length
   const progressPct    = currentStepIdx === -1 ? 100 : Math.round((currentStepIdx / totalSteps) * 100)
   const completedSteps = currentStepIdx === -1 ? totalSteps : currentStepIdx
+
+  const hasAttachments = travelOrder.attachments?.length > 0
 
   return (
     <>
@@ -418,7 +422,7 @@ export default async function HROrderDetailPage({ params }: PageProps) {
         }
         .od-doc-card {
           border-radius: 16px;
-          background: #eef2f6;  /* soft gray background to make white document stand out */
+          background: #eef2f6;
           border: 1px solid #cbd5e1;
           overflow: hidden;
           box-shadow: 0 8px 20px rgba(0,0,0,0.08);
@@ -451,6 +455,54 @@ export default async function HROrderDetailPage({ params }: PageProps) {
           border-radius: 12px;
           box-shadow: 0 4px 12px rgba(0,0,0,0.05);
           overflow: hidden;
+        }
+
+        /* ── attachment list (new) ── */
+        .od-attachment-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+          gap: 16px;
+        }
+        .od-attachment-item {
+          display: flex; align-items: center;
+          gap: 12px;
+          padding: 14px;
+          border-radius: 10px;
+          border: 1px solid #e2e8f0;
+          background: #f8fafc;
+          transition: box-shadow 0.2s ease;
+        }
+        .od-attachment-item:hover {
+          box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+          border-color: #cbd5e1;
+        }
+        .od-attachment-icon {
+          width: 28px; height: 28px;
+          border-radius: 6px;
+          display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0;
+        }
+        .od-attachment-name {
+          font-size: 13px; font-weight: 500; color: #1e293b;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .od-attachment-size {
+          font-size: 11px; color: #64748b;
+        }
+        .od-attachment-download {
+          margin-left: auto;
+          width: 28px; height: 28px;
+          border-radius: 6px;
+          border: 1px solid #e2e8f0;
+          background: white;
+          display: flex; align-items: center; justify-content: center;
+          color: #64748b; cursor: pointer; text-decoration: none;
+          flex-shrink: 0;
+          transition: background 0.15s;
+        }
+        .od-attachment-download:hover {
+          background: #f1f5f9;
+          border-color: #cbd5e1;
         }
       `}</style>
 
@@ -489,6 +541,7 @@ export default async function HROrderDetailPage({ params }: PageProps) {
 
         <div className="od-body">
 
+          {/* ── Approval Workflow Card ── */}
           <div className="od-card">
             <div className="od-card-head">
               <h1 className="od-card-title">
@@ -507,7 +560,6 @@ export default async function HROrderDetailPage({ params }: PageProps) {
             </div>
 
             <div className="od-card-body">
-              {/* Progress bar (full-width under header) */}
               {travelOrder.status !== 'REJECTED' && travelOrder.status !== 'COMPLETED' && (
                 <div style={{ marginBottom: 28 }}>
                   <div className="od-prog-track" style={{ height: 4 }}>
@@ -516,7 +568,6 @@ export default async function HROrderDetailPage({ params }: PageProps) {
                 </div>
               )}
 
-              {/* Rejection banner */}
               {travelOrder.status === 'REJECTED' && travelOrder.rejectionReason && (
                 <div className="od-rejection-banner">
                   <div className="od-rejection-icon">
@@ -533,7 +584,6 @@ export default async function HROrderDetailPage({ params }: PageProps) {
                 </div>
               )}
 
-              {/* Steps */}
               {travelOrder.approvals.map((approval, idx) => (
                 <ApprovalStep
                   key={approval.id}
@@ -550,7 +600,6 @@ export default async function HROrderDetailPage({ params }: PageProps) {
                 />
               ))}
 
-              {/* HR Processing step */}
               {travelOrder.status === 'HR_PROCESSING' && (
                 <div className="od-special-step" style={{ marginTop: 8 }}>
                   <div className="od-special-dot" style={{ background: '#f3e8ff', border: '2px solid #8b5cf6', boxShadow: '0 0 0 4px rgba(139,92,246,0.1)' }}>
@@ -565,7 +614,6 @@ export default async function HROrderDetailPage({ params }: PageProps) {
                 </div>
               )}
 
-              {/* Completed step */}
               {travelOrder.status === 'COMPLETED' && travelOrder.travelOrderNumber && (
                 <div className="od-special-step" style={{ marginTop: 8 }}>
                   <div className="od-special-dot" style={{ background: '#ecfdf5', border: '2px solid #10b981', boxShadow: '0 0 0 4px rgba(16,185,129,0.1)' }}>
@@ -585,20 +633,55 @@ export default async function HROrderDetailPage({ params }: PageProps) {
             </div>
           </div>
 
+          {/* ── Attachments Card (NEW) ── */}
+          {hasAttachments && (
+            <div className="od-card">
+              <div className="od-card-head">
+                <h1 className="od-card-title">
+                  <Paperclip size={18} color="#059669" />
+                  Supporting Documents
+                </h1>
+              </div>
+              <div className="od-card-body">
+                <div className="od-attachment-grid">
+                  {travelOrder.attachments.map((att) => (
+                    <div key={att.id} className="od-attachment-item">
+                      <div className={`od-attachment-icon ${
+                        att.mimeType.startsWith('image/')
+                          ? 'bg-blue-100 border border-blue-200'
+                          : 'bg-amber-100 border border-amber-200'
+                      }`}>
+                        {att.mimeType.startsWith('image/') ? (
+                          <ImageIcon size={14} color="#2563eb" />
+                        ) : (
+                          <FileText size={14} color="#d97706" />
+                        )}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p className="od-attachment-name">{att.fileName}</p>
+                        <p className="od-attachment-size">{(att.fileSize / 1024).toFixed(1)} KB</p>
+                      </div>
+                      <a
+                        href={att.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download
+                        className="od-attachment-download"
+                        title="Download"
+                      >
+                        <Download size={13} />
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ── Documents ── */}
           <div className="od-doc-section">
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{
-                width: 30, height: 30, borderRadius: 8,
-                background: '#ecfdf5',
-                border: '1px solid #a7f3d0',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <FileText size={14} color="#059669" />
-              </div>
-              <h2 style={{ fontSize: 14, fontWeight: 600, color: '#0f172a', margin: 0 }}>
-                Supporting Documents
-              </h2>
+            
             </div>
 
             <div className="od-doc-card">
@@ -614,7 +697,6 @@ export default async function HROrderDetailPage({ params }: PageProps) {
 
             {travelOrder.employmentStatus !== 'PERMANENT' && (
               <>
-                {/* Proposed Itinerary */}
                 <div className="od-doc-card">
                   <div className="od-doc-label">
                     <FileText size={12} />

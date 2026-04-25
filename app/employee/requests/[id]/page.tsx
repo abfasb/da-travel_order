@@ -7,13 +7,13 @@ import CertificationDocument from '@/app/sample/certification/page'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { 
+import {
   ArrowLeft, CheckCircle, XCircle, Clock, UserCheck, MapPin, CalendarDays,
-  User, Building, Calendar, Map, FileCheck, Hourglass, Bell, Hash
+  User, Building, Calendar, Map, FileCheck, Hourglass, Bell, Hash,
+  Paperclip, Download, FileText, Image as ImageIcon,
 } from 'lucide-react'
 import Link from 'next/link'
 import PrintButton from '@/components/employee/PrintButton'
-import { FloatingPrintButton } from '@/components/employee/floatingprintbutton'
 import { PDFDownloadButton } from '@/components/division-head/pdf-download-button'
 
 interface PageProps {
@@ -76,26 +76,8 @@ const roleTitles: Record<string, string> = {
 }
 
 const ApprovalStep = ({ 
-  role, 
-  title, 
-  status, 
-  approver, 
-  placeSigned, 
-  signedAt, 
-  signatureData, 
-  comment,
-  isLast 
-}: { 
-  role: string, 
-  title: string, 
-  status: string, 
-  approver?: any, 
-  placeSigned?: string, 
-  signedAt?: Date, 
-  signatureData?: string, 
-  comment?: string,
-  isLast?: boolean 
-}) => {
+  role, title, status, approver, placeSigned, signedAt, signatureData, comment, isLast 
+}: any) => {
   const isApproved = status === 'APPROVED'
   const isRejected = status === 'REJECTED'
   const isPending = status === 'PENDING'
@@ -103,19 +85,15 @@ const ApprovalStep = ({
   return (
     <div className="relative flex gap-4 group">
       <div className="flex flex-col items-center">
-        <div className={`
-          w-11 h-11 rounded-full flex items-center justify-center border-2 transition-all duration-300 shadow-sm
-          ${isApproved ? 'bg-emerald-100 dark:bg-emerald-900/50 border-emerald-500 text-emerald-600 dark:text-emerald-400' : 
-            isRejected ? 'bg-rose-100 dark:bg-rose-900/50 border-rose-500 text-rose-600 dark:text-rose-400' : 
-            'bg-background border-border text-muted-foreground'}
-        `}>
-          {isApproved ? <CheckCircle className="w-5 h-5" /> : 
-           isRejected ? <XCircle className="w-5 h-5" /> : 
-           <Clock className="w-5 h-5" />}
+        <div className={`w-11 h-11 rounded-full flex items-center justify-center border-2 transition-all duration-300 shadow-sm ${
+          isApproved ? 'bg-emerald-100 dark:bg-emerald-900/50 border-emerald-500 text-emerald-600 dark:text-emerald-400' : 
+          isRejected ? 'bg-rose-100 dark:bg-rose-900/50 border-rose-500 text-rose-600 dark:text-rose-400' : 
+          'bg-background border-border text-muted-foreground'
+        }`}>
+          {isApproved ? <CheckCircle className="w-5 h-5" /> : isRejected ? <XCircle className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
         </div>
         {!isLast && <div className="w-0.5 flex-1 bg-gradient-to-b from-border to-border/30 mt-2" />}
       </div>
-
       <div className={`flex-1 mb-7 rounded-xl border p-5 transition-all duration-200 hover:shadow-md ${
         isPending ? 'bg-card' : isApproved ? 'bg-emerald-50/40 dark:bg-emerald-950/20' : 'bg-rose-50/40 dark:bg-rose-950/20'
       } border-border`}>
@@ -124,16 +102,12 @@ const ApprovalStep = ({
             <h3 className="font-semibold text-foreground text-lg">{role.replace(/_/g, ' ')}</h3>
             <p className="text-sm text-muted-foreground mt-0.5">{title}</p>
           </div>
-          <Badge variant="outline" className={`
-            px-3 py-1 text-xs font-medium
-            ${isApproved ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' : 
-              isRejected ? 'bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800' : 
-              'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'}
-          `}>
-            {status}
-          </Badge>
+          <Badge variant="outline" className={`px-3 py-1 text-xs font-medium ${
+            isApproved ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' : 
+            isRejected ? 'bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800' : 
+            'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+          }`}>{status}</Badge>
         </div>
-
         {isApproved && approver && (
           <div className="mt-5 pt-4 border-t border-border space-y-3">
             <div className="flex items-center gap-3 text-sm">
@@ -161,16 +135,13 @@ const ApprovalStep = ({
             )}
           </div>
         )}
-
         {isPending && (
           <div className="mt-5 pt-4 border-t border-border">
             <p className="text-sm text-amber-600 dark:text-amber-400 flex items-center gap-2">
-              <Bell className="w-4 h-4" />
-              Awaiting approval from this officer
+              <Bell className="w-4 h-4" /> Awaiting approval from this officer
             </p>
           </div>
         )}
-
         {isRejected && comment && (
           <div className="mt-5 pt-4 border-t border-rose-200 dark:border-rose-800">
             <p className="text-sm text-rose-700 dark:text-rose-300">
@@ -224,7 +195,6 @@ const HRProcessingStep = ({ status, travelOrderNumber }: { status: string, trave
             {displayStatus === 'COMPLETED' ? 'COMPLETED' : displayStatus === 'HR_PROCESSING' ? 'HR PROCESSING' : 'PENDING'}
           </Badge>
         </div>
-        
         {isCompleted && travelOrderNumber && (
           <div className="mt-5 pt-4 border-t border-emerald-200 dark:border-emerald-800">
             <div className="flex items-center gap-3">
@@ -235,12 +205,10 @@ const HRProcessingStep = ({ status, travelOrderNumber }: { status: string, trave
               </div>
             </div>
             <p className="text-sm text-emerald-700 dark:text-emerald-300 mt-3 flex items-center gap-2">
-              <CheckCircle className="w-4 h-4" />
-              Travel order has been finalized. You may now print the official document.
+              <CheckCircle className="w-4 h-4" /> Travel order has been finalized. You may now print the official document.
             </p>
           </div>
         )}
-        
         {isProcessing && (
           <div className="mt-5 pt-4 border-t border-purple-200 dark:border-purple-800">
             <div className="flex items-center gap-3">
@@ -251,12 +219,10 @@ const HRProcessingStep = ({ status, travelOrderNumber }: { status: string, trave
             </div>
           </div>
         )}
-        
         {isWaiting && (
           <div className="mt-5 pt-4 border-t border-border">
             <p className="text-sm text-muted-foreground flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              Waiting for all officials to approve before HR processing begins.
+              <Clock className="w-4 h-4" /> Waiting for all officials to approve before HR processing begins.
             </p>
           </div>
         )}
@@ -280,6 +246,7 @@ export default async function TravelOrderPage({ params }: PageProps) {
       user: true,
       itineraryItems: true,
       approvals: { include: { approver: true }, orderBy: { createdAt: 'asc' } },
+      attachments: true, // 🆕 fetch supporting documents
     },
   })
 
@@ -297,10 +264,12 @@ export default async function TravelOrderPage({ params }: PageProps) {
   const StatusIcon = statusConfig.icon
 
   const showHRStep = allOfficialsApproved || isHRProcessing || isCompleted
+  const hasAttachments = travelOrder.attachments?.length > 0
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted overflow-hidden print:bg-white print:block">
       
+      {/* Sticky Header */}
       <div className="sticky top-0 z-20 bg-background/90 backdrop-blur-md border-b border-border print:hidden shadow-sm">
         <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-between py-4 gap-3">
@@ -329,7 +298,7 @@ export default async function TravelOrderPage({ params }: PageProps) {
             </div>
             <div className="flex items-center gap-2">
               <PrintButton status={travelOrder.status} />
-              <PDFDownloadButton order={travelOrder} />
+              {isCompleted && <PDFDownloadButton order={travelOrder} />}
             </div>
           </div>
         </div>
@@ -337,6 +306,7 @@ export default async function TravelOrderPage({ params }: PageProps) {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 print:max-w-none print:p-0 space-y-8">
         
+        {/* Request Summary */}
         <Card className="print:hidden border-0 shadow-xl bg-gradient-to-r from-card to-muted overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 dark:bg-emerald-400/5 rounded-full blur-3xl -translate-y-32 translate-x-32" />
           <CardHeader className="pb-2">
@@ -390,6 +360,56 @@ export default async function TravelOrderPage({ params }: PageProps) {
             </div>
           </CardContent>
         </Card>
+
+        {/* 🆕 Supporting Documents Card */}
+        {hasAttachments && (
+          <Card className="print:hidden border-0 shadow-xl bg-gradient-to-r from-card to-muted overflow-hidden">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <Paperclip className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                Supporting Documents
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {travelOrder.attachments.map((att) => (
+                  <div
+                    key={att.id}
+                    className="flex items-center gap-4 p-4 rounded-xl bg-muted/50 border border-border hover:shadow-md transition-shadow group"
+                  >
+                    <div className="shrink-0">
+                      {att.mimeType.startsWith('image/') ? (
+                        <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                          <ImageIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                      ) : (
+                        <div className="h-10 w-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                          <FileText className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{att.fileName}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {(att.fileSize / 1024).toFixed(1)} KB
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                      asChild
+                    >
+                      <a href={att.fileUrl} target="_blank" rel="noopener noreferrer" download>
+                        <Download className="h-4 w-4" />
+                      </a>
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Approval Workflow */}
         <div className="print:hidden">

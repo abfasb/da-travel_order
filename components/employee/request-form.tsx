@@ -1,12 +1,17 @@
 'use client'
 
+import { useState } from 'react'
 import { useForm, useFieldArray, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { Users, CalendarDays, FileText, Wallet, Plus, Trash2, Pen } from 'lucide-react'
+import {
+  Users, CalendarDays, FileText, Wallet,
+  Plus, Trash2, Pen, Paperclip
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { submitTravelOrder } from '@/app/actions/travelOrder'
 import { SignatureInput } from './signature-input'
+import { FileUpload } from './file-upload'
 
 const formSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
@@ -40,37 +45,39 @@ const formSchema = z.object({
   ).optional(),
 
   requestorSignature: z.string().optional(),
-
 }).refine((data) => {
   if (!data.departureDate || !data.returnDate) return true
   return new Date(data.returnDate) >= new Date(data.departureDate)
 }, {
   message: 'Return date cannot be before departure date',
   path: ['returnDate'],
-})
-.superRefine((data, ctx) => {
+}).superRefine((data, ctx) => {
   if (data.employmentStatus !== 'PERMANENT') {
     if (!data.itineraryItems || data.itineraryItems.length === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "At least one itinerary row is required for COS/JO status",
         path: ["itineraryItems", "root"]
-      });
+      })
     }
     if (!data.requestorSignature) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Signature is required for COS/JO employees",
         path: ["requestorSignature"]
-      });
+      })
     }
   }
 })
 
 type FormValues = z.infer<typeof formSchema>
 
+// ----------------------------------------------------------------------
+// Component
+// ----------------------------------------------------------------------
 export function RequestForm({ employmentStatus = 'COS' }: { employmentStatus?: string | null }) {
   const isPermanent = employmentStatus === 'PERMANENT'
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([])
 
   const {
     register,
@@ -95,25 +102,52 @@ export function RequestForm({ employmentStatus = 'COS' }: { employmentStatus?: s
 
   const watchedSignature = useWatch({ control, name: 'requestorSignature' })
 
+  // --------------------------------------------------
+  // Submit handler – chooses action based on files
+  // --------------------------------------------------
   const onSubmit = async (data: FormValues) => {
     const toastId = toast.loading('Submitting Travel Order...')
-    const result = await submitTravelOrder(data)
-    if (result.success) {
-      toast.success('Travel order submitted successfully!', { id: toastId })
-      reset()
-    } else {
-      toast.error(result.error || 'Failed to submit the request.', { id: toastId })
+
+    try {
+      if (attachedFiles.length > 0) {
+        const formData = new FormData()
+        formData.append('data', JSON.stringify(data))
+        attachedFiles.forEach(file => formData.append('files', file))
+
+        const { submitTravelOrder } = await import('@/app/actions/travelOrder')
+        const result = await submitTravelOrder(formData)
+
+        if (result.success) {
+          toast.success('Travel order submitted successfully!', { id: toastId })
+          reset()
+          setAttachedFiles([])
+        } else {
+          toast.error(result.error || 'Failed to submit the request.', { id: toastId })
+        }
+      } else {
+        //@ts-ignore
+        const result = await submitTravelOrder(data)
+        if (result.success) {
+          toast.success('Travel order submitted successfully!', { id: toastId })
+          reset()
+        } else {
+          toast.error(result.error || 'Failed to submit the request.', { id: toastId })
+        }
+      }
+    } catch (error) {
+      toast.error('Something went wrong. Please try again.', { id: toastId })
     }
   }
+
   const ErrorMessage = ({ error }: { error?: { message?: string } }) => (
     error?.message ? <p className="text-destructive text-xs mt-1">{error.message}</p> : null
   )
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
-      
       <input type="hidden" {...register('employmentStatus')} value={employmentStatus || 'COS'} />
 
+      {/* SECTION 1: Personal Profile */}
       <div className="space-y-4">
         <h3 className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest flex items-center gap-2">
           <Users className="w-4 h-4" /> Employee Profile
@@ -160,40 +194,22 @@ export function RequestForm({ employmentStatus = 'COS' }: { employmentStatus?: s
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="space-y-1">
             <label className="text-sm font-semibold text-foreground">Departure Date</label>
-            <input
-              type="date"
-              className="w-full h-11 px-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20"
-              {...register('departureDate')}
-            />
+            <input type="date" className="w-full h-11 px-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20" {...register('departureDate')} />
             <ErrorMessage error={errors.departureDate} />
           </div>
           <div className="space-y-1">
             <label className="text-sm font-semibold text-foreground">Return Date</label>
-            <input
-              type="date"
-              className="w-full h-11 px-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20"
-              {...register('returnDate')}
-            />
+            <input type="date" className="w-full h-11 px-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20" {...register('returnDate')} />
             <ErrorMessage error={errors.returnDate} />
           </div>
           <div className="space-y-1">
             <label className="text-sm font-semibold text-foreground">Dest. Province</label>
-            <input
-              type="text"
-              placeholder="e.g. Palawan"
-              className="w-full h-11 px-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20"
-              {...register('destinationProvince')}
-            />
+            <input type="text" placeholder="e.g. Palawan" className="w-full h-11 px-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20" {...register('destinationProvince')} />
             <ErrorMessage error={errors.destinationProvince} />
           </div>
           <div className="space-y-1">
             <label className="text-sm font-semibold text-foreground">Specific Location</label>
-            <input
-              type="text"
-              placeholder="e.g. Puerto Princesa City"
-              className="w-full h-11 px-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20"
-              {...register('specificLocation')}
-            />
+            <input type="text" placeholder="e.g. Puerto Princesa City" className="w-full h-11 px-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20" {...register('specificLocation')} />
             <ErrorMessage error={errors.specificLocation} />
           </div>
         </div>
@@ -220,52 +236,25 @@ export function RequestForm({ employmentStatus = 'COS' }: { employmentStatus?: s
               <div key={field.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 rounded-xl border border-border bg-muted relative">
                 <div className="md:col-span-2 space-y-1">
                   <label className="text-xs font-semibold text-foreground">Date</label>
-                  <input
-                    type="date"
-                    className="w-full h-10 px-3 rounded-lg border border-border bg-background text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20"
-                    {...register(`itineraryItems.${index}.date` as const)}
-                  />
+                  <input type="date" className="w-full h-10 px-3 rounded-lg border border-border bg-background text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20" {...register(`itineraryItems.${index}.date` as const)} />
                   <ErrorMessage error={errors?.itineraryItems?.[index]?.date} />
                 </div>
-                
                 <div className="md:col-span-3 space-y-1">
                   <label className="text-xs font-semibold text-foreground">Location</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Naujan, Or. Mindoro"
-                    className="w-full h-10 px-3 rounded-lg border border-border bg-background text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20"
-                    {...register(`itineraryItems.${index}.location` as const)}
-                  />
+                  <input type="text" placeholder="e.g. Naujan, Or. Mindoro" className="w-full h-10 px-3 rounded-lg border border-border bg-background text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20" {...register(`itineraryItems.${index}.location` as const)} />
                   <ErrorMessage error={errors?.itineraryItems?.[index]?.location} />
                 </div>
-
                 <div className="md:col-span-4 space-y-1">
                   <label className="text-xs font-semibold text-foreground">Activity</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Assist in personnel audit"
-                    className="w-full h-10 px-3 rounded-lg border border-border bg-background text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20"
-                    {...register(`itineraryItems.${index}.activity` as const)}
-                  />
+                  <input type="text" placeholder="e.g. Assist in personnel audit" className="w-full h-10 px-3 rounded-lg border border-border bg-background text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20" {...register(`itineraryItems.${index}.activity` as const)} />
                   <ErrorMessage error={errors?.itineraryItems?.[index]?.activity} />
                 </div>
-
                 <div className="md:col-span-3 space-y-1 relative">
                   <label className="text-xs font-semibold text-foreground">Responsible Person</label>
                   <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="e.g. Christine Montiano"
-                      className="w-full h-10 px-3 rounded-lg border border-border bg-background text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20"
-                      {...register(`itineraryItems.${index}.responsiblePerson` as const)}
-                    />
+                    <input type="text" placeholder="e.g. Christine Montiano" className="w-full h-10 px-3 rounded-lg border border-border bg-background text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20" {...register(`itineraryItems.${index}.responsiblePerson` as const)} />
                     {fields.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => remove(index)}
-                        className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors flex-shrink-0"
-                        title="Remove Row"
-                      >
+                      <button type="button" onClick={() => remove(index)} className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors flex-shrink-0" title="Remove Row">
                         <Trash2 className="w-5 h-5" />
                       </button>
                     )}
@@ -274,9 +263,7 @@ export function RequestForm({ employmentStatus = 'COS' }: { employmentStatus?: s
                 </div>
               </div>
             ))}
-            {errors.itineraryItems?.root && (
-              <p className="text-destructive text-sm">{errors.itineraryItems.root.message}</p>
-            )}
+            {errors.itineraryItems?.root && <p className="text-destructive text-sm">{errors.itineraryItems.root.message}</p>}
           </div>
         </div>
       )}
@@ -288,10 +275,7 @@ export function RequestForm({ employmentStatus = 'COS' }: { employmentStatus?: s
             <Pen className="w-4 h-4" /> Employee Signature
           </h3>
           <div className="p-4 rounded-xl border border-border bg-muted">
-            <SignatureInput
-              value={watchedSignature}
-              onChange={(val) => setValue('requestorSignature', val)}
-            />
+            <SignatureInput value={watchedSignature} onChange={(val) => setValue('requestorSignature', val)} />
             <ErrorMessage error={errors.requestorSignature} />
           </div>
         </div>
@@ -305,43 +289,23 @@ export function RequestForm({ employmentStatus = 'COS' }: { employmentStatus?: s
         <div className="grid grid-cols-1 gap-4">
           <div className="space-y-1">
             <label className="text-sm font-semibold text-foreground">Destination Summary (Optional)</label>
-            <input
-              type="text"
-              placeholder="Brief summary of where you are going"
-              className="w-full h-11 px-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20"
-              {...register('destinationSummary')}
-            />
+            <input type="text" placeholder="Brief summary of where you are going" className="w-full h-11 px-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20" {...register('destinationSummary')} />
             <ErrorMessage error={errors.destinationSummary} />
           </div>
           <div className="space-y-1">
             <label className="text-sm font-semibold text-foreground">Specific Purpose</label>
-            <textarea
-              placeholder="State the exact reason for travel..."
-              rows={2}
-              className="w-full p-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20 resize-none"
-              {...register('specificPurpose')}
-            ></textarea>
+            <textarea placeholder="State the exact reason for travel..." rows={2} className="w-full p-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20 resize-none" {...register('specificPurpose')}></textarea>
             <ErrorMessage error={errors.specificPurpose} />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="text-sm font-semibold text-foreground">Objectives</label>
-              <textarea
-                placeholder="Expected outcomes..."
-                rows={3}
-                className="w-full p-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20 resize-none"
-                {...register('objectives')}
-              ></textarea>
+              <textarea placeholder="Expected outcomes..." rows={3} className="w-full p-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20 resize-none" {...register('objectives')}></textarea>
               <ErrorMessage error={errors.objectives} />
             </div>
             <div className="space-y-1">
               <label className="text-sm font-semibold text-foreground">Travel Details (Activities)</label>
-              <textarea
-                placeholder="Step-by-step activities..."
-                rows={3}
-                className="w-full p-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20 resize-none"
-                {...register('travelDetails')}
-              ></textarea>
+              <textarea placeholder="Step-by-step activities..." rows={3} className="w-full p-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20 resize-none" {...register('travelDetails')}></textarea>
               <ErrorMessage error={errors.travelDetails} />
             </div>
           </div>
@@ -356,44 +320,42 @@ export function RequestForm({ employmentStatus = 'COS' }: { employmentStatus?: s
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="space-y-1 lg:col-span-2">
             <label className="text-sm font-semibold text-foreground">Means of Transportation</label>
-            <input
-              type="text"
-              placeholder="e.g. Official DA Vehicle, Commute, Flight"
-              className="w-full h-11 px-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20"
-              {...register('meansOfTransport')}
-            />
+            <input type="text" placeholder="e.g. Official DA Vehicle, Commute, Flight" className="w-full h-11 px-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20" {...register('meansOfTransport')} />
             <ErrorMessage error={errors.meansOfTransport} />
           </div>
           <div className="space-y-1">
             <label className="text-sm font-semibold text-foreground">Estimated Expenses</label>
-            <input
-              type="text"
-              placeholder="₱ 0.00"
-              className="w-full h-11 px-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20"
-              {...register('estimatedExpenses')}
-            />
+            <input type="text" placeholder="₱ 0.00" className="w-full h-11 px-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20" {...register('estimatedExpenses')} />
             <ErrorMessage error={errors.estimatedExpenses} />
           </div>
           <div className="space-y-1">
             <label className="text-sm font-semibold text-foreground">Source of Funds</label>
-            <input
-              type="text"
-              placeholder="e.g. Division Fund"
-              className="w-full h-11 px-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20"
-              {...register('sourceOfFunds')}
-            />
+            <input type="text" placeholder="e.g. Division Fund" className="w-full h-11 px-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20" {...register('sourceOfFunds')} />
             <ErrorMessage error={errors.sourceOfFunds} />
           </div>
           <div className="space-y-1 lg:col-span-4">
             <label className="text-sm font-semibold text-foreground">Accompanying Personnel (Optional)</label>
-            <input
-              type="text"
-              placeholder="Names of other staff joining you..."
-              className="w-full h-11 px-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20"
-              {...register('accompanyingPersonnel')}
-            />
+            <input type="text" placeholder="Names of other staff joining you..." className="w-full h-11 px-4 rounded-xl border border-border bg-muted text-sm focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-400/20" {...register('accompanyingPersonnel')} />
             <ErrorMessage error={errors.accompanyingPersonnel} />
           </div>
+        </div>
+      </div>
+
+      {/* SECTION 6: Attachments (NEW) */}
+      <div className="space-y-4">
+        <h3 className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest flex items-center gap-2">
+          <Paperclip className="w-4 h-4" /> Supporting Documents (Optional)
+        </h3>
+        <div className="p-4 rounded-xl border border-border bg-muted/30">
+          <FileUpload
+            onChange={setAttachedFiles}
+            maxFiles={5}
+            maxSizeMB={5}
+            accept=".pdf,.jpg,.jpeg,.png,.docx"
+          />
+          <p className="text-xs text-muted-foreground mt-2">
+            Attach invitations, meeting letters, training schedules, etc.
+          </p>
         </div>
       </div>
 
