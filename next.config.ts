@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import withPWA from "next-pwa";
 
 const nextConfig: NextConfig = {
  experimental: {
@@ -14,4 +15,10 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+const pwa = withPWA({
+  dest: "public",
+  register: true,
+  skipWaiting: true,
+});
+
+export default pwa(nextConfig as any);
