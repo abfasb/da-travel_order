@@ -14,11 +14,13 @@ const nextConfig: NextConfig = {
     domains: ["encrypted-tbn0.gstatic.com", "images.unsplash.com"],
   },
 };
+const isDev = process.env.NODE_ENV === "development";
 
 const pwa = withPWA({
   dest: "public",
   register: true,
   skipWaiting: true,
+  disable: isDev, 
 });
 
 export default pwa(nextConfig as any);
