@@ -4,11 +4,9 @@ import React from 'react'
 import Image from 'next/image'
 import logo from "@/assets/logo.png"
 
-interface TravelOrderDocumentProps {
-  data?: any
-}
+export default function TravelOrderDocument(props: any) {
+  const data = props.data as any;
 
-export default function TravelOrderDocument({ data }: TravelOrderDocumentProps) {
   const formatDate = (dateString?: Date | string) => {
     if (!dateString) return ""
     return new Date(dateString).toLocaleDateString('en-US', {

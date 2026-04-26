@@ -1,7 +1,11 @@
+'use client'
+
 import Image from "next/image";
 import logo from "@/assets/logo.png";
 
-export default function ProposedItineraryDocument({ data }: { data: any }) {
+export default function ProposedItineraryDocument(props: any) {
+  const data = props.data as any;
+
   const formatDate = (date: Date | string) => {
     if (!date) return '';
     return new Date(date).toLocaleDateString('en-US', {
