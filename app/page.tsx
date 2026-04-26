@@ -52,7 +52,7 @@ const AnnouncementBar: React.FC = () => (
   <div className="w-full bg-green-50 border-b border-green-200 py-2.5 px-6 flex items-center justify-center gap-3 z-50 relative">
     <span className="flex h-1.5 w-1.5 rounded-full bg-green-600 animate-pulse" />
     <p className="text-[11px] font-bold tracking-widest uppercase text-green-800 text-center">
-      DA-MIMAROPA Digital Transformation Initiative — Travel Order System Now Live
+      DA-MIMAROPA — Travel Order System Now Live
     </p>
     <ArrowUpRight className="w-3 h-3 text-green-700 shrink-0" />
   </div>
@@ -184,7 +184,7 @@ const HeroSection: React.FC = () => {
   ];
 
   return (
-    <section className="relative min-h-screen flex items-center pt-32 pb-20 overflow-hidden bg-[#FAFAF8]">
+    <section className="relative min-h-screen flex items-center pt-28 pb-20 overflow-hidden bg-[#FAFAF8]">
       <div
         className="absolute inset-0 z-0 opacity-[0.4]"
         style={{
@@ -332,9 +332,9 @@ const HeroSection: React.FC = () => {
                   {/* Mini stats row */}
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { label: "Total Orders", value: "1,426", change: "+12%", icon: FileText },
-                      { label: "Pending", value: "38", change: "-5%", icon: Clock },
-                      { label: "Approved", value: "1,388", change: "+18%", icon: CheckCircle2 },
+                      { label: "Total Travel Orders", value: "20", change: "+12%", icon: FileText },
+                      { label: "Pending", value: "8", change: "-5%", icon: Clock },
+                      { label: "Approved", value: "12", change: "+18%", icon: CheckCircle2 },
                     ].map((stat, i) => (
                       <div key={i} className="bg-stone-50 rounded-lg p-3 border border-stone-100">
                         <div className="flex items-center gap-1.5 mb-1">
@@ -877,9 +877,7 @@ const Footer: React.FC = () => (
       <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
         <div className="md:col-span-2">
           <div className="flex items-center gap-3 mb-5">
-            <div className="w-9 h-9 bg-green-700 rounded-lg flex items-center justify-center shadow-sm">
-              <Leaf className="w-4 h-4 text-white" />
-            </div>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Department_of_Agriculture_of_the_Philippines.svg/1280px-Department_of_Agriculture_of_the_Philippines.svg.png" alt="TravelOrder Logo" className="w-9 h-9 b rounded-lg flex items-center justify-center shadow-sm" />
             <div>
               <div className="text-[13px] font-black text-stone-900">TravelOrder</div>
               <div className="text-[9px] text-green-700 font-bold uppercase tracking-[0.25em]">DA · MIMAROPA</div>
