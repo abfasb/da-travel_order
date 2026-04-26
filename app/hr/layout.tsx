@@ -1,29 +1,40 @@
-import { Sidebar } from "@/components/hr/sidebar"
-import { getCurrentUser } from "@/lib/auth"
-import { Navbar } from "@/components/hr/navbar"
-import { prisma } from "@/lib/prisma"
-import { getUnreadCount } from "../actions/notifications"
+import { getCurrentUser } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import { prisma } from '@/lib/prisma';
+import { Sidebar } from '@/components/hr/sidebar';
+import { Navbar } from '@/components/hr/navbar';
 
 export default async function HRLayout({ children }: { children: React.ReactNode }) {
+  const user = await getCurrentUser();
 
-   const user = await getCurrentUser()
-  
-  let notificationCount = 0
-  if (user) {
-    notificationCount = await prisma.notification.count({
-      where: { userId: user.id, isRead: false },
-    })
+  if (!user || user.role !== 'HR') {
+    redirect('/login');
   }
 
-  const unreadCount  = await getUnreadCount();
+  const unreadCount = await prisma.notification.count({
+    where: { userId: user.id, isRead: false },
+  });
 
   return (
-    <div className="flex h-screen bg-muted/10">
+    <div className="flex h-screen overflow-hidden">
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <Navbar user={user} notificationCount={unreadCount} />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <Navbar
+          user={{
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            role: user.role,
+            //@ts-ignore
+            avatarUrl: user.avatarUrl,
+          }}
+          notificationCount={unreadCount}
+        />
+        <main className="flex-1 overflow-y-auto bg-background">
+          {children}
+        </main>
       </div>
     </div>
-  )
+  );
 }

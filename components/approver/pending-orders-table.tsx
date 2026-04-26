@@ -253,7 +253,7 @@ export default function PendingOrdersTable({ orders, userRole }: PendingOrdersTa
                     <TableCell className="px-6 py-4 text-right">
                       <div className="flex justify-center">
                         <Button variant="ghost" size="sm" asChild className="h-8 w-8 p-0 hover:bg-muted hover:text-foreground">
-                          <Link href={`/approvers/approvals/${order.id}`} target="_blank" title="View Details">
+                          <Link href={`/approvers/approvals/${order.id}`} title="View Details">
                             <Eye className="h-4 w-4" />
                             <span className="sr-only">View</span>
                           </Link>

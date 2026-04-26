@@ -1,13 +1,26 @@
 import { getCurrentUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { formatDistanceToNow } from 'date-fns'
 import { markAllNotificationsAsRead, markAsRead } from '@/app/actions/notifications'
 import Link from 'next/link'
-import { Bell, CheckCircle2, XCircle, FileText, ExternalLink } from 'lucide-react'
+import { Bell, ExternalLink } from 'lucide-react'
+
+const divisionLabels: Record<string, string> = {
+  regulatory: 'Regulatory Division',
+  laboratory: 'Integrated Laboratory Division',
+  research: 'Research Division',
+  field_ops: 'Field Operations Division',
+  agri_marketing: 'Agribusiness and Marketing Assistance Division',
+  engineering: 'Regional Agricultural Engineering Division',
+  planning: 'Planning, Monitoring and Evaluation Division',
+  info_section: 'Regional Agriculture & Fisheries Information Section',
+  admin_finance: 'Administrative & Finance Division',
+  procurement: 'Procurement of Goods and Infrastructure',
+}
 
 export default async function NotificationsPage() {
   const user = await getCurrentUser()
@@ -16,20 +29,21 @@ export default async function NotificationsPage() {
   const notifications = await prisma.notification.findMany({
     where: { userId: user.id },
     include: {
-      travelOrder: { select: { travelOrderNumber: true, status: true } },
+      travelOrder: {
+        select: {
+          travelOrderNumber: true,
+          status: true,
+          user: {
+            select: { firstName: true, lastName: true, division: true },
+          },
+        },
+      },
     },
     orderBy: { createdAt: 'desc' },
     take: 100,
   })
 
   const unreadCount = notifications.filter(n => !n.isRead).length
-
-  const getIcon = (type: string) => {
-    if (type.includes('APPROVAL') || type === 'APPROVE') return <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-    if (type.includes('REJECT')) return <XCircle className="h-5 w-5 text-red-500" />
-    if (type.includes('HR_READY')) return <FileText className="h-5 w-5 text-blue-500" />
-    return <Bell className="h-5 w-5 text-muted-foreground" />
-  }
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
@@ -40,7 +54,7 @@ export default async function NotificationsPage() {
             {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
           </p>
         </div>
-        { /* @ts-ignore */ }
+        { /* @ts-ignore */}
         <form action={markAllNotificationsAsRead}>
           <Button variant="outline" type="submit" disabled={unreadCount === 0}>
             Mark all as read
@@ -56,59 +70,69 @@ export default async function NotificationsPage() {
               <p className="text-muted-foreground">No notifications yet.</p>
             </div>
           ) : (
-            notifications.map(async (notif) => {
-              const markAsReadAction = markAsRead.bind(null, notif.id)
-              return (
-                <div
-                  key={notif.id}
-                  className={`py-4 px-6 flex items-start gap-4 transition-colors ${
-                    !notif.isRead ? 'bg-amber-50/50 dark:bg-amber-950/20' : ''
-                  }`}
-                >
-                  <div className="mt-0.5">{getIcon(notif.type)}</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-medium text-foreground">{notif.title}</h3>
-                      {!notif.isRead && (
-                        <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 text-xs">
-                          New
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-2">{notif.message}</p>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            notifications.map((notif) => (
+              <div
+                key={notif.id}
+                className={`py-4 px-6 flex items-start gap-4 transition-colors ${
+                  !notif.isRead ? 'bg-amber-50/50 dark:bg-amber-950/20' : ''
+                }`}
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-medium text-foreground">{notif.title}</h3>
+                    {!notif.isRead && (
+                      <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 text-xs">
+                        New
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-2">{notif.message}</p>
+
+                  {notif.travelOrder && (
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground mb-2">
                       <span>{formatDistanceToNow(notif.createdAt, { addSuffix: true })}</span>
-                      {notif.travelOrder && (
+                      <span>•</span>
+                      <span className="font-medium text-foreground">
+                        {notif.travelOrder.user?.firstName} {notif.travelOrder.user?.lastName}
+                      </span>
+                      {notif.travelOrder.user?.division && (
                         <>
                           <span>•</span>
-                          <span className="font-mono">{notif.travelOrder.travelOrderNumber}</span>
-                          <Badge variant="outline" className="text-[10px]">
-                            {notif.travelOrder.status}
-                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {divisionLabels[notif.travelOrder.user.division] || notif.travelOrder.user.division}
+                          </span>
                         </>
                       )}
+                      <span>•</span>
+                      <span className="font-mono">{notif.travelOrder.travelOrderNumber}</span>
+                      <Badge variant="outline" className="text-[10px]">
+                        {notif.travelOrder.status}
+                      </Badge>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {!notif.isRead && (
-             /* @ts-ignore */
-                      <form action={markAsReadAction}>
-                        <Button variant="ghost" size="sm" type="submit">
-                          Mark read
-                        </Button>
-                      </form>
-                    )}
-                    {notif.link && (
-                      <Button variant="outline" size="sm" asChild>
-                        <Link href={notif.link}>
-                          <ExternalLink className="h-3.5 w-3.5 mr-1" /> View
-                        </Link>
-                      </Button>
-                    )}
-                  </div>
+                  )}
                 </div>
-              )
-            })
+
+                <div className="flex items-center gap-2 shrink-0">
+                  {!notif.isRead && (
+                    <form action={async () => {
+                      'use server'
+                      await markAsRead(notif.id)
+                    }}>
+                      <Button variant="ghost" size="sm" type="submit">
+                        Mark read
+                      </Button>
+                    </form>
+                  )}
+                  {notif.link && (
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={notif.link}>
+                        <ExternalLink className="h-3.5 w-3.5 mr-1" /> View
+                      </Link>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))
           )}
         </CardContent>
       </Card>

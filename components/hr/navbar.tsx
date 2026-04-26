@@ -21,7 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { logout } from '@/app/actions/logout'
 import { toast } from 'sonner'
 import Link from 'next/link'
-import { NotificationsDropdown } from './notifications-dropdown'
+import { NotificationsDropdown } from '@/components/hr/notifications-dropdown'
 
 interface NavbarProps {
   user: {
@@ -41,15 +41,11 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
   const [mounted, setMounted] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [notifCount, setNotifCount] = useState(notificationCount)
 
   useEffect(() => {
     setMounted(true)
     setIsFullscreen(!!document.fullscreenElement)
-    
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement)
-    }
+    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement)
     document.addEventListener('fullscreenchange', handleFullscreenChange)
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
   }, [])
@@ -83,12 +79,9 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
   const roleDisplay = user.role === 'HR' ? 'HR Officer' : user.role
 
   return (
-    <>
-      <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@500&display=swap');
-
+    <header className="navbar-root">
+      <style jsx>{`
         .navbar-root {
-          font-family: 'DM Sans', sans-serif;
           display: flex;
           align-items: center;
           height: 64px;
@@ -99,7 +92,6 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
           position: relative;
           z-index: 40;
         }
-
         .navbar-root::after {
           content: '';
           position: absolute;
@@ -110,7 +102,6 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
           background: linear-gradient(90deg, transparent, hsl(var(--primary)) 20%, hsl(var(--primary)/0.8) 50%, hsl(var(--primary)) 80%, transparent);
           opacity: 0.4;
         }
-
         .navbar-mobile-btn {
           display: flex;
           align-items: center;
@@ -125,23 +116,18 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
           transition: all 0.15s ease;
           flex-shrink: 0;
         }
-
         .navbar-mobile-btn:hover {
           background: hsl(var(--muted));
           color: hsl(var(--foreground));
-          border-color: hsl(var(--border));
         }
-
         @media (min-width: 768px) {
           .navbar-mobile-btn { display: none; }
         }
-
         .navbar-search-wrap {
           flex: 1;
           max-width: 420px;
           position: relative;
         }
-
         .navbar-search-icon {
           position: absolute;
           left: 11px;
@@ -149,14 +135,11 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
           transform: translateY(-50%);
           color: hsl(var(--muted-foreground));
           pointer-events: none;
-          display: flex;
         }
-
         .navbar-search-input {
           width: 100%;
           height: 36px;
           padding: 0 12px 0 34px;
-          font-family: 'DM Sans', sans-serif;
           font-size: 13px;
           color: hsl(var(--foreground));
           background: hsl(var(--muted));
@@ -166,47 +149,26 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
           transition: all 0.15s ease;
           caret-color: hsl(var(--primary));
         }
-
         .navbar-search-input::placeholder {
           color: hsl(var(--muted-foreground));
         }
-
         .navbar-search-input:focus {
           background: hsl(var(--background));
           border-color: hsl(var(--primary));
           box-shadow: 0 0 0 3px hsl(var(--primary)/0.12);
         }
-
-        .navbar-search-kbd {
-          position: absolute;
-          right: 8px;
-          top: 50%;
-          transform: translateY(-50%);
-          font-family: 'DM Mono', monospace;
-          font-size: 10px;
-          color: hsl(var(--muted-foreground));
-          background: hsl(var(--muted));
-          border: 1px solid hsl(var(--border));
-          border-radius: 4px;
-          padding: 1px 5px;
-          letter-spacing: 0.03em;
-          pointer-events: none;
-        }
-
         .navbar-actions {
           display: flex;
           align-items: center;
           gap: 8px;
           margin-left: auto;
         }
-
         .navbar-divider {
           width: 1px;
           height: 24px;
           background: hsl(var(--border));
           margin: 0 4px;
         }
-
         .navbar-icon-btn {
           position: relative;
           width: 36px;
@@ -221,49 +183,10 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
           justify-content: center;
           transition: all 0.15s ease;
         }
-
         .navbar-icon-btn:hover {
           background: hsl(var(--muted));
           color: hsl(var(--foreground));
-          border-color: hsl(var(--border));
         }
-
-        .navbar-bell-badge {
-          position: absolute;
-          top: -4px;
-          right: -4px;
-          min-width: 18px;
-          height: 18px;
-          border-radius: 9px;
-          background: hsl(var(--destructive));
-          color: hsl(var(--destructive-foreground));
-          font-family: 'DM Mono', monospace;
-          font-size: 10px;
-          font-weight: 500;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0 4px;
-          border: 2px solid hsl(var(--background));
-          line-height: 1;
-        }
-
-        .navbar-bell-badge::before {
-          content: '';
-          position: absolute;
-          inset: -2px;
-          border-radius: 50%;
-          background: hsl(var(--destructive));
-          opacity: 0.4;
-          animation: navbar-pulse 2s ease-out infinite;
-        }
-
-        @keyframes navbar-pulse {
-          0%   { transform: scale(1); opacity: 0.4; }
-          70%  { transform: scale(1.8); opacity: 0; }
-          100% { transform: scale(1.8); opacity: 0; }
-        }
-
         .navbar-profile-btn {
           display: flex;
           align-items: center;
@@ -276,12 +199,9 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
           transition: all 0.15s ease;
           text-align: left;
         }
-
         .navbar-profile-btn:hover {
           background: hsl(var(--muted));
-          border-color: hsl(var(--border));
         }
-
         .navbar-avatar {
           width: 32px;
           height: 32px;
@@ -290,118 +210,99 @@ export function Navbar({ user, notificationCount }: NavbarProps) {
           display: flex;
           align-items: center;
           justify-content: center;
-          font-family: 'DM Mono', monospace;
           font-size: 11px;
           font-weight: 500;
           color: hsl(var(--primary-foreground));
-          letter-spacing: 0.05em;
           flex-shrink: 0;
         }
-
         .navbar-profile-info {
           display: none;
         }
-
         @media (min-width: 1024px) {
           .navbar-profile-info { display: block; }
         }
-
         .navbar-profile-name {
           font-size: 13px;
           font-weight: 600;
           color: hsl(var(--foreground));
-          line-height: 1.2;
-          white-space: nowrap;
         }
-
         .navbar-profile-role {
           font-size: 11px;
           color: hsl(var(--muted-foreground));
-          line-height: 1.2;
-          white-space: nowrap;
         }
       `}</style>
 
-      <header className="navbar-root">
-        {/* Mobile menu button */}
-        <button className="navbar-mobile-btn">
-          <Menu size={16} strokeWidth={2} />
-        </button>
+      {/* Mobile menu button */}
+      <button className="navbar-mobile-btn">
+        <Menu size={16} strokeWidth={2} />
+      </button>
 
-        {/* Search Form */}
-        <form onSubmit={handleSearch} className="navbar-search-wrap">
-          <span className="navbar-search-icon">
-            <Search size={14} strokeWidth={2} />
-          </span>
-          <input
-            className="navbar-search-input"
-            placeholder="Search orders by number, employee..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <span className="navbar-search-kbd">⌘K</span>
-        </form>
+      {/* Search */}
+      <form onSubmit={handleSearch} className="navbar-search-wrap">
+        <span className="navbar-search-icon">
+          <Search size={14} strokeWidth={2} />
+        </span>
+        <input
+          className="navbar-search-input"
+          placeholder="Search orders by number, employee..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </form>
 
-        <div className="navbar-actions">
-          {/* Dark Mode Toggle */}
-          {mounted && (
-            <button
-              className="navbar-icon-btn"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              title="Toggle theme"
-            >
-              <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-              <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-              <span className="sr-only">Toggle theme</span>
-            </button>
-          )}
-
+      <div className="navbar-actions">
+        {/* Dark mode toggle */}
+        {mounted && (
           <button
             className="navbar-icon-btn"
-            onClick={toggleFullscreen}
-            title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            title="Toggle theme"
           >
-            {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
+            <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           </button>
+        )}
 
-          <NotificationsDropdown userId={user.id} initialCount={notificationCount} />
+        {/* Fullscreen toggle */}
+        <button className="navbar-icon-btn" onClick={toggleFullscreen} title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}>
+          {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
+        </button>
 
-          <div className="navbar-divider" />
+        {/* Notifications (live badge) */}
+        <NotificationsDropdown userId={user.id} initialCount={notificationCount} />
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="navbar-profile-btn">
-                <Avatar className="navbar-avatar">
-                  <AvatarImage src={user.avatarUrl || undefined} />
-                  <AvatarFallback className="bg-transparent">{initials}</AvatarFallback>
-                </Avatar>
-                <div className="navbar-profile-info">
-                  <div className="navbar-profile-name">{displayName}</div>
-                  <div className="navbar-profile-role">{roleDisplay}</div>
-                </div>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/hr/profile">
-                  <User className="mr-2 h-4 w-4" /> Profile
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/hr/settings">
-                  <Settings className="mr-2 h-4 w-4" /> Settings
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="text-destructive">
-                <LogOut className="mr-2 h-4 w-4" /> Log out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </header>
-    </>
+        <div className="navbar-divider" />
+
+        {/* Profile dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="navbar-profile-btn">
+              <Avatar className="navbar-avatar">
+                <AvatarImage src={user.avatarUrl || undefined} />
+                <AvatarFallback className="bg-transparent">{initials}</AvatarFallback>
+              </Avatar>
+              <div className="navbar-profile-info">
+                <div className="navbar-profile-name">{displayName}</div>
+                <div className="navbar-profile-role">{roleDisplay}</div>
+              </div>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/hr/profile"><User className="mr-2 h-4 w-4" /> Profile</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/hr/settings"><Settings className="mr-2 h-4 w-4" /> Settings</Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+              <LogOut className="mr-2 h-4 w-4" /> Log out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </header>
   )
 }
