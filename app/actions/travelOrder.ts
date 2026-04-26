@@ -98,14 +98,11 @@ export async function submitTravelOrder(formData: FormData) {
 
     const attachmentData = await Promise.all(attachmentPromises)
 
-    // ---------- Step 3: Create attachments, approvals, audit log ----------
     await prisma.$transaction(async (tx) => {
-      // Create attachments
       for (const att of attachmentData) {
         await tx.attachment.create({ data: att })
       }
 
-      // Create approvals
       const isFieldOps = user.division?.toLowerCase().includes('field') ?? false
       const roles = isFieldOps
         ? ['APCO', 'CHIEF_AGRICULTURIST', 'CHIEF_ADMINISTRATIVE', 'REGIONAL_EXECUTIVE']
@@ -121,7 +118,6 @@ export async function submitTravelOrder(formData: FormData) {
         })
       }
 
-      // Create audit log
       await tx.auditLog.create({
         data: {
           userId,
