@@ -1,7 +1,7 @@
 import Image from "next/image";
 import logo from "@/assets/logo.png";
 
-export default function CertificationDocument({ data }: { data: any }) {
+function CertificationDocument({ data }: { data: any }) {
   const formatTravelPeriod = (start: Date, end: Date) => {
     if (!start || !end) return '';
     const startDate = new Date(start);
@@ -101,3 +101,5 @@ export default function CertificationDocument({ data }: { data: any }) {
     </>
   );
 }
+
+export default CertificationDocument;
