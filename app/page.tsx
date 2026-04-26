@@ -152,10 +152,10 @@ const Navbar: React.FC = () => {
               ))}
               <Separator className="bg-stone-100" />
               <Button
-                onClick={() => router.push("/login")}
+                onClick={() => router.push("/registration")}
                 className="bg-green-700 hover:bg-green-600 text-white font-semibold rounded-lg border-0"
               >
-                Request Access
+                Create Your Account
               </Button>
             </div>
           </motion.div>
@@ -184,7 +184,7 @@ const HeroSection: React.FC = () => {
   ];
 
   return (
-    <section className="relative min-h-screen flex items-center pt-28 pb-20 overflow-hidden bg-[#FAFAF8]">
+    <section className="relative min-h-screen flex items-center pt-26 pb-20 overflow-hidden bg-[#FAFAF8]">
       <div
         className="absolute inset-0 z-0 opacity-[0.4]"
         style={{
@@ -879,7 +879,7 @@ const Footer: React.FC = () => (
           <div className="flex items-center gap-3 mb-5">
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Department_of_Agriculture_of_the_Philippines.svg/1280px-Department_of_Agriculture_of_the_Philippines.svg.png" alt="TravelOrder Logo" className="w-9 h-9 b rounded-lg flex items-center justify-center shadow-sm" />
             <div>
-              <div className="text-[13px] font-black text-stone-900">TravelOrder</div>
+              <div className="text-[13px] font-black text-stone-900">Travel Order</div>
               <div className="text-[9px] text-green-700 font-bold uppercase tracking-[0.25em]">DA · MIMAROPA</div>
             </div>
           </div>
