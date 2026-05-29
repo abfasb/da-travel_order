@@ -183,8 +183,8 @@ model Approval {
 
 model Attachment {
   id                     String        @id @default(uuid())
-  travelOrderId          String
-  travelOrder            TravelOrderRequest @relation(fields: [travelOrderId], references: [id], onDelete: Cascade)
+  travelOrderId          String?
+  travelOrder            TravelOrderRequest? @relation(fields: [travelOrderId], references: [id], onDelete: Cascade)
 
   fileName               String
   fileUrl                String
